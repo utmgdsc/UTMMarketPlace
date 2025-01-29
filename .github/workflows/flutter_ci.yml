@@ -23,4 +23,4 @@ jobs:
       run: flutter --version
 
     - name: Lint code
-      run: flutter analyze
+      run: cd frontend && flutter analyze
