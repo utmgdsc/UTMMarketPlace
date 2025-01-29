@@ -3,12 +3,17 @@
 .vscode
 
 # Platforms not targeted
-windows/
-macos/
-linux/
-web/
+/windows/
+/macos/
+/linux/
+/web/
 
-# Miscellaneous
+/frontend/windows/
+/frontend/macos/
+/frontend/linux/
+/frontend/web/
+
+/# Miscellaneous
 *.class
 *.log
 *.pyc
@@ -42,6 +47,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/frontend/build/
 
 # Symbolication related
 app.*.symbols
