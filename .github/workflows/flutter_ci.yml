@@ -17,7 +17,10 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: 'stable'
+        channel: stable
+
+    - name: Verify flutter version
+      run: flutter --version
 
     - name: Lint code
       run: flutter analyze
