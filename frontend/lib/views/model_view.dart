@@ -9,7 +9,7 @@ class ModelView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Scaffold(body:Padding(
       padding: EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,6 +24,6 @@ class ModelView extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ),);
   }
 }
