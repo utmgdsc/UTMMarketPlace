@@ -15,7 +15,8 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/temp_view',
-      builder: (context, state) => ModelView(model: Model(attribute1: 'Attribute 1', attribute2: 2)),
+      builder: (context, state) =>
+          ModelView(model: Model(attribute1: 'Attribute 1', attribute2: 2)),
     ),
   ],
 );
