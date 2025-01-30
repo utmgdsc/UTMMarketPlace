@@ -1,34 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 // import 'package:provider/provider.dart';
 
 import 'package:utm_marketplace/common/theme.dart';
-import 'package:utm_marketplace/views/login.dart';
-
-// TODO: These are just for testing, remove when done/replace with actual views
-import 'package:utm_marketplace/views/model_view.dart';
-import 'package:utm_marketplace/models/model.dart';
+import 'package:utm_marketplace/common/router.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-GoRouter router() {
-  return GoRouter(
-    initialLocation: '/login',
-    routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const Login(),
-      ),
-      GoRoute(
-        path: '/temp_view',
-        builder: (context, state) => ModelView(model: Model(attribute1: 'Attribute 1', attribute2: 2)),
-      ),
-    ],
-  );
-}
-
+// The main app widget, which initializes the app with the router and theme
+// Router and theme are defined in the common/router.dart and common/theme.dart files
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -37,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'UTM Marketplace',
       theme: appTheme,
-      routerConfig: router(),
+      routerConfig: router,
     );
   }
 }
