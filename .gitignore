@@ -48,6 +48,7 @@ migrate_working_dir/
 .pub/
 /build/
 /frontend/build/
+devtools_options.yaml
 
 # Symbolication related
 app.*.symbols
