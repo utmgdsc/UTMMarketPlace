@@ -9,21 +9,23 @@ class ModelView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body:Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            'Attribute 1: ${model.attribute1}',
-            style: TextStyle(fontSize: 18.0),
-          ),
-          Text(
-            'Attribute 2: ${model.attribute2}',
-            style: TextStyle(fontSize: 18.0),
-          ),
-        ],
+    return Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Attribute 1: ${model.attribute1}',
+              style: TextStyle(fontSize: 18.0),
+            ),
+            Text(
+              'Attribute 2: ${model.attribute2}',
+              style: TextStyle(fontSize: 18.0),
+            ),
+          ],
+        ),
       ),
-    ),);
+    );
   }
 }
