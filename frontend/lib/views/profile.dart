@@ -153,7 +153,6 @@ class _ProfileState extends State<Profile> {
                 GestureDetector(
                   onTap: () {
                     // TODO: Implement image picker
-                    print('Change profile picture');
                   },
                   child: Stack(
                     children: [
