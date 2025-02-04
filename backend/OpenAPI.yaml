@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  title: UTM Marketplace API
+  description: API specification for a campus-wide marketplace app
+  version: 1.0.0
+
+servers:
+  - url: https://api.utmmarketplace.com
+    description: Production Server
+  - url: http://localhost:5000
+    description: Local Development Server
+
+paths:
+  /listings:
+    get:
+      summary: Retrieve all listings
+      description: Fetches all product/service listings available in the marketplace.
+      responses:
+        "200":
+          description: A list of marketplace listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: "MacBook Pro for sale"
+                    price:
+                      type: number
+                      format: float
+                      example: 1200.99
+                    description:
+                      type: string
+                      example: "Selling my MacBook Pro in great condition!"
+                    seller_id:
+                      type: integer
+                      example: 101
+    post:
+      summary: Create a new listing
+      description: Adds a new product or service listing to the marketplace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Gaming Laptop for sale"
+                price:
+                  type: number
+                  format: float
+                  example: 899.99
+                description:
+                  type: string
+                  example: "Lightly used gaming laptop, great condition!"
+                seller_id:
+                  type: integer
+                  example: 101
+      responses:
+        "201":
+          description: Listing created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 10
+                  title:
+                    type: string
+                    example: "Gaming Laptop for sale"
+                  price:
+                    type: number
+                    format: float
+                    example: 899.99
+                  description:
+                    type: string
+                    example: "Lightly used gaming laptop, great condition!"
+       
