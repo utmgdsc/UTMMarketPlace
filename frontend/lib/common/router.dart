@@ -21,8 +21,12 @@ final GoRouter router = GoRouter(
           ModelView(model: Model(attribute1: 'Attribute 1', attribute2: 2)),
     ),
     GoRoute(
-      path: '/profile',
-      builder: (context, state) => const Profile(),
+      path: '/profile/:userId',
+      builder: (context, state) {
+        final userId = state.pathParameters['userId'] ?? '';
+        final isOwnProfile = userId == 'me';
+        return Profile(userId: userId, isOwnProfile: isOwnProfile);
+      },
     ),
     GoRoute(
       path: '/home',
