@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:utm_marketplace/common/theme.dart';
+import 'package:utm_marketplace/shared/themes/theme.dart';
 
 // Note: There's a small issue regarding the flex Spacer widget, it's not too important
 // but would be nice to find a way that makes it so the UI elements
@@ -71,7 +71,7 @@ class LoginState extends State<Login> {
           // TODO: Implement login functionality (backend)
           // If this condition passed, a redirect call to the home
           // page should be made
-          context.go('/temp_view');
+          context.go('/item_listing');
         }
       },
       style: ElevatedButton.styleFrom(
