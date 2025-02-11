@@ -44,7 +44,8 @@ class _ProfileState extends State<Profile> {
         imageUrl: 'assets/books.jpg',
         price: 29.99,
         title: 'Item $i',
-        description: 'Description for item $i that might be very long and need truncating',
+        description:
+            'Description for item $i that might be very long and need truncating',
       ),
     );
     savedItemsCount = 15;
@@ -85,9 +86,7 @@ class _ProfileState extends State<Profile> {
         if (widget.isOwnProfile)
           IconButton(
             icon: Icon(Icons.settings),
-            onPressed: () {
-              
-            },
+            onPressed: () {},
           ),
       ],
     );
@@ -172,16 +171,12 @@ class _ProfileState extends State<Profile> {
           _ActionButton(
             label: 'Saved Items ($savedItemsCount)',
             icon: Icons.favorite_border,
-            onPressed: () {
-              
-            },
+            onPressed: () {},
           ),
           _ActionButton(
             label: 'Purchase History',
             icon: Icons.history,
-            onPressed: () {
-              
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -226,9 +221,7 @@ class _ProfileState extends State<Profile> {
     final formKey = GlobalKey<FormState>();
 
     final profilePicture = GestureDetector(
-      onTap: () {
-
-      },
+      onTap: () {},
       child: Stack(
         children: [
           CircleAvatar(
@@ -307,7 +300,7 @@ class _ProfileState extends State<Profile> {
           if (formKey.currentState!.validate()) {
             final String firstName = firstNameController.text.trim();
             final String lastName = lastNameController.text.trim();
-            
+
             setState(() {
               this.firstName = firstName;
               this.lastName = lastName;
@@ -315,8 +308,7 @@ class _ProfileState extends State<Profile> {
 
             Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Profile updated successfully'))
-            );
+                SnackBar(content: Text('Profile updated successfully')));
           }
         },
         child: Text('Save'),
