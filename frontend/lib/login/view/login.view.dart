@@ -71,7 +71,7 @@ class LoginState extends State<Login> {
           // TODO: Implement login functionality (backend)
           // If this condition passed, a redirect call to the home
           // page should be made
-          context.go('/home'); // TODO: JUST FOR DEBUGGING
+          context.replace('/home'); // TODO: JUST FOR DEBUGGING
         }
       },
       style: ElevatedButton.styleFrom(

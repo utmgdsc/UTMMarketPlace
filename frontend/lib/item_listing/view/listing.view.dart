@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/item_listing/components/item_card/item_card.component.dart';
 import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart';
@@ -28,6 +29,10 @@ class _ListingViewState extends State<ListingView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
         title: const Text('Items Listing'),
       ),
       body: SafeArea(

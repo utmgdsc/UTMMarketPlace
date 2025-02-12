@@ -79,7 +79,7 @@ class _ProfileState extends State<Profile> {
     return AppBar(
       leading: IconButton(
         icon: Icon(Icons.arrow_back),
-        onPressed: () => context.go('/home'),
+        onPressed: () => context.pop(),
       ),
       title: Text('Profile'),
       actions: [
@@ -171,7 +171,7 @@ class _ProfileState extends State<Profile> {
           _ActionButton(
             label: 'Saved Items ($savedItemsCount)',
             icon: Icons.favorite_border,
-            onPressed: () => context.go('/item_listing'),
+            onPressed: () => context.push('/item_listing'),
           ),
           _ActionButton(
             label: 'Purchase History',
