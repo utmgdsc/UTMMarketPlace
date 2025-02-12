@@ -32,35 +32,35 @@ class _ListingViewState extends State<ListingView> {
       ),
       body: SafeArea(
         child: Consumer<ListingViewModel>(
-          builder: (_, model, child) {
-            if (model.isLoading) {
+          builder: (_, listingViewModel, child) {
+            if (listingViewModel.isLoading) {
               return const Center(child: LoadingComponent());
             }
 
-            if (model.listingModel.items.isEmpty) {
+            if (listingViewModel.items.isEmpty) {
               return const Center(child: Text('No items available.'));
             }
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                mainAxisExtent: 250,
-              ),
-              itemCount: model.listingModel.items.length,
-              itemBuilder: (context, index) {
-                final item = model.listingModel.items[index];
-                return ItemCard(
-                id: item.id,
-                name: item.name,
-                price: item.price,
-                category: item.category,
-                imageUrl: item.imageUrl ?? '',
-                );
-              },
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.75,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  mainAxisExtent: 250,
+                ),
+                itemCount: listingViewModel.items.length,
+                itemBuilder: (context, index) {
+                  final item = listingViewModel.items[index];
+                  return ItemCard(
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    category: item.category,
+                    imageUrl: item.imageUrl ?? '',
+                  );
+                },
               ),
             );
           },

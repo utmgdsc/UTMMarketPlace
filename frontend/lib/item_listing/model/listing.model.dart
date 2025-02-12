@@ -24,17 +24,17 @@ class ListingModel {
 class Item {
   Item({
     this.id,
-    this.name,
+    required this.name,
+    required this.price,
     this.description,
-    this.price,
     this.imageUrl,
     this.category,
   });
 
   String? id;
-  String? name;
+  String name;
+  double price;
   String? description;
-  double? price;
   String? imageUrl;
   String? category;
 

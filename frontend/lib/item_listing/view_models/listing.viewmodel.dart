@@ -12,10 +12,12 @@ class ListingViewModel extends LoadingViewModel {
 
   final ListingRepo repo;
 
-  ListingModel get listingModel => _listingModel;
+  ListingModel _listingModel = ListingModel();
 
-  set listingModel(ListingModel listingModel) {
-    _listingModel = listingModel;
+  List<Item> _items = [];
+  List<Item> get items => _items;
+  set items(List<Item> value) {
+    _items = value;
     notifyListeners();
   }
 
@@ -24,13 +26,12 @@ class ListingViewModel extends LoadingViewModel {
       isLoading = true;
 
       _listingModel = await repo.fetchData();
+      items = _listingModel.items;
     } catch (exc) {
-      debugPrint('Error in _fetchData : ${exc.toString()}');
-    }
-
-    isLoading = false;
-    notifyListeners();
+      debugPrint('Error in fetchData : ${exc.toString()}');
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }  
   }
-
-  ListingModel _listingModel = ListingModel();
 }
