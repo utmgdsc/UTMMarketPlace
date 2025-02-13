@@ -10,7 +10,8 @@ class ListingRepoImpl extends ListingRepo {
   Future<ListingModel> fetchData() async {
     await Future.delayed(const Duration(milliseconds: 1800));
 
-    final resp = await rootBundle.loadString('assets/data/temp_listing_data.json');
+    final resp =
+        await rootBundle.loadString('assets/data/temp_listing_data.json');
     return listingModelFromJson(resp);
   }
 }

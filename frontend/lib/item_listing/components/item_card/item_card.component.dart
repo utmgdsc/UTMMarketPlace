@@ -19,21 +19,21 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageWidget = imageUrl != null
-    ? Container(
-        width: double.infinity,
-        height: 175.0,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(15.0),
-            topRight: Radius.circular(15.0),
-          ),
-          image: DecorationImage(
-            image: NetworkImage(imageUrl!),
-            fit: BoxFit.cover,
-          ),
-        ),
-      )
-    : SizedBox.shrink();
+        ? Container(
+            width: double.infinity,
+            height: 175.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15.0),
+                topRight: Radius.circular(15.0),
+              ),
+              image: DecorationImage(
+                image: NetworkImage(imageUrl!),
+                fit: BoxFit.cover,
+              ),
+            ),
+          )
+        : SizedBox.shrink();
 
     final nameWidget = Text(
       name,

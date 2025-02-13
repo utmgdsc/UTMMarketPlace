@@ -32,6 +32,6 @@ class ListingViewModel extends LoadingViewModel {
     } finally {
       isLoading = false;
       notifyListeners();
-    }  
+    }
   }
 }
