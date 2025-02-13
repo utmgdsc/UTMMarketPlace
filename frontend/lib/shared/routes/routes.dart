@@ -1,11 +1,12 @@
 import 'package:go_router/go_router.dart';
-import 'package:utm_marketplace/views/login.dart';
-import 'package:utm_marketplace/views/profile.dart';
+import 'package:utm_marketplace/login/view/login.view.dart';
+import 'package:utm_marketplace/profile/view/profile.view.dart';
+import 'package:utm_marketplace/item_listing/view/listing.view.dart';
 
 // TODO: These are temporary imports for testing purposes, remove when no longer needed
-import 'package:utm_marketplace/views/model_view.dart';
-import 'package:utm_marketplace/models/model.dart';
-import 'package:utm_marketplace/views/home.dart';
+import 'package:utm_marketplace/temp_view/view/temp_view.view.dart';
+import 'package:utm_marketplace/temp_view/view_models/temp_model.viewmodel.dart';
+import 'package:utm_marketplace/home/view/home.view.dart';
 
 // Define the router as a top-level global variable
 final GoRouter router = GoRouter(
@@ -19,6 +20,10 @@ final GoRouter router = GoRouter(
       path: '/temp_view',
       builder: (context, state) =>
           ModelView(model: Model(attribute1: 'Attribute 1', attribute2: 2)),
+    ),
+    GoRoute(
+      path: '/item_listing',
+      builder: (context, state) => const ListingView(),
     ),
     GoRoute(
       path: '/profile/:userId',

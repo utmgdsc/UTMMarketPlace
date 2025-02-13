@@ -13,7 +13,7 @@ class HomePage extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () {
-            context.go('/profile/me');
+            context.push('/profile/me');
           },
           child: const Text('Go to Profile'),
         ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:utm_marketplace/common/theme.dart';
+import 'package:utm_marketplace/shared/themes/theme.dart';
 import 'package:go_router/go_router.dart';
 
 class Profile extends StatefulWidget {
@@ -36,12 +36,12 @@ class _ProfileState extends State<Profile> {
     email = 'aubreydrake@mail.utoronto.ca';
     rating = 4.3;
     reviewCount = 28;
-    profileImage = 'assets/Default_pfp.jpg';
+    profileImage = 'assets/images/Default_pfp.jpg';
     listings = List.generate(
       12,
       (i) => ListingItem(
         id: i.toString(),
-        imageUrl: 'assets/books.jpg',
+        imageUrl: 'assets/images/books.jpg',
         price: 29.99,
         title: 'Item $i',
         description:
@@ -79,7 +79,7 @@ class _ProfileState extends State<Profile> {
     return AppBar(
       leading: IconButton(
         icon: Icon(Icons.arrow_back),
-        onPressed: () => context.go('/home'),
+        onPressed: () => context.pop(),
       ),
       title: Text('Profile'),
       actions: [
@@ -171,7 +171,7 @@ class _ProfileState extends State<Profile> {
           _ActionButton(
             label: 'Saved Items ($savedItemsCount)',
             icon: Icons.favorite_border,
-            onPressed: () {},
+            onPressed: () => context.push('/item_listing'),
           ),
           _ActionButton(
             label: 'Purchase History',
@@ -226,7 +226,7 @@ class _ProfileState extends State<Profile> {
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundImage: AssetImage('assets/Default_pfp.jpg'),
+            backgroundImage: AssetImage('assets/images/Default_pfp.jpg'),
           ),
           Positioned(
             bottom: 0,
