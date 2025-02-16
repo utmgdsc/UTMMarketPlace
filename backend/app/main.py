@@ -3,10 +3,11 @@
 #   timestamp: 2025-02-16T02:44:10+00:00
 
 from __future__ import annotations
-
 from typing import List, Optional, Union
-
-from fastapi import FastAPI
+import re
+from fastapi import FastAPI, HTTPException
+from passlib.context import CryptContext
+from pymongo.errors import DuplicateKeyError
 
 from .models import (
     ListingsGetResponseItem,
@@ -17,6 +18,8 @@ from .models import (
     SignUpPostResponse1,
     SignUpPostResponse2,
 )
+
+from .connect_db import db  # Import MongoDB connection
 
 app = FastAPI(
     title='UTM Marketplace API',
@@ -56,10 +59,32 @@ def post_listings(body: ListingsPostRequest) -> Optional[ListingsPostResponse]:
         '409': {'model': SignUpPostResponse2},
     },
 )
-def post_sign_up(
-    body: SignUpPostRequest,
-) -> Optional[Union[SignUpPostResponse, SignUpPostResponse1, SignUpPostResponse2]]:
+def post_sign_up(body: SignUpPostRequest) -> Optional[Union[SignUpPostResponse, SignUpPostResponse1, SignUpPostResponse2]]:
     """
     Sign up a new user
     """
-    pass
+    email = body.email
+    password = body.password.get_secret_value()
+
+    #Validate email
+    if not bool(re.match(r"^[a-zA-Z0-9_.+-]+@(utoronto\.ca|mail\.utoronto\.ca)$", email)):
+        raise HTTPException(status_code=400, detail="Invalid email format. Please use a UofT email.")
+    
+    #Hash password
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    hashed_password = pwd_context.hash(password)
+
+    #Create user document
+    user_data = {
+        'email': email,
+        'password': hashed_password,
+    }
+
+    #Send to DB
+    try:
+        result = db.users.insert_one(user_data)
+        return {"user_id": str(result.inserted_id), "message": "User registered successfully."}
+    except DuplicateKeyError:
+        raise HTTPException(status_code=409, detail="Email already registered.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
