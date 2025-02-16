@@ -1,0 +1,52 @@
+{
+    "items": [
+        {
+            "id": "item1",
+            "name": "Wireless Mouse",
+            "description": "A high-precision wireless mouse with ergonomic design.",
+            "price": 25.99,
+            "image_url": "https://placehold.co/400/png",
+            "category": "Electronics"
+        },
+        {
+            "id": "item2",
+            "name": "Bluetooth Headphones",
+            "description": "Noise-cancelling over-ear headphones with long battery life.",
+            "price": 79.99,
+            "image_url": "https://placehold.co/400/png",
+            "category": "Electronics"
+        },
+        {
+            "id": "item3",
+            "name": "Coffee Maker",
+            "description": "Automatic coffee maker with programmable settings.",
+            "price": 49.99,
+            "image_url": "https://placehold.co/400/png",
+            "category": "Home Appliances"
+        },
+        {
+            "id": "item4",
+            "name": "Yoga Mat",
+            "description": "Eco-friendly yoga mat with non-slip surface.",
+            "price": 19.99,
+            "image_url": "https://placehold.co/400/png",
+            "category": "Fitness"
+        },
+        {
+            "id": "item5",
+            "name": "Running Shoes",
+            "description": "Lightweight running shoes with breathable material.",
+            "price": 59.99,
+            "image_url": "https://placehold.co/400/png",
+            "category": "Footwear"
+        },
+        {
+            "id": "item6",
+            "name": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "description": "Lightweight running shoes with breathable material.",
+            "price": 0,
+            "image_url": "https://th.bing.com/th/id/OIP.ocWJRj0Lfzhr0m4Hmw5-yQHaK0?rs=1&pid=ImgDetMain",
+            "category": "IDK"
+        }
+    ]
+}
