@@ -11,6 +11,65 @@ servers:
     description: Local Development Server
 
 paths:
+  /sign-up:
+    post:
+      summary: Sign up a new user
+      description: Registers a new user using an email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "student@utoronto.ca"
+                  description: "Must be a valid University of Toronto email (utoronto.ca or mail.utoronto.ca)."
+                password:
+                  type: string
+                  format: password
+                  example: "P@ssword123"
+                  description: "Must be at least 8 characters, contain 1 uppercase letter, 1 number."
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    example: 42
+                  message:
+                    type: string
+                    example: "User registered successfully."
+        "400":
+          description: Bad Request - Invalid email or password format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid email format. Please use a UofT email."
+        "409":
+          description: Conflict - Email already in use
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Email already registered."
+
   /listings:
     get:
       summary: Retrieve all listings
@@ -85,4 +144,3 @@ paths:
                   description:
                     type: string
                     example: "Lightly used gaming laptop, great condition!"
-       
