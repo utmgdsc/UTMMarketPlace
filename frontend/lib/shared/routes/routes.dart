@@ -1,15 +1,17 @@
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
 import 'package:utm_marketplace/login/view/login.view.dart';
 import 'package:utm_marketplace/profile/view/profile.view.dart';
 import 'package:utm_marketplace/item_listing/view/listing.view.dart';
 
-// TODO: These are temporary imports for testing purposes, remove when no longer needed
-import 'package:utm_marketplace/temp_view/view/temp_view.view.dart';
-import 'package:utm_marketplace/temp_view/view_models/temp_model.viewmodel.dart';
-import 'package:utm_marketplace/home/view/home.view.dart';
+import 'package:utm_marketplace/shared/components/shell/shell.layout.dart';
+import 'package:utm_marketplace/messages/view/messages.view.dart';
+import 'package:utm_marketplace/notifications/view/notifications.view.dart';
+import 'package:utm_marketplace/menu/view/menu.view.dart';
+import 'package:utm_marketplace/shared/components/navigation/bottom_nav.component.dart';
 
 // Define the router as a top-level global variable
-final GoRouter router = GoRouter(
+final router = GoRouter(
   initialLocation: '/login',
   routes: [
     GoRoute(
@@ -17,12 +19,34 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const Login(),
     ),
     GoRoute(
-      path: '/temp_view',
-      builder: (context, state) =>
-          ModelView(model: Model(attribute1: 'Attribute 1', attribute2: 2)),
-    ),
-    GoRoute(
       path: '/item_listing',
+      builder: (context, state) => const ListingView(),
+    ),
+ShellRoute(
+  builder: (context, state, child) {
+    final location = state.uri.path;
+    int currentIndex;
+    
+    if (location.startsWith('/profile')) {
+      currentIndex = 0;
+    } else if (location.startsWith('/messages')) {
+      currentIndex = 1;
+    } else if (location.startsWith('/marketplace')) {
+      currentIndex = 2;
+    } else if (location.startsWith('/notifications')) {
+      currentIndex = 3;
+    } else {
+      currentIndex = 4; // menu
+    }
+    
+    return ShellLayout(
+      currentIndex: currentIndex,
+      child: child,
+    );
+  },
+  routes: [
+    GoRoute(
+      path: '/marketplace',
       builder: (context, state) => const ListingView(),
     ),
     GoRoute(
@@ -34,8 +58,18 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-      path: '/home',
-      builder: (context, state) => const HomePage(),
+      path: '/messages',
+      builder: (context, state) => const MessagesView(),
     ),
+    GoRoute(
+      path: '/notifications',
+      builder: (context, state) => const NotificationsView(),
+    ),
+    GoRoute(
+      path: '/menu',
+      builder: (context, state) => const MenuView(),
+    ),
+  ],
+),
   ],
 );

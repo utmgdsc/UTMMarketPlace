@@ -29,11 +29,16 @@ class _ListingViewState extends State<ListingView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+        centerTitle: true,
+        title: const Text(
+          'Marketplace',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        title: const Text('Items Listing'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: SafeArea(
         child: Consumer<ListingViewModel>(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
 import 'package:go_router/go_router.dart';
+import 'package:utm_marketplace/shared/components/navigation/bottom_nav.component.dart';
 
 class Profile extends StatefulWidget {
   final String userId;
@@ -36,7 +37,7 @@ class _ProfileState extends State<Profile> {
     email = 'aubreydrake@mail.utoronto.ca';
     rating = 4.3;
     reviewCount = 28;
-    profileImage = 'assets/images/Default_pfp.jpg';
+    profileImage = 'assets/images/aubreydrakepfp.jpg';
     listings = List.generate(
       12,
       (i) => ListingItem(
@@ -79,7 +80,7 @@ class _ProfileState extends State<Profile> {
     return AppBar(
       leading: IconButton(
         icon: Icon(Icons.arrow_back),
-        onPressed: () => context.pop(),
+        onPressed: () => context.replace('/marketplace'),  // Changed from context.pop()
       ),
       title: Text('Profile'),
       actions: [
@@ -97,9 +98,12 @@ class _ProfileState extends State<Profile> {
       padding: EdgeInsets.all(16.0),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundImage: AssetImage(profileImage),
+          Hero(
+            tag: 'profile-image',
+            child: CircleAvatar(
+              radius: 50,
+              backgroundImage: AssetImage(profileImage),
+            ),
           ),
           SizedBox(height: 16),
           Text(
@@ -226,7 +230,7 @@ class _ProfileState extends State<Profile> {
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundImage: AssetImage('assets/images/Default_pfp.jpg'),
+            backgroundImage: AssetImage('assets/images/aubreydrakepfp.jpg'),
           ),
           Positioned(
             bottom: 0,
