@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
 import 'package:go_router/go_router.dart';
-import 'package:utm_marketplace/shared/components/navigation/bottom_nav.component.dart';
 
 class Profile extends StatefulWidget {
   final String userId;

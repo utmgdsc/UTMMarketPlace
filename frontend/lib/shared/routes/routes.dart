@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
 import 'package:utm_marketplace/login/view/login.view.dart';
 import 'package:utm_marketplace/profile/view/profile.view.dart';
 import 'package:utm_marketplace/item_listing/view/listing.view.dart';
@@ -8,7 +7,6 @@ import 'package:utm_marketplace/shared/components/shell/shell.layout.dart';
 import 'package:utm_marketplace/messages/view/messages.view.dart';
 import 'package:utm_marketplace/notifications/view/notifications.view.dart';
 import 'package:utm_marketplace/menu/view/menu.view.dart';
-import 'package:utm_marketplace/shared/components/navigation/bottom_nav.component.dart';
 
 // Define the router as a top-level global variable
 final router = GoRouter(

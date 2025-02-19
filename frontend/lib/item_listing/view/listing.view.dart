@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/item_listing/components/item_card/item_card.component.dart';
 import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart';
