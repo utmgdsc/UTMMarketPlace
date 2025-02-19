@@ -21,11 +21,9 @@ class ItemCard extends StatelessWidget {
     final imageWidget = imageUrl != null
         ? Container(
             width: double.infinity,
-            height: 175.0,
+            height: 250.0,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15.0),
-                topRight: Radius.circular(15.0),
+              borderRadius: BorderRadius.all(Radius.circular(4.0)
               ),
               image: DecorationImage(
                 image: NetworkImage(imageUrl!),
@@ -39,7 +37,7 @@ class ItemCard extends StatelessWidget {
       name,
       style: TextStyle(
         fontSize: 17,
-        fontWeight: FontWeight.bold,
+        fontFamily: 'Sans-serif',
       ),
       overflow: TextOverflow.ellipsis,
     );
@@ -49,19 +47,19 @@ class ItemCard extends StatelessWidget {
       style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: Colors.green,
       ),
     );
 
     return Card(
-      elevation: 5,
+      elevation: 0,
+      color: Theme.of(context).scaffoldBackgroundColor,
       margin: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           imageWidget,
           Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(1.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
