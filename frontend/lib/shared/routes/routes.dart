@@ -16,58 +16,58 @@ final router = GoRouter(
       path: '/login',
       builder: (context, state) => const Login(),
     ),
-    GoRoute(
-      path: '/item_listing',
-      builder: (context, state) => const ListingView(),
-    ),
-ShellRoute(
-  builder: (context, state, child) {
-    final location = state.uri.path;
-    int currentIndex;
-    
-    if (location.startsWith('/profile')) {
-      currentIndex = 0;
-    } else if (location.startsWith('/messages')) {
-      currentIndex = 1;
-    } else if (location.startsWith('/marketplace')) {
-      currentIndex = 2;
-    } else if (location.startsWith('/notifications')) {
-      currentIndex = 3;
-    } else {
-      currentIndex = 4; // menu
-    }
-    
-    return ShellLayout(
-      currentIndex: currentIndex,
-      child: child,
-    );
-  },
-  routes: [
-    GoRoute(
-      path: '/marketplace',
-      builder: (context, state) => const ListingView(),
-    ),
-    GoRoute(
-      path: '/profile/:userId',
-      builder: (context, state) {
-        final userId = state.pathParameters['userId'] ?? '';
-        final isOwnProfile = userId == 'me';
-        return Profile(userId: userId, isOwnProfile: isOwnProfile);
+
+    ShellRoute(
+      builder: (context, state, child) {
+        final location = state.uri.path;
+        int currentIndex;
+        
+        if (location.startsWith('/profile')) {
+          currentIndex = 0;
+        } else if (location.startsWith('/messages')) {
+          currentIndex = 1;
+        } else if (location.startsWith('/marketplace')) {
+          currentIndex = 2;
+        } else if (location.startsWith('/notifications')) {
+          currentIndex = 3;
+        } else {
+          currentIndex = 4;
+        }
+        
+        return ShellLayout(
+          currentIndex: currentIndex,
+          child: child,
+        );
       },
+      routes: [
+        GoRoute(
+          path: '/marketplace',
+          builder: (context, state) => const ListingView(),
+        ),
+        GoRoute(
+          path: '/profile/:userId',
+          builder: (context, state) {
+            final userId = state.pathParameters['userId'] ?? '';
+            final isOwnProfile = userId == 'me';
+            return Profile(
+              userId: userId,
+              isOwnProfile: isOwnProfile,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/messages',
+          builder: (context, state) => const MessagesView(),
+        ),
+        GoRoute(
+          path: '/notifications',
+          builder: (context, state) => const NotificationsView(),
+        ),
+        GoRoute(
+          path: '/menu',
+          builder: (context, state) => const MenuView(),
+        ),
+      ],
     ),
-    GoRoute(
-      path: '/messages',
-      builder: (context, state) => const MessagesView(),
-    ),
-    GoRoute(
-      path: '/notifications',
-      builder: (context, state) => const NotificationsView(),
-    ),
-    GoRoute(
-      path: '/menu',
-      builder: (context, state) => const MenuView(),
-    ),
-  ],
-),
   ],
 );

@@ -79,7 +79,7 @@ class _ProfileState extends State<Profile> {
     return AppBar(
       leading: IconButton(
         icon: Icon(Icons.arrow_back),
-        onPressed: () => context.replace('/marketplace'),  // Changed from context.pop()
+        onPressed: () => context.replace('/marketplace'),
       ),
       title: Text('Profile'),
       actions: [
@@ -97,12 +97,9 @@ class _ProfileState extends State<Profile> {
       padding: EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Hero(
-            tag: 'profile-image',
-            child: CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage(profileImage),
-            ),
+          CircleAvatar(
+            radius: 50,
+            backgroundImage: AssetImage(profileImage),
           ),
           SizedBox(height: 16),
           Text(
