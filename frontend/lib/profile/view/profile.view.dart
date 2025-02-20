@@ -77,7 +77,7 @@ class _ProfileState extends State<Profile> {
 
   Widget _buildListingsGrid(List<ListingItem> listings) {
     return Padding(
-      padding: const EdgeInsets.all(2.0),
+      padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
