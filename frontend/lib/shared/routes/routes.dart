@@ -8,7 +8,6 @@ import 'package:utm_marketplace/messages/view/messages.view.dart';
 import 'package:utm_marketplace/notifications/view/notifications.view.dart';
 import 'package:utm_marketplace/menu/view/menu.view.dart';
 
-// Define the router as a top-level global variable
 final router = GoRouter(
   initialLocation: '/login',
   routes: [
