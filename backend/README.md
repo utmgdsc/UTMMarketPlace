@@ -48,3 +48,42 @@ After generating the code, copy-paste the necessary snippets from `app_draft/` t
 
 ## Recipe for OpenAPI specification
 
+### POST Request OpenAPI specification recipe
+
+Sample request body definition
+```
+/sign-up:
+    post:
+      summary: Sign up a new user
+      description: Registers a new user using an email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "student@utoronto.ca"
+                  description: "Must be a valid University of Toronto email (utoronto.ca or mail.utoronto.ca)."
+                password:
+                  type: string
+                  format: password
+                  example: "P@ssword123"
+                  description: "Must be at least 8 characters, contain 1 uppercase letter, 1 number."
+```
+
+Things to notice:
+- Always include `summary`, `description`, and `requestBody`.
+  - `summary` is a one-line summary of the endpoint
+  - `description` is a full description of the behaviour of that response (e.g., if the endpoint has pagination and how clients should work with it)
+- For `requestBody`
+  - make sure it is `required` for POST
+  - we always use JSON, specify what schema property are required
+  - for each schema property, specify `type`, `format` (if applicable), `example`, and `description`.
+
