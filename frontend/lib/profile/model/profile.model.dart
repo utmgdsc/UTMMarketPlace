@@ -1,5 +1,3 @@
-import 'package:utm_marketplace/shared/models/listing_item.model.dart';
-
 class ProfileModel {
   final String id;
   final String name;
