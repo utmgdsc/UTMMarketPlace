@@ -24,7 +24,7 @@ from .connect_db import db  # Import MongoDB connection
 app = FastAPI(
     title='UTM Marketplace API',
     servers=[
-        {'url': 'http://localhost:5000', 'description': 'Local Development Server'},
+        {'url': 'http://localhost:8000', 'description': 'Local Development Server'},
     ],
 )
 
