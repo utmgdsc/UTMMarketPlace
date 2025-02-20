@@ -68,6 +68,8 @@ flutter:
     - assets/images/Default_pfp.jpg
     - assets/images/books.jpg
     - assets/data/temp_listing_data.json
+    - assets/images/aubreydrakepfp.jpg
+    - assets/data/temp_profile_data.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

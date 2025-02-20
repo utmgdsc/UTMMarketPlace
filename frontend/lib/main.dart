@@ -6,6 +6,15 @@ import 'package:utm_marketplace/shared/routes/routes.dart';
 import 'package:utm_marketplace/item_listing/repository/listing_repo.dart';
 import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart';
 import 'package:utm_marketplace/locator.dart';
+import 'package:utm_marketplace/messages/repository/message.repository.dart';
+import 'package:utm_marketplace/messages/view_models/message.viewmodel.dart';
+import 'package:utm_marketplace/notifications/repository/notification.repository.dart';
+import 'package:utm_marketplace/notifications/view_models/notification.viewmodel.dart';
+import 'package:utm_marketplace/menu/repository/menu.repository.dart';
+import 'package:utm_marketplace/menu/view_models/menu.viewmodel.dart';
+import 'package:utm_marketplace/profile/repository/profile.repository.dart';
+import 'package:utm_marketplace/profile/view_models/profile.viewmodel.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +26,18 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(
           create: (_) => ListingViewModel(repo: locator<ListingRepo>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => MessageViewModel(repo: locator<MessageRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NotificationViewModel(repo: locator<NotificationRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => MenuViewModel(repo: locator<MenuRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ProfileViewModel(repo: locator<ProfileRepository>()),
         ),
       ],
       child: const MyApp(),
