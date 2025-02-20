@@ -35,3 +35,16 @@ source venv/bin/activate
 cd backend/
 uvicorn app.main:app --reload --port 8000  # you can specify another port if needed
 ```
+
+## Generating code from OpenAPI specification file
+
+This will output the FastAPI boilerplate to `app_draft`.
+```shell
+cd backend/
+fastapi-codegen --input OpenAPI.yaml --output app_draft
+```
+
+After generating the code, copy-paste the necessary snippets from `app_draft/` to `app/` (this includes the models and the endpoint definitions)
+
+## Recipe for OpenAPI specification
+
