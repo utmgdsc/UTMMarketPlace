@@ -1,12 +1,13 @@
 from dotenv import load_dotenv
 import os
 from pymongo import MongoClient
+import certifi
 
 load_dotenv()  # Load environment variables from .env
 MONGO_URI = os.getenv("MONGO_URI")  
 DB_NAME = "marketplace"
 
-client = MongoClient(MONGO_URI)
+client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
 db = client[DB_NAME]
 
 
