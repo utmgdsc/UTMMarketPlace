@@ -63,3 +63,9 @@ app.*.map.json
 
 # Ignoring launch configuration and tasks
 .vscode/launch.json
+
+# Ignore virtual environment directory
+venv/
+
+# Ignore environment variable files
+.env

@@ -1,6 +1,6 @@
 // Template model view file for creating new model views
 import 'package:flutter/material.dart';
-import 'package:utm_marketplace/models/model.dart';
+import 'package:utm_marketplace/temp_view/view_models/temp_model.viewmodel.dart';
 
 class ModelView extends StatelessWidget {
   final Model model;

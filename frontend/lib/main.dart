@@ -1,15 +1,29 @@
 import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart';
+import 'package:provider/provider.dart';
 
-import 'package:utm_marketplace/common/theme.dart';
-import 'package:utm_marketplace/common/router.dart';
+import 'package:utm_marketplace/shared/themes/theme.dart';
+import 'package:utm_marketplace/shared/routes/routes.dart';
+import 'package:utm_marketplace/item_listing/repository/listing_repo.dart';
+import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart';
+import 'package:utm_marketplace/locator.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  setupLocator();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => ListingViewModel(repo: locator<ListingRepo>()),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
-// The main app widget, which initializes the app with the router and theme
-// Router and theme are defined in the common/router.dart and common/theme.dart files
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
