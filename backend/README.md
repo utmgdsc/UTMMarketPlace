@@ -1,4 +1,4 @@
-# UTMarketplace Mobile Frontend Development Guide
+# UTMarketplace Mobile Backend Development Guide
 
 ## Initial setup
 
