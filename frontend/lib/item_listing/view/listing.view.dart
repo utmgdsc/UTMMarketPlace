@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:utm_marketplace/item_listing/components/item_card/item_card.component.dart';
 import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart';
 import 'package:utm_marketplace/shared/components/loading.component.dart';
+import 'package:utm_marketplace/shared/themes/theme.dart';
 
 class ListingView extends StatefulWidget {
   const ListingView({super.key});
@@ -28,6 +29,7 @@ class _ListingViewState extends State<ListingView> {
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
+      automaticallyImplyLeading: false,
       centerTitle: true,
       title: const Text(
         'Marketplace',
@@ -41,8 +43,7 @@ class _ListingViewState extends State<ListingView> {
     );
 
     final searchBar = Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: hPad, vertical: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 8.0),
       child: Row(
         children: [
           Expanded(
@@ -62,8 +63,8 @@ class _ListingViewState extends State<ListingView> {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search...',
-                  contentPadding: EdgeInsets.symmetric(
-                      horizontal: hPad, vertical: 12.0),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: hPad, vertical: 12.0),
                   border: InputBorder.none,
                   suffixIcon: Icon(Icons.search),
                 ),
@@ -133,34 +134,22 @@ class _ListingViewState extends State<ListingView> {
                       searchBar,
                       trendingLabel,
                       Padding(
-                        padding: EdgeInsets.fromLTRB(
-                            hPad, 8.0, hPad, 8.0),
-                        child: Column(
-                          children: [
-                            GridView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 0.75,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 1,
-                                mainAxisExtent: 310,
-                              ),
-                              itemCount: listingViewModel.items.length,
-                              itemBuilder: (context, index) {
-                                final item = listingViewModel.items[index];
-                                return ItemCard(
-                                  id: item.id,
-                                  name: item.name,
-                                  price: item.price,
-                                  category: item.category,
-                                  imageUrl: item.imageUrl ?? '',
-                                );
-                              },
-                            ),
-                          ],
+                        padding: EdgeInsets.fromLTRB(hPad, 8.0, hPad, 8.0),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          gridDelegate: itemCardDelegate(),
+                          itemCount: listingViewModel.items.length,
+                          itemBuilder: (context, index) {
+                            final item = listingViewModel.items[index];
+                            return ItemCard(
+                              id: item.id,
+                              name: item.name,
+                              price: item.price,
+                              category: item.category,
+                              imageUrl: item.imageUrl ?? '',
+                            );
+                          },
                         ),
                       ),
                     ],

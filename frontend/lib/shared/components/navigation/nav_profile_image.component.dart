@@ -5,19 +5,9 @@ class NavProfileImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: 'profile-image',
-      child: Container(
-        width: 26,
-        height: 26,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          image: DecorationImage(
-            image: AssetImage('assets/images/aubreydrakepfp.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
+    return CircleAvatar(
+      radius: 13,
+      backgroundImage: const AssetImage('assets/images/aubreydrakepfp.jpg'),
     );
   }
 }

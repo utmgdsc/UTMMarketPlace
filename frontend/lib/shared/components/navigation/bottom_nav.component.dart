@@ -17,7 +17,7 @@ class BottomNav extends StatelessWidget {
         color: const Color(0xFFE8E8E8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.shade400,
             spreadRadius: 5,
             blurRadius: 7,
             offset: const Offset(0, 3),
@@ -74,22 +74,22 @@ class BottomNav extends StatelessWidget {
         ],
         onTap: (index) {
           if (index == currentIndex) return;
-          
+
           switch (index) {
             case 0:
-              context.replace('/profile/me');
+              context.push('/profile/me');
               break;
             case 1:
-              context.replace('/messages');
+              context.push('/messages');
               break;
             case 2:
-              context.replace('/marketplace');
+              context.push('/marketplace');
               break;
             case 3:
-              context.replace('/notifications');
+              context.push('/notifications');
               break;
             case 4:
-              context.replace('/menu');
+              context.push('/menu');
               break;
           }
         },

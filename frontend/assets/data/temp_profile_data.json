@@ -1,0 +1,47 @@
+{
+    "id": "user123",
+    "name": "Aubrey Drake",
+    "email": "aubreydrake@mail.utoronto.ca",
+    "image_url": "assets/images/aubreydrakepfp.jpg",
+    "rating": 4.0,
+    "reviews": [
+      {
+        "reviewer_id": "user1",
+        "reviewer_name": "John Q.",
+        "reviewer_image": "https://placehold.co/100/png",
+        "rating": 4.0,
+        "comment": "Great seller, highly trusted!",
+        "date": "2024-03-10T10:00:00Z"
+      },
+      {
+        "reviewer_id": "user2",
+        "reviewer_name": "May Davis",
+        "reviewer_image": "https://placehold.co/100/png",
+        "rating": 4.0,
+        "comment": "Quick, easy, and wonderful transactions",
+        "date": "2024-03-09T15:30:00Z"
+      },
+      {
+        "reviewer_id": "user3",
+        "reviewer_name": "Qais CEO",
+        "reviewer_image": "https://placehold.co/100/png",
+        "rating": 4.0,
+        "comment": "great person to deal with!",
+        "date": "2024-03-08T09:15:00Z"
+      }
+    ],
+    "listings": [
+      {
+        "id": "item1",
+        "title": "MacBook Pro 2021",
+        "price": 1200.00,
+        "image_url": "https://placehold.co/400/png"
+      },
+      {
+        "id": "item2",
+        "title": "iPhone 13 Pro",
+        "price": 800.00,
+        "image_url": "https://placehold.co/400/png"
+      }
+    ]
+  }
