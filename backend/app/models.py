@@ -38,28 +38,22 @@ class SignUpPostResponse2(BaseModel):
 
 
 class ListingsGetResponseItem(BaseModel):
-    id: Optional[int] = Field(None, example=1)
-    title: Optional[str] = Field(None, example='MacBook Pro for sale')
-    price: Optional[float] = Field(None, example=1200.99)
-    description: Optional[str] = Field(
-        None, example='Selling my MacBook Pro in great condition!'
-    )
-    seller_id: Optional[int] = Field(None, example=101)
+    id: int #Post ID
+    title: str #Example='MacBook Pro for sale')
+    price: float #Example=999.99)
+    description: str #example='Selling my MacBook Pro in great condition!'
+    seller_id: int = Field(None, example=101) #Poster (seller) ID
 
 
 class ListingsPostRequest(BaseModel):
-    title: Optional[str] = Field(None, example='Gaming Laptop for sale')
-    price: Optional[float] = Field(None, example=899.99)
-    description: Optional[str] = Field(
-        None, example='Lightly used gaming laptop, great condition!'
-    )
-    seller_id: Optional[int] = Field(None, example=101)
+    title: str
+    price: float
+    description: str 
+    seller_id: int
 
 
 class ListingsPostResponse(BaseModel):
-    id: Optional[int] = Field(None, example=10)
-    title: Optional[str] = Field(None, example='Gaming Laptop for sale')
-    price: Optional[float] = Field(None, example=899.99)
-    description: Optional[str] = Field(
-        None, example='Lightly used gaming laptop, great condition!'
-    )
+    id: int 
+    title: str #Example='Gaming Laptop for sale')
+    price: float #Example=899.99)
+    description: str #Example='Lightly used gaming laptop, great condition!'

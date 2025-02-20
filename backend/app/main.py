@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import List, Optional, Union
 import re
 from fastapi import FastAPI, HTTPException
-from passlib.context import CryptContext
+from passlib.hash import pbkdf2_sha256
 from pymongo.errors import DuplicateKeyError
 
 from .models import (
@@ -23,10 +23,7 @@ from .connect_db import db  # Import MongoDB connection
 
 app = FastAPI(
     title='UTM Marketplace API',
-    description='API specification for a campus-wide marketplace app',
-    version='1.0.0',
     servers=[
-        {'url': 'https://api.utmmarketplace.com', 'description': 'Production Server'},
         {'url': 'http://localhost:5000', 'description': 'Local Development Server'},
     ],
 )
@@ -71,8 +68,7 @@ def post_sign_up(body: SignUpPostRequest) -> Optional[Union[SignUpPostResponse, 
         raise HTTPException(status_code=400, detail="Invalid email format. Please use a UofT email.")
     
     #Hash password
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    hashed_password = pwd_context.hash(password)
+    hashed_password = pbkdf2_sha256.hash(password)
 
     #Create user document
     user_data = {
