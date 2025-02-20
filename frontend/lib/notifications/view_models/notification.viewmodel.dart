@@ -9,15 +9,18 @@ class NotificationViewModel extends LoadingViewModel {
   NotificationViewModel({required this.repo});
 
   NotificationModel _notificationModel = NotificationModel();
+  NotificationModel get notifications => _notificationModel;
 
   Future<void> fetchData() async {
     try {
       isLoading = true;
       _notificationModel = await repo.fetchData();
+      notifyListeners();
     } catch (e) {
       debugPrint('Error in fetchData: ${e.toString()}');
     } finally {
       isLoading = false;
+      notifyListeners();
     }
   }
 }

@@ -9,15 +9,18 @@ class MenuViewModel extends LoadingViewModel {
   MenuViewModel({required this.repo});
 
   MenuModel _menuModel = MenuModel();
+  MenuModel get menu => _menuModel;
 
   Future<void> fetchData() async {
     try {
       isLoading = true;
       _menuModel = await repo.fetchData();
+      notifyListeners();
     } catch (e) {
       debugPrint('Error in fetchData: ${e.toString()}');
     } finally {
       isLoading = false;
+      notifyListeners();
     }
   }
 }

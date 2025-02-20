@@ -9,15 +9,18 @@ class MessageViewModel extends LoadingViewModel {
   MessageViewModel({required this.repo});
 
   MessageModel _messageModel = MessageModel();
+  MessageModel get messages => _messageModel;
 
   Future<void> fetchData() async {
     try {
       isLoading = true;
       _messageModel = await repo.fetchData();
+      notifyListeners();
     } catch (e) {
       debugPrint('Error in fetchData: ${e.toString()}');
     } finally {
       isLoading = false;
+      notifyListeners();
     }
   }
 }
