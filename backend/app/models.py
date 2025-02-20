@@ -10,50 +10,36 @@ from pydantic import BaseModel, EmailStr, Field, SecretStr
 
 
 class SignUpPostRequest(BaseModel):
-    email: EmailStr = Field(
-        ...,
-        description='Must be a valid University of Toronto email (utoronto.ca or mail.utoronto.ca).',
-        example='student@utoronto.ca',
-    )
-    password: SecretStr = Field(
-        ...,
-        description='Must be at least 8 characters, contain 1 uppercase letter, 1 number.',
-        example='P@ssword123',
-    )
+    email: EmailStr = Field(..., description='Must be a valid University of Toronto email.', example='student@utoronto.ca')
+    password: SecretStr = Field(..., description='Must be at least 8 characters, contain 1 uppercase letter, 1 number.', example='P@ssword123')
 
-
+# Keep "Optional" only for these responses
 class SignUpPostResponse(BaseModel):
     user_id: Optional[int] = Field(None, example=42)
     message: Optional[str] = Field(None, example='User registered successfully.')
 
-
 class SignUpPostResponse1(BaseModel):
-    error: Optional[str] = Field(
-        None, example='Invalid email format. Please use a UofT email.'
-    )
-
+    error: Optional[str] = Field(None, example='Invalid email format. Please use a UofT email.')
 
 class SignUpPostResponse2(BaseModel):
     error: Optional[str] = Field(None, example='Email already registered.')
 
-
+# Remove Optional from other models
 class ListingsGetResponseItem(BaseModel):
-    id: int #Post ID
-    title: str #Example='MacBook Pro for sale')
-    price: float #Example=999.99)
-    description: str #example='Selling my MacBook Pro in great condition!'
-    seller_id: int = Field(None, example=101) #Poster (seller) ID
-
+    id: int
+    title: str
+    price: float
+    description: str
+    seller_id: int = Field(..., example=101)
 
 class ListingsPostRequest(BaseModel):
     title: str
     price: float
-    description: str 
+    description: str
     seller_id: int
 
-
 class ListingsPostResponse(BaseModel):
-    id: int 
-    title: str #Example='Gaming Laptop for sale')
-    price: float #Example=899.99)
-    description: str #Example='Lightly used gaming laptop, great condition!'
+    id: int
+    title: str
+    price: float
+    description: str
