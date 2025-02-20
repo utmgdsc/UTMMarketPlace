@@ -15,7 +15,6 @@ import 'package:utm_marketplace/menu/view_models/menu.viewmodel.dart';
 import 'package:utm_marketplace/profile/repository/profile.repository.dart';
 import 'package:utm_marketplace/profile/view_models/profile.viewmodel.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -31,7 +30,8 @@ Future<void> main() async {
           create: (_) => MessageViewModel(repo: locator<MessageRepository>()),
         ),
         ChangeNotifierProvider(
-          create: (_) => NotificationViewModel(repo: locator<NotificationRepository>()),
+          create: (_) =>
+              NotificationViewModel(repo: locator<NotificationRepository>()),
         ),
         ChangeNotifierProvider(
           create: (_) => MenuViewModel(repo: locator<MenuRepository>()),

@@ -74,7 +74,7 @@ class BottomNav extends StatelessWidget {
         ],
         onTap: (index) {
           if (index == currentIndex) return;
-          
+
           switch (index) {
             case 0:
               context.push('/profile/me');

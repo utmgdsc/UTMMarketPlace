@@ -31,12 +31,14 @@ class ProfileHeader extends StatelessWidget {
       ),
       backgroundColor: Colors.transparent,
       elevation: 0,
-      actions: isOwnProfile ? [
-        IconButton(
-          icon: const Icon(Icons.settings, color: Colors.white),
-          onPressed: () {},
-        ),
-      ] : null,
+      actions: isOwnProfile
+          ? [
+              IconButton(
+                icon: const Icon(Icons.settings, color: Colors.white),
+                onPressed: () {},
+              ),
+            ]
+          : null,
     );
 
     final profileImage = Container(

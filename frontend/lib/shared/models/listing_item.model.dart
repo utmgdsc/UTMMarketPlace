@@ -19,4 +19,4 @@ class ListingItem {
       price: json['price'].toDouble(),
     );
   }
-} 
+}

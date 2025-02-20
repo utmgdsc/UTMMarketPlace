@@ -27,14 +27,17 @@ class ProfileModel {
       imageUrl: json['image_url'],
       rating: json['rating']?.toDouble() ?? 0.0,
       reviews: (json['reviews'] as List?)
-          ?.map((review) => Review.fromJson(review))
-          .toList() ?? [],
+              ?.map((review) => Review.fromJson(review))
+              .toList() ??
+          [],
       listings: (json['listings'] as List?)
-          ?.map((listing) => ListingItem.fromJson(listing))
-          .toList() ?? [],
+              ?.map((listing) => ListingItem.fromJson(listing))
+              .toList() ??
+          [],
       savedItems: (json['saved_items'] as List?)
-          ?.map((item) => ListingItem.fromJson(item))
-          .toList() ?? [],
+              ?.map((item) => ListingItem.fromJson(item))
+              .toList() ??
+          [],
     );
   }
 }

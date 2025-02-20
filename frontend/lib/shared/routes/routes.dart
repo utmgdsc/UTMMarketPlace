@@ -15,12 +15,11 @@ final router = GoRouter(
       path: '/login',
       builder: (context, state) => const Login(),
     ),
-
     ShellRoute(
       builder: (context, state, child) {
         final location = state.uri.path;
         int currentIndex;
-        
+
         if (location.startsWith('/profile')) {
           currentIndex = 0;
         } else if (location.startsWith('/messages')) {
@@ -32,7 +31,7 @@ final router = GoRouter(
         } else {
           currentIndex = 4;
         }
-        
+
         return ShellLayout(
           currentIndex: currentIndex,
           child: child,

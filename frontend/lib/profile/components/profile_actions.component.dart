@@ -15,8 +15,7 @@ class ProfileActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final savedItemsButton = ElevatedButton(
-      onPressed: () {
-      },
+      onPressed: () {},
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF11384A),
         minimumSize: const Size(double.infinity, 45),
