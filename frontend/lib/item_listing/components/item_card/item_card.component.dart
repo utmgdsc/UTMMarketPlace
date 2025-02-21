@@ -23,8 +23,7 @@ class ItemCard extends StatelessWidget {
             width: double.infinity,
             height: 250.0,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(4.0)
-              ),
+              borderRadius: BorderRadius.all(Radius.circular(4.0)),
               image: DecorationImage(
                 image: NetworkImage(imageUrl!),
                 fit: BoxFit.cover,
