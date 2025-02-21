@@ -6,6 +6,16 @@ final appTheme = ThemeData(
   scaffoldBackgroundColor: Colors.white,
 );
 
+SliverGridDelegateWithFixedCrossAxisCount itemCardDelegate() {
+  return const SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    childAspectRatio: 0.75,
+    crossAxisSpacing: 8,
+    mainAxisSpacing: 1,
+    mainAxisExtent: 310,
+  );
+}
+
 // This class is for storing text styles that are used throughout the app
 // The label style is used for smaller text, such as form labels
 // The header style is used for larger text, such as titles

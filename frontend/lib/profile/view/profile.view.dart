@@ -6,6 +6,7 @@ import 'package:utm_marketplace/profile/components/profile_actions.component.dar
 import 'package:utm_marketplace/profile/view_models/profile.viewmodel.dart';
 import 'package:utm_marketplace/item_listing/components/item_card/item_card.component.dart';
 import 'package:utm_marketplace/shared/components/loading.component.dart';
+import 'package:utm_marketplace/shared/themes/theme.dart';
 
 class Profile extends StatefulWidget {
   final String userId;
@@ -75,20 +76,12 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget _buildListingsGrid(List<ListingItem> listings) {
-    final gridDelegate = const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      childAspectRatio: 0.75,
-      crossAxisSpacing: 8,
-      mainAxisSpacing: 8,
-      mainAxisExtent: 250,
-    );
-
     return Padding(
-      padding: const EdgeInsets.all(2.0),
+      padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: gridDelegate,
+        gridDelegate: itemCardDelegate(),
         itemCount: listings.length,
         itemBuilder: (context, index) {
           final item = listings[index];

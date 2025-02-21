@@ -17,7 +17,7 @@ class BottomNav extends StatelessWidget {
         color: const Color(0xFFE8E8E8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withAlpha(51),
+            color: Colors.grey.shade400,
             spreadRadius: 5,
             blurRadius: 7,
             offset: const Offset(0, 3),
