@@ -5,12 +5,17 @@
 from __future__ import annotations
 from typing import List, Optional, Union
 import re
-from fastapi import FastAPI, HTTPException
+from datetime import datetime
+from fastapi import FastAPI, HTTPException, Query
 from passlib.hash import pbkdf2_sha256
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import DuplicateKeyError, PyMongoError
+from bson import ObjectId
 
-from .models import (
+from models import (
+    ListingGetResponse,
+    ListingGetResponse1,
     ListingsGetResponseItem,
+    ListingsGetAllResponse,
     ListingsPostRequest,
     ListingsPostResponse,
     SignUpPostRequest,
@@ -19,7 +24,7 @@ from .models import (
     SignUpPostResponse2,
 )
 
-from .connect_db import db  # Import MongoDB connection
+from connect_db import db  # Import MongoDB connection
 
 app = FastAPI(
     title='UTM Marketplace API',
@@ -28,13 +33,66 @@ app = FastAPI(
     ],
 )
 
+@app.get("/listing", response_model=ListingsGetResponseItem,
+         responses={
+            '400': {'model': ListingGetResponse},
+            '404': {'model': ListingGetResponse1},
+         })
+def get_listing(listingid: str = Query(..., description="Listing ID to retrieve")):
+    """
+    Retrieve a single listing by its listing ID
+    """
+    try:
+        # Validate listingid as a valid MongoDB ObjectId
+        if not ObjectId.is_valid(listingid):
+            raise HTTPException(status_code=400, detail="Invalid listing ID format.")
 
-@app.get('/listings', response_model=List[ListingsGetResponseItem])
-def get_listings() -> List[ListingsGetResponseItem]:
+        # Fetch listing from MongoDB
+        listing = db.listings.find_one({"_id": ObjectId(listingid)})
+
+        if not listing:
+            raise HTTPException(status_code=404, detail="Listing not found.")
+
+        # Convert MongoDB document to response model
+        return ListingsGetResponseItem(
+            id=str(listing["_id"]),
+            title=listing.get("title"),
+            price=listing.get("price"),
+            description=listing.get("description"),
+            seller_id=listing.get("user_id")  # Assuming `user_id` is the seller_id
+        )
+
+    except PyMongoError as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+    
+
+@app.get('/listings', response_model=ListingsGetAllResponse)
+def get_listings() -> ListingsGetAllResponse:
     """
     Retrieve all listings
     """
-    pass
+    try:
+        # Fetch all listings from MongoDB
+        listings_cursor = db.listings.find({})
+        
+        # Convert MongoDB documents to Pydantic models
+        listings = [
+            ListingsGetResponseItem(
+                id=str(listing["_id"]),  # Convert ObjectId to string
+                title=listing.get("title"),
+                price=listing.get("price"),
+                description=listing.get("description"),
+                seller_id=listing.get("user_id")
+            )
+            for listing in listings_cursor
+        ]
+
+        return listings
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
 @app.post(
@@ -44,7 +102,29 @@ def post_listings(body: ListingsPostRequest) -> Optional[ListingsPostResponse]:
     """
     Create a new listing
     """
-    pass
+    try:
+        # Prepare listing document
+        listing_data = body.dict()
+        listing_data["date_posted"] = datetime.utcnow().isoformat()
+
+        # Insert into MongoDB
+        result = db.listings.insert_one(listing_data)
+
+        if not result.inserted_id:
+            raise HTTPException(status_code=500, detail="Listing failed to post")
+
+        return ListingsPostResponse(
+            id=str(result.inserted_id),
+            title=body.title,
+            price=body.price,
+            description=body.description,
+            message="Listing created successfully."
+        )
+
+    except PyMongoError as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
 @app.post(
