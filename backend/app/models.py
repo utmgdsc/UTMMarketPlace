@@ -45,6 +45,16 @@ class ListingsGetResponseItem(BaseModel):
     seller_id: Optional[int] = Field(None, example=101)
 
 
+class ListingGetResponse(BaseModel):
+    error: Optional[str] = Field(
+        None, example='Invalid listing ID format. Must be a valid ObjectId.'
+    )
+
+
+class ListingGetResponse1(BaseModel):
+    error: Optional[str] = Field(None, example='Listing not found.')
+
+
 class ListingsGetAllResponse(BaseModel):
     listings: List[ListingsGetResponseItem]
     total: int  # (we can use for pagination)

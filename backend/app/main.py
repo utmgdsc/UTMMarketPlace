@@ -12,7 +12,10 @@ from pymongo.errors import DuplicateKeyError, PyMongoError
 from bson import ObjectId
 
 from models import (
+    ListingGetResponse,
+    ListingGetResponse1,
     ListingsGetResponseItem,
+    ListingsGetAllResponse,
     ListingsPostRequest,
     ListingsPostResponse,
     SignUpPostRequest,
@@ -30,7 +33,11 @@ app = FastAPI(
     ],
 )
 
-@app.get("/listing", response_model=ListingsGetResponseItem)
+@app.get("/listing", response_model=ListingsGetResponseItem,
+         responses={
+            '400': {'model': ListingGetResponse},
+            '404': {'model': ListingGetResponse1},
+         })
 def get_listing(listingid: str = Query(..., description="Listing ID to retrieve")):
     """
     Retrieve a single listing by its listing ID
@@ -55,12 +62,14 @@ def get_listing(listingid: str = Query(..., description="Listing ID to retrieve"
             seller_id=listing.get("user_id")  # Assuming `user_id` is the seller_id
         )
 
+    except PyMongoError as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
     
 
-@app.get('/listings', response_model=List[ListingsGetResponseItem])
-def get_listings() -> List[ListingsGetResponseItem]:
+@app.get('/listings', response_model=ListingsGetAllResponse)
+def get_listings() -> ListingsGetAllResponse:
     """
     Retrieve all listings
     """
