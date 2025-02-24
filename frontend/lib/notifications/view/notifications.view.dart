@@ -31,7 +31,7 @@ class _NotificationsViewState extends State<NotificationsView> {
         title: const Text(
           'Notifications',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 32,
             fontWeight: FontWeight.bold,
           ),
         ),

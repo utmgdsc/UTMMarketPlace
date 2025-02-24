@@ -31,7 +31,7 @@ class _MessagesViewState extends State<MessagesView> {
         title: const Text(
           'Messages',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 32,
             fontWeight: FontWeight.bold,
           ),
         ),
