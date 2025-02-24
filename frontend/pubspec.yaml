@@ -70,6 +70,9 @@ flutter:
     - assets/data/temp_listing_data.json
     - assets/images/aubreydrakepfp.jpg
     - assets/data/temp_profile_data.json
+    - assets/icons/logout.png
+    - assets/icons/create_listing.png
+    - assets/icons/settings.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

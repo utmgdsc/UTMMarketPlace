@@ -34,7 +34,7 @@ class _ListingViewState extends State<ListingView> {
       title: const Text(
         'Marketplace',
         style: TextStyle(
-          fontSize: 24,
+          fontSize: 32,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -47,26 +47,25 @@ class _ListingViewState extends State<ListingView> {
       child: Row(
         children: [
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade400,
-                    spreadRadius: 1,
-                    blurRadius: 1,
-                    offset: Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search...',
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: hPad, vertical: 12.0),
-                  border: InputBorder.none,
-                  suffixIcon: Icon(Icons.search),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search',
+                hintStyle: TextStyle(
+                  color: Colors.grey[600],
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 15,
+                ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Colors.grey[600],
                 ),
               ),
             ),
@@ -74,19 +73,14 @@ class _ListingViewState extends State<ListingView> {
           SizedBox(width: 8.0),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.grey[200],
               borderRadius: BorderRadius.circular(30.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade400,
-                  spreadRadius: 1,
-                  blurRadius: 1,
-                  offset: Offset(0, 1),
-                ),
-              ],
             ),
             child: IconButton(
-              icon: Icon(Icons.filter_list),
+              icon: Icon(
+                Icons.filter_list,
+                color: Colors.grey[600],
+              ),
               onPressed: () {
                 debugPrint('Filter button pressed');
               },
