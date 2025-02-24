@@ -36,28 +36,13 @@ class SignUpPostResponse2(BaseModel):
 
 
 class ListingsGetResponseItem(BaseModel):
-    id: Optional[str] = Field(None, example=1)
+    id: Optional[int] = Field(None, example=1)
     title: Optional[str] = Field(None, example='MacBook Pro for sale')
     price: Optional[float] = Field(None, example=1200.99)
     description: Optional[str] = Field(
         None, example='Selling my MacBook Pro in great condition!'
     )
     seller_id: Optional[int] = Field(None, example=101)
-
-
-class ListingGetResponse(BaseModel):
-    error: Optional[str] = Field(
-        None, example='Invalid listing ID format. Must be a valid ObjectId.'
-    )
-
-
-class ListingGetResponse1(BaseModel):
-    error: Optional[str] = Field(None, example='Listing not found.')
-
-
-class ListingsGetAllResponse(BaseModel):
-    listings: List[ListingsGetResponseItem]
-    total: int  # (we can use for pagination)
 
 
 class ListingsPostRequest(BaseModel):
@@ -69,12 +54,10 @@ class ListingsPostRequest(BaseModel):
     seller_id: Optional[int] = Field(None, example=101)
 
 
-
 class ListingsPostResponse(BaseModel):
-    id: Optional[str] = Field(None, example=10)
+    id: Optional[int] = Field(None, example=10)
     title: Optional[str] = Field(None, example='Gaming Laptop for sale')
     price: Optional[float] = Field(None, example=899.99)
     description: Optional[str] = Field(
         None, example='Lightly used gaming laptop, great condition!'
     )
-    message: Optional[str] = Field(None, example='Listing created successfully.')

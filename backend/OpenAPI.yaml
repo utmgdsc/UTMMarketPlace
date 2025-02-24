@@ -79,131 +79,74 @@ paths:
   /listings:
     get:
       summary: Retrieve all listings
+      description: Fetches all product/service listings available in the marketplace.
       responses:
         "200":
           description: A list of marketplace listings
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListingsGetAllResponse"
-    
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: "MacBook Pro for sale"
+                    price:
+                      type: number
+                      format: float
+                      example: 1200.99
+                    description:
+                      type: string
+                      example: "Selling my MacBook Pro in great condition!"
+                    seller_id:
+                      type: integer
+                      example: 101
     post:
       summary: Create a new listing
+      description: Adds a new product or service listing to the marketplace.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ListingsPostRequest"
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Gaming Laptop for sale"
+                price:
+                  type: number
+                  format: float
+                  example: 899.99
+                description:
+                  type: string
+                  example: "Lightly used gaming laptop, great condition!"
+                seller_id:
+                  type: integer
+                  example: 101
       responses:
         "201":
           description: Listing created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListingsPostResponse"
-
-  /listing:
-    get:
-      summary: Retrieve a single listing by ID
-      parameters:
-        - name: listingid
-          in: query
-          required: true
-          schema:
-            type: string
-            example: "65d53a49c2c5f2b9e8e1d4b5"
-      responses:
-        "200":
-          description: Listing retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ListingsGetResponseItem"
-        "400":
-          description: Invalid listing ID format
-          content:
-            application/json:
-              schema:
                 type: object
                 properties:
-                  error:
+                  id:
+                    type: integer
+                    example: 10
+                  title:
                     type: string
-                    example: "Invalid listing ID format. Must be a valid ObjectId."
-        "404":
-          description: Listing not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
+                    example: "Gaming Laptop for sale"
+                  price:
+                    type: number
+                    format: float
+                    example: 899.99
+                  description:
                     type: string
-                    example: "Listing not found."
-
-components:
-  schemas:
-    ListingsGetResponseItem:
-      type: object
-      properties:
-        id:
-          type: string
-          example: "1"
-        title:
-          type: string
-          example: "MacBook Pro for sale"
-        price:
-          type: number
-          format: float
-          example: 1200.99
-        description:
-          type: string
-          example: "Selling my MacBook Pro in great condition!"
-        seller_id:
-          type: integer
-          example: 101
-    ListingsGetAllResponse:
-      type: object
-      properties:
-        listings:
-          type: array
-          items:
-            $ref: "#/components/schemas/ListingsGetResponseItem"
-        total:
-          type: integer
-          example: 10
-    ListingsPostRequest:
-      type: object
-      properties:
-        title:
-          type: string
-          example: "Gaming Laptop for sale"
-        price:
-          type: number
-          format: float
-          example: 899.99
-        description:
-          type: string
-          example: "Lightly used gaming laptop, great condition!"
-        seller_id:
-          type: integer
-          example: 101
-    ListingsPostResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          example: "10"
-        title:
-          type: string
-          example: "Gaming Laptop for sale"
-        price:
-          type: number
-          format: float
-          example: 899.99
-        description:
-          type: string
-          example: "Lightly used gaming laptop, great condition!"
-        message:
-          type: string
-          example: "Listing created successfully."
+                    example: "Lightly used gaming laptop, great condition!"
