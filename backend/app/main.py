@@ -6,16 +6,20 @@ from __future__ import annotations
 from typing import List, Optional, Union
 import re
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException
 from passlib.hash import pbkdf2_sha256
 from pymongo.errors import DuplicateKeyError, PyMongoError
 from bson import ObjectId
 
+#importing async way of connecting to MongoDB
+from MongoClient_async import db, listings_collection
+
 from models import (
+    Field500ErrorResponse,
     ListingGetResponse,
     ListingGetResponse1,
-    ListingsGetResponseItem,
     ListingsGetAllResponse,
+    ListingsGetResponseItem,
     ListingsPostRequest,
     ListingsPostResponse,
     SignUpPostRequest,
@@ -24,108 +28,134 @@ from models import (
     SignUpPostResponse2,
 )
 
-from connect_db import db  # Import MongoDB connection
-
 app = FastAPI(
     title='UTM Marketplace API',
+    description='API specification for a campus-wide marketplace app',
+    version='1.0.0',
     servers=[
-        {'url': 'http://localhost:8000', 'description': 'Local Development Server'},
+        {'url': 'https://api.utmmarketplace.com', 'description': 'Production Server'},
+        {'url': 'http://localhost:5000', 'description': 'Local Development Server'},
     ],
 )
 
-@app.get("/listing", response_model=ListingsGetResponseItem,
-         responses={
-            '400': {'model': ListingGetResponse},
-            '404': {'model': ListingGetResponse1},
-         })
-def get_listing(listingid: str = Query(..., description="Listing ID to retrieve")):
+
+@app.get(
+    '/listing/{listing_id}',
+    response_model=ListingsGetResponseItem,
+    responses={
+        '400': {'model': ListingGetResponse},
+        '404': {'model': ListingGetResponse1},
+        '500': {'model': Field500ErrorResponse},
+    },
+)
+async def get_listing(
+    listing_id: str,
+) -> Union[
+    ListingsGetResponseItem, ListingGetResponse, ListingGetResponse1, Field500ErrorResponse]:
     """
-    Retrieve a single listing by its listing ID
+    Retrieve a single listing by ID
     """
     try:
-        # Validate listingid as a valid MongoDB ObjectId
-        if not ObjectId.is_valid(listingid):
-            raise HTTPException(status_code=400, detail="Invalid listing ID format.")
+        # Validate ObjectId
+        if not ObjectId.is_valid(listing_id):
+            return ListingGetResponse(error="Invalid listing ID format. Must be a valid Id.")
 
         # Fetch listing from MongoDB
-        listing = db.listings.find_one({"_id": ObjectId(listingid)})
+        listing = await listings_collection.find_one({"_id": ObjectId(listing_id)})
 
+        # Check if listing exists
         if not listing:
-            raise HTTPException(status_code=404, detail="Listing not found.")
+            return ListingGetResponse1(error="Listing not found.")
 
-        # Convert MongoDB document to response model
+        # Convert MongoDB document to Pydantic model
         return ListingsGetResponseItem(
             id=str(listing["_id"]),
-            title=listing.get("title"),
-            price=listing.get("price"),
+            title=listing["title"],
+            price=listing["price"],
             description=listing.get("description"),
-            seller_id=listing.get("user_id")  # Assuming `user_id` is the seller_id
+            seller_id=listing["seller_id"],
+            pictures=listing.get("pictures", []),
+            category=listing.get("category"),
+            date_posted=listing.get("date_posted"),
+            campus=listing.get("campus"),
         )
 
-    except PyMongoError as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
-    
+        return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
-@app.get('/listings', response_model=ListingsGetAllResponse)
-def get_listings() -> ListingsGetAllResponse:
+
+@app.get('/listings', 
+    response_model=ListingsGetAllResponse, responses={'500': {'model': Field500ErrorResponse}},)
+async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
     """
     Retrieve all listings
     """
     try:
         # Fetch all listings from MongoDB
-        listings_cursor = db.listings.find({})
-        
-        # Convert MongoDB documents to Pydantic models
-        listings = [
-            ListingsGetResponseItem(
-                id=str(listing["_id"]),  # Convert ObjectId to string
-                title=listing.get("title"),
-                price=listing.get("price"),
-                description=listing.get("description"),
-                seller_id=listing.get("user_id")
-            )
-            for listing in listings_cursor
-        ]
+        cursor = listings_collection.find()
+        listings = await cursor.to_list(length=None)  # Get all documents
 
-        return listings
+        response_data = []
+        for listing in listings:
+            try:
+                formatted_listing = ListingsGetResponseItem(
+                    id=str(listing["_id"]),
+                    title=listing["title"],
+                    price=listing["price"],
+                    description=listing.get("description"),
+                    seller_id=listing["seller_id"],
+                    pictures=listing.get("pictures", []),
+                    category=listing.get("category"),
+                    date_posted=listing.get("date_posted"),  # need to decide on the date format
+                    campus=listing.get("campus"),
+                )
+                response_data.append(formatted_listing)
+            # except Exception as e:
+            #     print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
+
+        return ListingsGetAllResponse(listings=response_data, total=len(response_data))
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+        return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
 
 @app.post(
-    '/listings', response_model=None, responses={'201': {'model': ListingsPostResponse}}
+    '/listings',
+    response_model=None,
+    responses={
+        '201': {'model': ListingsPostResponse},
+        '500': {'model': Field500ErrorResponse},
+    },
 )
-def post_listings(body: ListingsPostRequest) -> Optional[ListingsPostResponse]:
+async def post_listings(
+    body: ListingsPostRequest,
+) -> Optional[Union[ListingsPostResponse, Field500ErrorResponse]]:
     """
     Create a new listing
     """
     try:
-        # Prepare listing document
+        # Prepare data for MongoDB
         listing_data = body.dict()
-        listing_data["date_posted"] = datetime.utcnow().isoformat()
+        listing_data["date_posted"] = listing_data.get("date_posted") or None  # Ensure date is handled properly
 
         # Insert into MongoDB
-        result = db.listings.insert_one(listing_data)
+        result = await listings_collection.insert_one(listing_data)
 
-        if not result.inserted_id:
-            raise HTTPException(status_code=500, detail="Listing failed to post")
-
+        # Return the created listing
         return ListingsPostResponse(
             id=str(result.inserted_id),
             title=body.title,
             price=body.price,
             description=body.description,
-            message="Listing created successfully."
+            seller_id=body.seller_id,
+            pictures=body.pictures,
+            category=body.category,
+            date_posted=body.date_posted,
+            campus=body.campus,
         )
 
-    except PyMongoError as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
-
+        return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
 @app.post(
     '/sign-up',
