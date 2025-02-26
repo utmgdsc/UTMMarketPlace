@@ -40,8 +40,8 @@ class CreateListingModel {
 }
 
 enum ListingCondition {
-  New,
-  AlmostNew,
-  Used,
-  Fair,
+  brandNew,
+  almostNew,
+  used,
+  fair,
 }

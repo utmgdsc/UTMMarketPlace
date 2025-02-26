@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/notifications/view_models/notification.viewmodel.dart';
-import 'package:utm_marketplace/shared/components/loading.component.dart';
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -40,9 +39,6 @@ class _NotificationsViewState extends State<NotificationsView> {
       ),
       body: Consumer<NotificationViewModel>(
         builder: (_, notificationViewModel, __) {
-          if (notificationViewModel.isLoading) {
-            return const Center(child: LoadingComponent());
-          }
           return const Center(
             child: Text('Notifications'),
           );

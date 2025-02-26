@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/messages/view_models/message.viewmodel.dart';
-import 'package:utm_marketplace/shared/components/loading.component.dart';
 
 class MessagesView extends StatefulWidget {
   const MessagesView({super.key});
@@ -40,9 +39,6 @@ class _MessagesViewState extends State<MessagesView> {
       ),
       body: Consumer<MessageViewModel>(
         builder: (_, messageViewModel, __) {
-          if (messageViewModel.isLoading) {
-            return const Center(child: LoadingComponent());
-          }
           return const Center(
             child: Text('Messages'),
           );

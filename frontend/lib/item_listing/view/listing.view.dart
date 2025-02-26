@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/item_listing/components/item_card/item_card.component.dart';
 import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart';
-import 'package:utm_marketplace/shared/components/loading.component.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
 
 class ListingView extends StatefulWidget {
@@ -106,8 +105,6 @@ class _ListingViewState extends State<ListingView> {
 
     final emptyState = const Center(child: Text('No items available.'));
 
-    final loadingState = const Center(child: LoadingComponent());
-
     return Scaffold(
       appBar: appBar,
       body: SafeArea(
@@ -117,9 +114,6 @@ class _ListingViewState extends State<ListingView> {
             Expanded(
               child: Consumer<ListingViewModel>(
                 builder: (_, listingViewModel, child) {
-                  if (listingViewModel.isLoading) {
-                    return loadingState;
-                  }
                   if (listingViewModel.items.isEmpty) {
                     return emptyState;
                   }

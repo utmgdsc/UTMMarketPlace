@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/menu/components/menu_item.component.dart';
 import 'package:utm_marketplace/menu/view_models/menu.viewmodel.dart';
-import 'package:utm_marketplace/shared/components/loading.component.dart';
 import 'package:utm_marketplace/menu/model/menu.model.dart';
 
 class MenuView extends StatefulWidget {
@@ -83,10 +82,6 @@ class _MenuViewState extends State<MenuView> {
       appBar: appBar,
       body: Consumer<MenuViewModel>(
         builder: (_, menuViewModel, __) {
-          if (menuViewModel.isLoading) {
-            return const Center(child: LoadingComponent());
-          }
-
           return _buildMenuList(menuViewModel.menu);
         },
       ),
