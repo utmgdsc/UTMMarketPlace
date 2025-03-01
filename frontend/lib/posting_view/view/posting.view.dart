@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:utm_marketplace/item_listing/components/item_card/item_card.component.dart';
-import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart';
+import 'package:utm_marketplace/posting_view/view_models/posting.viewmodel.dart';
 import 'package:utm_marketplace/shared/components/loading.component.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
-import 'package:go_router/go_router.dart';
 
-class ListingView extends StatefulWidget {
-  const ListingView({super.key});
+class PostingView extends StatefulWidget {
+  final String itemId;
+
+  const PostingView({super.key, required this.itemId});
 
   @override
-  State<ListingView> createState() => _ListingViewState();
+  State<PostingView> createState() => _PostingViewState();
 }
 
-class _ListingViewState extends State<ListingView> {
-  late ListingViewModel viewModel;
+class _PostingViewState extends State<PostingView> {
+  late PostingViewModel viewModel;
   final double hPad = 16.0; // Horizontal padding
 
   @override
   void initState() {
     super.initState();
-    viewModel = Provider.of<ListingViewModel>(context, listen: false);
+    viewModel = Provider.of<PostingViewModel>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      viewModel.fetchData();
+      viewModel.fetchData(widget.itemId);
     });
   }
 
@@ -122,42 +122,18 @@ class _ListingViewState extends State<ListingView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Consumer<ListingViewModel>(
-                builder: (_, listingViewModel, child) {
-                  if (listingViewModel.isLoading) {
+              child: Consumer<PostingViewModel>(
+                builder: (_, postingViewModel, child) {
+                  if (postingViewModel.isLoading) {
                     return loadingState;
                   }
-                  if (listingViewModel.items.isEmpty) {
+                  if (postingViewModel.items.isEmpty) {
                     return emptyState;
                   }
                   return ListView(
                     children: [
                       searchBar,
                       trendingLabel,
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(hPad, 8.0, hPad, 8.0),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          gridDelegate: itemCardDelegate(),
-                          itemCount: listingViewModel.items.length,
-                          itemBuilder: (context, index) {
-                            final item = listingViewModel.items[index];
-                            return GestureDetector(
-                              onTap: () {
-                                context.push('/item/${item.id}');
-                              },
-                              child: ItemCard(
-                                id: item.id,
-                                name: item.name,
-                                price: item.price,
-                                category: item.category,
-                                imageUrl: item.imageUrl ?? '',
-                              ),
-                            );
-                          },
-                        ),
-                      ),
                     ],
                   );
                 },
