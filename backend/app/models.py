@@ -61,3 +61,19 @@ class ListingsPostResponse(BaseModel):
     description: Optional[str] = Field(
         None, example='Lightly used gaming laptop, great condition!'
     )
+
+class LoginPostResponse(BaseModel):
+    access_token: Optional[str] = Field(None, example='eyJhbGciOiJIUzI1NiIsInR...')
+    token_type: Optional[str] = Field(None, example='bearer')
+
+
+class ListingsPostRequest(BaseModel):
+    title: Optional[str] = Field(None, example='Gaming Laptop for sale')
+    price: Optional[float] = Field(None, example=899.99)
+    description: Optional[str] = Field(
+        None, example='Lightly used gaming laptop, great condition!'
+    )
+
+class LoginPostRequest(BaseModel):
+    email: EmailStr = Field(..., example='student@utoronto.ca')
+    password: SecretStr = Field(..., example='P@ssword123')

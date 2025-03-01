@@ -21,6 +21,8 @@ from .models import (
     SignUpPostResponse,
     SignUpPostResponse1,
     SignUpPostResponse2,
+    LoginPostRequest,
+    LoginPostResponse,
 )
 from .connect_db import db  # Import MongoDB connection
 
@@ -33,7 +35,7 @@ app = FastAPI(
 
 oauth2_scheme = HTTPBearer()
 
-### Decode JWT Token (Protect Routes)
+
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     """
     Decode the JWT token and return the user if valid.
@@ -54,7 +56,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except exceptions.DecodeError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-### User Authentication (Verify Email & Password)
+
 async def authenticate_user(username: str, password: str):
     """
     Check if the user exists and verify the password.
@@ -65,21 +67,11 @@ async def authenticate_user(username: str, password: str):
         return None
     return user
 
-### Define JWT Token Response
-class TokenResponse(BaseModel):
-    access_token: str  # Token string
-    token_type: str  # Always "bearer"
 
-### Login Request Model (Replaces OAuth2PasswordRequestForm)
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-### Generate JWT Token on Successful Login
-@app.post('/login', response_model=TokenResponse)
-async def login(body: LoginRequest):
+@app.post('/login', response_model=LoginPostResponse)
+async def post_login(body: LoginPostRequest) -> LoginPostResponse:
     """
-    Authenticate user and return a JWT token.
+    Log in an existing user
     """
     user = await authenticate_user(body.username, body.password)
 
@@ -87,30 +79,29 @@ async def login(body: LoginRequest):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
 
     token = jwt.encode({"email": user["email"], "id": str(user["_id"])}, JWT_SECRET, algorithm="HS256")
-    return TokenResponse(access_token=token, token_type="bearer")
+    return LoginPostResponse(access_token=token, token_type="bearer")
 
-### Public Route: Retrieve All Listings (No Authentication Required)
-@app.get('/listings', response_model=List[ListingsGetResponseItem])
-def get_listings():
+
+@app.get('/listings', response_model=None)
+def get_listings() -> None:
     """
-    Retrieve all listings (Anyone can view).
+    Retrieve all listings
     """
     pass
 
-### Protected Route: Create a New Listing (JWT Required)
-@app.post('/listings', response_model=ListingsPostResponse)
-async def post_listings(
-    body: ListingsPostRequest,
-    current_user: dict = Depends(get_current_user)  # Require JWT Authentication
-):
-    """
-    Create a new listing (Only authenticated users).
-    """
-    return {"message": "Listing created!", "created_by": current_user["email"]}
 
-### Public Route: User Registration
-@app.post('/sign-up', response_model=Union[SignUpPostResponse, SignUpPostResponse1, SignUpPostResponse2])
-async def post_sign_up(body: SignUpPostRequest):
+@app.post('/listings', response_model=None)
+def post_listings(body: ListingsPostRequest) -> None:
+    """
+    Create a new listing
+    """
+    pass
+
+
+@app.post(
+    '/sign-up', response_model=None, responses={'201': {'model': SignUpPostResponse}}
+)
+async def post_sign_up(body: SignUpPostRequest) -> Optional[SignUpPostResponse]:
     """
     Sign up a new user.
     """
