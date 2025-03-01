@@ -1,23 +1,26 @@
 import 'dart:convert';
 
-PostingModel postingModelFromJson(String str) =>
-    PostingModel.fromJson(json.decode(str));
+PostingModel postingModelFromJson(String str, String itemid) =>
+    PostingModel.fromJson(json.decode(str), itemid);
 
 String postingModelToJson(PostingModel data) => json.encode(data.toJson());
 
 class PostingModel {
   PostingModel({
-    this.items = const [],
-  });
+    Item? item,
+  }) : item = item ?? Item(name: '', price: 0.0);
 
-  List<Item> items;
+  Item item;
 
-  factory PostingModel.fromJson(Map<String, dynamic> json) => PostingModel(
-        items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
-      );
-
+  factory PostingModel.fromJson(Map<String, dynamic> json, String itemid) {
+    List<Item> items =
+        List<Item>.from(json["items"].map((x) => Item.fromJson(x)));
+    Item? foundItem = items.firstWhere((item) => item.id == itemid,
+        orElse: () => Item(name: '', price: 0.0));
+    return PostingModel(item: foundItem);
+  }
   Map<String, dynamic> toJson() => {
-        "items": List<dynamic>.from(items.map((x) => x.toJson())),
+        "item": item.toJson(),
       };
 }
 
