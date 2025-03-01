@@ -9,6 +9,8 @@ from passlib.hash import pbkdf2_sha256
 from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from fastapi.responses import JSONResponse
+from fastapi.requests import Request
 
 load_dotenv()  # Load environment variables from .env
 JWT_SECRET = os.getenv("JWT_SECRET")
@@ -35,6 +37,19 @@ app = FastAPI(
 
 oauth2_scheme = HTTPBearer()
 
+@app.exception_handler(Exception)
+async def catch_all_exceptions_handler(request: Request, exc: Exception):
+    """
+    Catch all exceptions and return a JSON response.
+    """
+    # Log the original error, if desired:
+    # logger.error(f"Unhandled error: {exc}")
+
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error. An unexpected error occurred."},
+    )
+
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     """
@@ -55,6 +70,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Token expired")
     except exceptions.DecodeError:
         raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception:
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
+
 
 
 async def authenticate_user(username: str, password: str):
