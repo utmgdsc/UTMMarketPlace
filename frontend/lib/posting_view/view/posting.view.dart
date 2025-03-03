@@ -56,17 +56,18 @@ class _PostingViewState extends State<PostingView> {
                   )
                 : Container();
 
+            final itemTitle = Text(
+              item.name,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
+            );
+
             final itemDetails = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  item.name,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
                 const SizedBox(height: 8.0),
                 const Text(
                   'Aubery Drake',
@@ -109,11 +110,12 @@ class _PostingViewState extends State<PostingView> {
                 children: [
                   itemImage,
                   const SizedBox(height: 16.0),
+                  itemTitle,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(flex: 5, child: itemDetails),
-                      Expanded(flex: 2, child: itemPrice),
+                      Expanded(flex: 4, child: itemDetails),
+                      Expanded(flex: 3, child: itemPrice),
                     ],
                   ),
                   const SizedBox(height: 16.0),
