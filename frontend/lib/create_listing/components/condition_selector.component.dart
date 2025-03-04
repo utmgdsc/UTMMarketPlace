@@ -15,7 +15,6 @@ class ConditionSelector extends StatelessWidget {
     return Consumer<CreateListingViewModel>(
       builder: (_, model, __) {
         final bool showError = showValidationErrors && model.condition.isEmpty;
-        
         final titleText = const Text(
           'Condition',
           style: TextStyle(
@@ -45,7 +44,7 @@ class ConditionSelector extends StatelessWidget {
               ),
             )
           : const SizedBox.shrink();
-        
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

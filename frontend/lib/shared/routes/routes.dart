@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:utm_marketplace/login/view/login.view.dart';
 import 'package:utm_marketplace/profile/view/profile.view.dart';
 import 'package:utm_marketplace/item_listing/view/listing.view.dart';
+import 'package:utm_marketplace/posting_view/view/posting.view.dart';
 
 import 'package:utm_marketplace/shared/components/shell/shell.layout.dart';
 import 'package:utm_marketplace/messages/view/messages.view.dart';
@@ -79,6 +80,13 @@ final router = GoRouter(
         GoRoute(
           path: '/menu',
           builder: (context, state) => const MenuView(),
+        ),
+        GoRoute(
+          path: '/item/:itemId',
+          builder: (context, state) {
+            final itemId = state.pathParameters['itemId'] ?? '';
+            return PostingView(itemId: itemId);
+          },
         ),
       ],
     ),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:utm_marketplace/item_listing/components/item_card/item_card.component.dart';
 import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
+import 'package:go_router/go_router.dart';
 
 class ListingView extends StatefulWidget {
   const ListingView({super.key});
@@ -130,12 +131,17 @@ class _ListingViewState extends State<ListingView> {
                           itemCount: listingViewModel.items.length,
                           itemBuilder: (context, index) {
                             final item = listingViewModel.items[index];
-                            return ItemCard(
-                              id: item.id,
-                              name: item.name,
-                              price: item.price,
-                              category: item.category,
-                              imageUrl: item.imageUrl ?? '',
+                            return GestureDetector(
+                              onTap: () {
+                                context.push('/item/${item.id}');
+                              },
+                              child: ItemCard(
+                                id: item.id,
+                                name: item.name,
+                                price: item.price,
+                                category: item.category,
+                                imageUrl: item.imageUrl ?? '',
+                              ),
                             );
                           },
                         ),

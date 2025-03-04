@@ -15,7 +15,6 @@ class ImageSelector extends StatelessWidget {
     return Consumer<CreateListingViewModel>(
       builder: (_, model, __) {
         final bool showError = !model.hasImage && showValidationErrors;
-        
         final imageContent = model.image != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(12),
@@ -58,7 +57,6 @@ class ImageSelector extends StatelessWidget {
                     ),
                 ],
               );
-        
         final imageContainer = Container(
           height: 300,
           decoration: BoxDecoration(
@@ -73,7 +71,6 @@ class ImageSelector extends StatelessWidget {
           ),
           child: imageContent,
         );
-        
         return GestureDetector(
           onTap: () async {
             // Your existing image selection logic

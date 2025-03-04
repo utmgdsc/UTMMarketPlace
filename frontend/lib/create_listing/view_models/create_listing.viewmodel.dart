@@ -6,7 +6,6 @@ import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
 
 class CreateListingViewModel extends LoadingViewModel {
   final CreateListingRepository repo;
-  
   CreateListingViewModel({required this.repo});
 
   String _condition = '';
@@ -23,12 +22,11 @@ class CreateListingViewModel extends LoadingViewModel {
     _image = image;
     notifyListeners();
   }
-  
   void setCondition(String condition) {
     _condition = condition;
     notifyListeners();
   }
-  
+
   void setShowValidationErrors(bool value) {
     _showValidationErrors = value;
     notifyListeners();
@@ -49,7 +47,7 @@ class CreateListingViewModel extends LoadingViewModel {
     if (value == null || value.isEmpty) {
       return 'Price is required';
     }
-    
+
     try {
       final price = double.parse(value);
       if (price <= 0) {
@@ -61,7 +59,7 @@ class CreateListingViewModel extends LoadingViewModel {
     } catch (e) {
       return 'Please enter a valid price';
     }
-    
+
     return null;
   }
 
@@ -95,7 +93,6 @@ class CreateListingViewModel extends LoadingViewModel {
     if (!validateForm(formKey)) {
       return false;
     }
-    
     try {
       return await createListing(
         title: title.trim(),
@@ -115,7 +112,6 @@ class CreateListingViewModel extends LoadingViewModel {
   }) async {
     try {
       isLoading = true;
-      
       final listing = CreateListingModel(
         title: title,
         price: price,

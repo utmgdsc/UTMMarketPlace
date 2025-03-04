@@ -14,9 +14,10 @@ import 'package:utm_marketplace/menu/repository/menu.repository.dart';
 import 'package:utm_marketplace/menu/view_models/menu.viewmodel.dart';
 import 'package:utm_marketplace/profile/repository/profile.repository.dart';
 import 'package:utm_marketplace/profile/view_models/profile.viewmodel.dart';
+import 'package:utm_marketplace/posting_view/repository/posting.repository.dart';
+import 'package:utm_marketplace/posting_view/view_models/posting.viewmodel.dart';
 import 'package:utm_marketplace/create_listing/repository/create_listing.repository.dart';
 import 'package:utm_marketplace/create_listing/view_models/create_listing.viewmodel.dart';
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +44,11 @@ Future<void> main() async {
           create: (_) => ProfileViewModel(repo: locator<ProfileRepository>()),
         ),
         ChangeNotifierProvider(
-          create: (_) => CreateListingViewModel(repo: locator<CreateListingRepository>()),
+          create: (_) => PostingViewModel(repo: locator<PostingRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) =>
+              CreateListingViewModel(repo: locator<CreateListingRepository>()),
         ),
       ],
       child: const MyApp(),
