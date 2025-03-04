@@ -29,6 +29,7 @@ paths:
                   type: string
                   format: email
                   example: "student@utoronto.ca"
+                  description: "Must be a valid University of Toronto email (utoronto.ca or mail.utoronto.ca)."
                 password:
                   type: string
                   format: password
@@ -40,6 +41,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  user_id
                 properties:
                   user_id:
                     type: integer
@@ -49,11 +52,53 @@ paths:
                     example: "User registered successfully."
         "400":
           description: Bad Request - Invalid email or password format
+          content:
+            application/json:
+              schema:
+                type: object
+              properties:
+                error_code:
+                  type: string
+                  example: "INVALID_INPUT"
+                message:
+                  type: string
+                  example: "Invalid email or password"
+                details:
+                  type: string
+                  example: "Email must be a valid University of Toronto email"
+
         "409":
           description: Conflict - Email already in use
+          content:
+            application/json:
+            schema:
+              type: object
+            properties:
+              error_code:
+                type: string
+                example: "EMAIL_ALREADY_IN_USE"
+              message:
+                type: string
+                example: "The email address is already registered."
+              details:
+                type: string
+                example: "Please use a different email address of log in."
         "500":
           description: Internal Server Error
-
+          content:
+            application/json:
+            schema:
+              type: object
+            properties:
+              error_codE:
+                type: string
+                example: "INTERNAL_SERVER_ERROR"
+              message:
+                type: string
+                example: "An unexpected error occurred."
+                details:
+                  type: string
+                  example: "Please try again later or contact support."
   /login:
     post:
       summary: Log in an existing user
@@ -92,8 +137,36 @@ paths:
                     example: "bearer"
         "401":
           description: Unauthorized - Invalid email or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                    example: "UNAUTHORIZED"
+                  message:
+                    type: string
+                    example: "Invalid email or password."
+                  details:
+                    type: string
+                    example: "Please check your credentials and try again."
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                    example: "INTERNAL_SERVER_ERROR"
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+                  details:
+                    type: string
+                    example: "Please try again later or contact support."
 
   /listings:
     get:
@@ -102,8 +175,42 @@ paths:
       responses:
         "200":
           description: A list of marketplace listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: "Gaming Laptop for sale"
+                    price:
+                      type: number
+                      format: float
+                      example: 899.99
+                    description:
+                      type: string
+                      example: "Lightly used gaming laptop, great condition!"
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                    example: "INTERNAL_SERVER_ERROR"
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+                  details:
+                    type: string
+                    example: "Please try again later or contact support."
     post:
       summary: Create a new listing
       description: Adds a new product or service listing to the marketplace.
@@ -131,6 +238,21 @@ paths:
           description: Listing created successfully
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                    example: "INTERNAL_SERVER_ERROR"
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+                  details:
+                    type: string
+                    example: "Please try again later or contact support."
+
 
 components:
   securitySchemes:
