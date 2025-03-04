@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import List, Optional, Union
 import re
 from datetime import datetime
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from passlib.hash import pbkdf2_sha256
 from pymongo.errors import DuplicateKeyError, PyMongoError
 from bson import ObjectId
@@ -110,25 +110,29 @@ async def get_listings(
 
         # Get total count for pagination info
         total_count = await listings_collection.count_documents({})
-
+        print(listings)
         # Convert MongoDB documents to Pydantic models
-        # try:
-        response_data = [
-            ListingsGetResponseItem(
-                id=str(listing["_id"]),
-                title=listing["title"],
-                price=listing["price"],
-                description=listing.get("description"),
-                seller_id=listing["seller_id"],
-                pictures=listing.get("pictures", []),
-                category=listing.get("category"),
-                date_posted=listing.get("date_posted"),  # need to decide on the date format
-                campus=listing.get("campus"),
-            )
-            for listing in listings
-        ]
-        # except Exception as e:
-        #     print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
+        response_data = []
+        for listing in listings:
+            try:
+                response_data.append(
+                    ListingsGetResponseItem(
+                        id=str(listing["_id"]),
+                        title=listing["title"],
+                        price=listing["price"],
+                        description=listing.get("description"),
+                        seller_id=listing["seller_id"],
+                        pictures=listing.get("pictures", []),
+                        condition=listing["condition"],
+                        category=listing.get("category"),
+                        date_posted=listing.get("date_posted"),  # need to decide on the date format
+                        campus=listing.get("campus"),
+                    )
+                )
+            except Exception as e:
+                pass
+                # print(f"Skipping invalid listing {listing['_id']}: {e}")  # Log invalid listings
+        
         return ListingsGetAllResponse(
             listings=response_data,
             total=total_count
@@ -168,11 +172,13 @@ async def post_listings(
             seller_id=body.seller_id,
             pictures=body.pictures,
             category=body.category,
-            date_posted=body.date_posted,
+            date_posted=listing_data["date_posted"],
+            condition=body.condition,
             campus=body.campus,
         )
 
     except Exception as e:
+        # print(f"An error occurred: {str(e)}")
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
 
