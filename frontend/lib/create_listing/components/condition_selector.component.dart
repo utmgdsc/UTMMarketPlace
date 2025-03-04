@@ -15,7 +15,7 @@ class ConditionSelector extends StatelessWidget {
     return Consumer<CreateListingViewModel>(
       builder: (_, model, __) {
         final bool showError = showValidationErrors && model.condition.isEmpty;
-        
+
         final titleText = const Text(
           'Condition',
           style: TextStyle(
@@ -23,7 +23,7 @@ class ConditionSelector extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         );
-        
+
         final conditionChips = Row(
           children: [
             _buildConditionChip('New', model),
@@ -32,20 +32,20 @@ class ConditionSelector extends StatelessWidget {
             _buildConditionChip('Fair', model),
           ],
         );
-        
+
         final errorMessage = showError
-          ? const Padding(
-              padding: EdgeInsets.only(top: 4),
-              child: Text(
-                'Select a condition to continue.',
-                style: TextStyle(
-                  color: Color(0xFFFF5252),
-                  fontSize: 12,
+            ? const Padding(
+                padding: EdgeInsets.only(top: 4),
+                child: Text(
+                  'Select a condition to continue.',
+                  style: TextStyle(
+                    color: Color(0xFFFF5252),
+                    fontSize: 12,
+                  ),
                 ),
-              ),
-            )
-          : const SizedBox.shrink();
-        
+              )
+            : const SizedBox.shrink();
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
