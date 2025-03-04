@@ -5,7 +5,6 @@ import 'package:utm_marketplace/messages/view_models/message.viewmodel.dart';
 import 'package:utm_marketplace/shared/components/loading.component.dart';
 import 'package:go_router/go_router.dart';
 
-
 class ConversationDetailView extends StatefulWidget {
   final String conversationId;
 
@@ -51,10 +50,10 @@ class _ConversationDetailViewState extends State<ConversationDetailView> {
 
   void _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
-    
+
     viewModel.messageText = _messageController.text;
     final success = await viewModel.sendMessage();
-    
+
     if (success) {
       _messageController.clear();
       _scrollToBottom();
@@ -74,7 +73,7 @@ class _ConversationDetailViewState extends State<ConversationDetailView> {
           builder: (_, messageViewModel, __) {
             final conversation = messageViewModel.currentConversation;
             if (conversation == null) return const Text('Loading...');
-            
+
             return Row(
               children: [
                 CircleAvatar(
@@ -109,7 +108,8 @@ class _ConversationDetailViewState extends State<ConversationDetailView> {
             );
           }
 
-          WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+          WidgetsBinding.instance
+              .addPostFrameCallback((_) => _scrollToBottom());
 
           return Column(
             children: [

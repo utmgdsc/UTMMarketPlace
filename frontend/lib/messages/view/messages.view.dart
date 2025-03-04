@@ -121,7 +121,7 @@ class _MessagesViewState extends State<MessagesView> {
           }
 
           final sortedConversations = messageViewModel.sortedConversations;
-          
+
           if (sortedConversations.isEmpty) {
             return _buildEmptyState();
           }

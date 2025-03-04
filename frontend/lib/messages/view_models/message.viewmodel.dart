@@ -10,7 +10,7 @@ class MessageViewModel extends LoadingViewModel {
 
   MessageModel _messageModel = MessageModel();
   MessageModel get messages => _messageModel;
-  
+
   List<Conversation> _sortedConversations = [];
   List<Conversation> get sortedConversations => _sortedConversations;
 
@@ -19,7 +19,7 @@ class MessageViewModel extends LoadingViewModel {
 
   String _messageText = '';
   String get messageText => _messageText;
-  
+
   set messageText(String value) {
     _messageText = value;
     notifyListeners();
@@ -67,12 +67,12 @@ class MessageViewModel extends LoadingViewModel {
         _currentConversation!.id,
         _messageText.trim(),
       );
-      
+
       if (success) {
         _messageText = '';
         notifyListeners();
       }
-      
+
       return success;
     } catch (e) {
       debugPrint('Error in sendMessage: ${e.toString()}');

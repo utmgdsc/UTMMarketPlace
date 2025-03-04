@@ -30,9 +30,8 @@ class ImageSelector extends StatelessWidget {
                   Icon(
                     Icons.add_photo_alternate_outlined,
                     size: 48,
-                    color: showError
-                        ? const Color(0xFFFF5252)
-                        : Colors.grey[600],
+                    color:
+                        showError ? const Color(0xFFFF5252) : Colors.grey[600],
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -63,9 +62,7 @@ class ImageSelector extends StatelessWidget {
             color: Colors.grey[200],
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: showError
-                  ? const Color(0xFFFF5252)
-                  : Colors.grey[300]!,
+              color: showError ? const Color(0xFFFF5252) : Colors.grey[300]!,
               width: 1,
             ),
           ),
