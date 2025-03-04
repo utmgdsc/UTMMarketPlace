@@ -84,22 +84,16 @@ async def get_listing(
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
 
-async def get_listings(
-    page: int = Query(1, description="Page number", ge=1),
-    limit: int = Query(10, description="Number of listings per page", ge=1, le=50),
-) -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
+@app.get('/listings', 
+    response_model=ListingsGetAllResponse, responses={'500': {'model': Field500ErrorResponse}},)
+async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
     """
-    Retrieve all listings with pagination.
+    Retrieve all listings
     """
-
     try:
-        # Pagination logic
-        skip = (page - 1) * limit
-
-        # Fetch listings from MongoDB
-        cursor = listings_collection.find().skip(skip).limit(limit)
-        listings = await cursor.to_list(length=limit)
-        total_count = await listings_collection.count_documents({})  # Count all listings
+        # Fetch all listings from MongoDB
+        cursor = listings_collection.find()
+        listings = await cursor.to_list(length=None)  # Get all documents
 
         response_data = []
         for listing in listings:
