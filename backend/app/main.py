@@ -84,32 +84,38 @@ async def get_listing(
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
 
-@app.get('/listings', 
-    response_model=ListingsGetAllResponse, responses={'500': {'model': Field500ErrorResponse}},)
-async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
+async def get_listings(
+    page: int = Query(1, description="Page number", ge=1),
+    limit: int = Query(10, description="Number of listings per page", ge=1, le=50),
+) -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
     """
-    Retrieve all listings
+    Retrieve all listings with pagination.
     """
+
     try:
-        # Fetch all listings from MongoDB
-        cursor = listings_collection.find()
-        listings = await cursor.to_list(length=None)  # Get all documents
+        # Pagination logic
+        skip = (page - 1) * limit
+
+        # Fetch listings from MongoDB
+        cursor = listings_collection.find().skip(skip).limit(limit)
+        listings = await cursor.to_list(length=limit)
+        total_count = await listings_collection.count_documents({})  # Count all listings
 
         response_data = []
         for listing in listings:
-            try:
-                formatted_listing = ListingsGetResponseItem(
-                    id=str(listing["_id"]),
-                    title=listing["title"],
-                    price=listing["price"],
-                    description=listing.get("description"),
-                    seller_id=listing["seller_id"],
-                    pictures=listing.get("pictures", []),
-                    category=listing.get("category"),
-                    date_posted=listing.get("date_posted"),  # need to decide on the date format
-                    campus=listing.get("campus"),
-                )
-                response_data.append(formatted_listing)
+            # try:
+            formatted_listing = ListingsGetResponseItem(
+                id=str(listing["_id"]),
+                title=listing["title"],
+                price=listing["price"],
+                description=listing.get("description"),
+                seller_id=listing["seller_id"],
+                pictures=listing.get("pictures", []),
+                category=listing.get("category"),
+                date_posted=listing.get("date_posted"),  # need to decide on the date format
+                campus=listing.get("campus"),
+            )
+            response_data.append(formatted_listing)
             # except Exception as e:
             #     print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
 
@@ -136,7 +142,7 @@ async def post_listings(
     try:
         # Prepare data for MongoDB
         listing_data = body.dict()
-        listing_data["date_posted"] = listing_data.get("date_posted") or None  # Ensure date is handled properly
+        listing_data["date_posted"] = datetime.utcnow().isoformat()  # Ensure date is handled properly
 
         # Insert into MongoDB
         result = await listings_collection.insert_one(listing_data)

@@ -174,6 +174,8 @@ components:
         - title
         - price
         - seller_id
+        - pictures
+        - condition
       properties:
         id:
           type: string
@@ -199,6 +201,9 @@ components:
         category:
           type: string
           example: "Electronics"
+        condition:
+          type: string
+          example: "Used"
         date_posted:
           type: string
           format: date-time
@@ -222,7 +227,8 @@ components:
         - seller_id
         - title
         - price
-        - campus
+        - pictures
+        - condition
       properties:
         title:
           type: string
@@ -245,10 +251,14 @@ components:
         category:
           type: string
           example: "Electronics"
-        date_posted:
+        condition:
           type: string
-          format: date-time
-          example: "2025-02-22T10:00:00Z"
+          example: "Used"
+        # date_posted:
+        #   type: string
+        #   required: true
+        #   format: date-time
+        #   example: "2025-02-22T10:00:00Z"
         campus:
           type: string
           example: "UTM"
@@ -281,6 +291,9 @@ components:
         category:
           type: string
           example: "Electronics"
+        condition:
+          type: string
+          example: "Used"
         date_posted:
           type: string
           format: date-time
