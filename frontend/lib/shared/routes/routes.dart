@@ -8,6 +8,7 @@ import 'package:utm_marketplace/shared/components/shell/shell.layout.dart';
 import 'package:utm_marketplace/messages/view/messages.view.dart';
 import 'package:utm_marketplace/notifications/view/notifications.view.dart';
 import 'package:utm_marketplace/menu/view/menu.view.dart';
+import 'package:utm_marketplace/create_listing/view/create_listing.view.dart';
 
 final router = GoRouter(
   initialLocation: '/login',
@@ -15,6 +16,10 @@ final router = GoRouter(
     GoRoute(
       path: '/login',
       builder: (context, state) => const Login(),
+    ),
+    GoRoute(
+      path: '/create-listing',
+      builder: (context, state) => const CreateListingView(),
     ),
     ShellRoute(
       builder: (context, state, child) {

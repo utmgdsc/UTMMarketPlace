@@ -5,6 +5,7 @@ import 'package:utm_marketplace/notifications/repository/notification.repository
 import 'package:utm_marketplace/menu/repository/menu.repository.dart';
 import 'package:utm_marketplace/posting_view/repository/posting.repository.dart';
 import 'package:utm_marketplace/profile/repository/profile.repository.dart';
+import 'package:utm_marketplace/create_listing/repository/create_listing.repository.dart';
 
 final GetIt locator = GetIt.instance;
 
@@ -15,4 +16,5 @@ void setupLocator() {
   locator.registerLazySingleton(() => MenuRepository());
   locator.registerLazySingleton(() => ProfileRepository());
   locator.registerLazySingleton(() => PostingRepository());
+  locator.registerLazySingleton(() => CreateListingRepository());
 }
