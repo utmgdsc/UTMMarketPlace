@@ -6,6 +6,7 @@ import 'package:utm_marketplace/posting_view/view/posting.view.dart';
 
 import 'package:utm_marketplace/shared/components/shell/shell.layout.dart';
 import 'package:utm_marketplace/messages/view/messages.view.dart';
+import 'package:utm_marketplace/messages/view/conversation_detail.view.dart';
 import 'package:utm_marketplace/notifications/view/notifications.view.dart';
 import 'package:utm_marketplace/menu/view/menu.view.dart';
 import 'package:utm_marketplace/create_listing/view/create_listing.view.dart';
@@ -62,6 +63,15 @@ final router = GoRouter(
         GoRoute(
           path: '/messages',
           builder: (context, state) => const MessagesView(),
+        ),
+        GoRoute(
+          path: '/messages/:conversationId',
+          builder: (context, state) {
+            final conversationId = state.pathParameters['conversationId'] ?? '';
+            return ConversationDetailView(
+              conversationId: conversationId,
+            );
+          },
         ),
         GoRoute(
           path: '/notifications',

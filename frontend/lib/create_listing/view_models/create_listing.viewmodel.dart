@@ -6,16 +6,15 @@ import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
 
 class CreateListingViewModel extends LoadingViewModel {
   final CreateListingRepository repo;
-
   CreateListingViewModel({required this.repo});
 
   String _condition = '';
   String get condition => _condition;
-
+  
   File? _image;
   File? get image => _image;
   bool get hasImage => _image != null;
-
+  
   bool _showValidationErrors = false;
   bool get showValidationErrors => _showValidationErrors;
 
@@ -23,7 +22,6 @@ class CreateListingViewModel extends LoadingViewModel {
     _image = image;
     notifyListeners();
   }
-
   void setCondition(String condition) {
     _condition = condition;
     notifyListeners();
@@ -76,13 +74,13 @@ class CreateListingViewModel extends LoadingViewModel {
     }
     return null;
   }
-
+  
   bool validateForm(GlobalKey<FormState> formKey) {
     setShowValidationErrors(true);
-
+    
     final isFormValid = formKey.currentState?.validate() ?? false;
     final hasConditionSelected = condition.isNotEmpty;
-
+    
     return isFormValid && hasImage && hasConditionSelected;
   }
 
@@ -95,7 +93,6 @@ class CreateListingViewModel extends LoadingViewModel {
     if (!validateForm(formKey)) {
       return false;
     }
-
     try {
       return await createListing(
         title: title.trim(),
@@ -115,7 +112,6 @@ class CreateListingViewModel extends LoadingViewModel {
   }) async {
     try {
       isLoading = true;
-
       final listing = CreateListingModel(
         title: title,
         price: price,

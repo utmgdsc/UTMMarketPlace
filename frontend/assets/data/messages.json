@@ -1,0 +1,428 @@
+{
+    "conversations": [
+      {
+        "id": "1",
+        "user_id": "101",
+        "user_name": "Ashley Rice",
+        "user_image_url": "https://randomuser.me/api/portraits/women/12.jpg",
+        "last_message_time": "2025-02-28T19:30:00Z",
+        "is_unread": true,
+        "messages": [
+          {
+            "id": "m1",
+            "content": "Hi there! I'm interested in your laptop listing.",
+            "timestamp": "2025-02-28T14:25:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m2",
+            "content": "Hello! Yes, it's still available. Would you like to know more about it?",
+            "timestamp": "2025-02-28T14:28:00Z",
+            "is_from_current_user": true
+          },
+          {
+            "id": "m3",
+            "content": "About to call! Excited to chat and plan the trip 🎉",
+            "timestamp": "2025-02-28T14:30:00Z",
+            "is_from_current_user": false
+          }
+        ]
+      },
+      {
+        "id": "2",
+        "user_id": "102",
+        "user_name": "John Smith",
+        "user_image_url": "https://randomuser.me/api/portraits/men/32.jpg",
+        "last_message_time": "2025-02-27T18:45:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m4",
+            "content": "Is your bike still for sale?",
+            "timestamp": "2025-02-27T18:40:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m5",
+            "content": "Yes, it is! Are you interested in seeing it?",
+            "timestamp": "2025-02-27T18:45:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "3",
+        "user_id": "103",
+        "user_name": "Emma Johnson",
+        "user_image_url": "https://randomuser.me/api/portraits/women/22.jpg",
+        "last_message_time": "2025-02-25T09:15:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m6",
+            "content": "I'd like to buy your textbook. Is $40 okay?",
+            "timestamp": "2025-02-25T09:10:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m7",
+            "content": "I was hoping for $50, but $45 would work for me.",
+            "timestamp": "2025-02-25T09:15:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "4",
+        "user_id": "104",
+        "user_name": "Michael Brown",
+        "user_image_url": "https://randomuser.me/api/portraits/men/45.jpg",
+        "last_message_time": "2025-02-20T16:20:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m8",
+            "content": "Do you deliver the furniture or is it pickup only?",
+            "timestamp": "2025-02-20T16:15:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m9",
+            "content": "It's pickup only from the UTM campus, sorry!",
+            "timestamp": "2025-02-20T16:20:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "5",
+        "user_id": "105",
+        "user_name": "Sophia Garcia",
+        "user_image_url": "https://randomuser.me/api/portraits/women/33.jpg",
+        "last_message_time": "2025-02-18T10:45:00Z",
+        "is_unread": true,
+        "messages": [
+          {
+            "id": "m10",
+            "content": "Is your iPhone still available? What's the condition?",
+            "timestamp": "2025-02-18T10:30:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m11",
+            "content": "Yes, it's available! It's in great condition, only used for a year with a screen protector.",
+            "timestamp": "2025-02-18T10:45:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "6",
+        "user_id": "106",
+        "user_name": "David Wilson",
+        "user_image_url": "https://randomuser.me/api/portraits/men/52.jpg",
+        "last_message_time": "2025-02-17T14:20:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m12",
+            "content": "Hey, I saw your ad for concert tickets. Are they still available?",
+            "timestamp": "2025-02-17T14:10:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m13",
+            "content": "Yes they are! I have two tickets for the show on March 15th.",
+            "timestamp": "2025-02-17T14:20:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "7",
+        "user_id": "107",
+        "user_name": "Olivia Martinez",
+        "user_image_url": "https://randomuser.me/api/portraits/women/28.jpg",
+        "last_message_time": "2025-02-16T09:05:00Z",
+        "is_unread": true,
+        "messages": [
+          {
+            "id": "m14",
+            "content": "I'm interested in your dining table. What are the dimensions?",
+            "timestamp": "2025-02-16T08:55:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m15",
+            "content": "It's 60 inches long, 36 inches wide, and 30 inches tall. Seats 6 comfortably!",
+            "timestamp": "2025-02-16T09:05:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "8",
+        "user_id": "108",
+        "user_name": "James Taylor",
+        "user_image_url": "https://randomuser.me/api/portraits/men/67.jpg",
+        "last_message_time": "2025-02-15T16:40:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m16",
+            "content": "Do you still have the PS5 for sale?",
+            "timestamp": "2025-02-15T16:35:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m17",
+            "content": "Yes, it's still available. It comes with two controllers and 3 games.",
+            "timestamp": "2025-02-15T16:40:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "9",
+        "user_id": "109",
+        "user_name": "Ava Thompson",
+        "user_image_url": "https://randomuser.me/api/portraits/women/41.jpg",
+        "last_message_time": "2025-02-14T11:25:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m18",
+            "content": "Hi! I'm interested in your winter coat. What size is it?",
+            "timestamp": "2025-02-14T11:20:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m19",
+            "content": "It's a women's medium. The brand runs a bit large though, so it fits more like a large.",
+            "timestamp": "2025-02-14T11:25:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "10",
+        "user_id": "110",
+        "user_name": "Ethan Clark",
+        "user_image_url": "https://randomuser.me/api/portraits/men/23.jpg",
+        "last_message_time": "2025-02-13T19:15:00Z",
+        "is_unread": true,
+        "messages": [
+          {
+            "id": "m20",
+            "content": "I saw your ad for the guitar. Is it acoustic or electric?",
+            "timestamp": "2025-02-13T19:10:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m21",
+            "content": "It's an acoustic-electric hybrid. You can play it unplugged or connect it to an amp.",
+            "timestamp": "2025-02-13T19:15:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "11",
+        "user_id": "111",
+        "user_name": "Isabella Rodriguez",
+        "user_image_url": "https://randomuser.me/api/portraits/women/56.jpg",
+        "last_message_time": "2025-02-12T13:50:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m22",
+            "content": "Is your microwave still for sale? Does it work well?",
+            "timestamp": "2025-02-12T13:45:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m23",
+            "content": "Yes, it's available! Works perfectly, I'm just moving and don't need it anymore.",
+            "timestamp": "2025-02-12T13:50:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "12",
+        "user_id": "112",
+        "user_name": "Noah Lewis",
+        "user_image_url": "https://randomuser.me/api/portraits/men/78.jpg",
+        "last_message_time": "2025-02-11T08:30:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m24",
+            "content": "I'm interested in your calculus textbook. Which edition is it?",
+            "timestamp": "2025-02-11T08:25:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m25",
+            "content": "It's the 8th edition, published in 2023. No highlighting or notes inside.",
+            "timestamp": "2025-02-11T08:30:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "13",
+        "user_id": "113",
+        "user_name": "Mia Walker",
+        "user_image_url": "https://randomuser.me/api/portraits/women/63.jpg",
+        "last_message_time": "2025-02-10T15:40:00Z",
+        "is_unread": true,
+        "messages": [
+          {
+            "id": "m26",
+            "content": "Hi! Do you still have the desk lamp available?",
+            "timestamp": "2025-02-10T15:35:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m27",
+            "content": "Yes, I do! It's adjustable and has 3 brightness settings.",
+            "timestamp": "2025-02-10T15:40:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "14",
+        "user_id": "114",
+        "user_name": "William Hall",
+        "user_image_url": "https://randomuser.me/api/portraits/men/91.jpg",
+        "last_message_time": "2025-02-09T12:15:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m28",
+            "content": "I'm interested in your bicycle. What's the frame size?",
+            "timestamp": "2025-02-09T12:10:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m29",
+            "content": "It's a medium frame, suitable for someone 5'7\" to 5'11\" tall.",
+            "timestamp": "2025-02-09T12:15:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "15",
+        "user_id": "115",
+        "user_name": "Charlotte Young",
+        "user_image_url": "https://randomuser.me/api/portraits/women/75.jpg",
+        "last_message_time": "2025-02-08T17:55:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m30",
+            "content": "Do you deliver the coffee table or is it pickup only?",
+            "timestamp": "2025-02-08T17:50:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m31",
+            "content": "I can deliver within 10 miles for a small fee, or you can pick it up for free.",
+            "timestamp": "2025-02-08T17:55:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "16",
+        "user_id": "116",
+        "user_name": "Benjamin Allen",
+        "user_image_url": "https://randomuser.me/api/portraits/men/36.jpg",
+        "last_message_time": "2025-02-07T09:20:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m32",
+            "content": "Is your monitor still available? What's the resolution?",
+            "timestamp": "2025-02-07T09:15:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m33",
+            "content": "Yes, it is! It's a 27-inch 4K monitor (3840x2160 resolution).",
+            "timestamp": "2025-02-07T09:20:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "17",
+        "user_id": "117",
+        "user_name": "Amelia Scott",
+        "user_image_url": "https://randomuser.me/api/portraits/women/87.jpg",
+        "last_message_time": "2025-02-06T14:05:00Z",
+        "is_unread": true,
+        "messages": [
+          {
+            "id": "m34",
+            "content": "Hi! I'm interested in your plant collection. How many plants are included?",
+            "timestamp": "2025-02-06T14:00:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m35",
+            "content": "There are 5 plants total - 2 succulents, 2 pothos, and 1 snake plant. All come with pots!",
+            "timestamp": "2025-02-06T14:05:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "18",
+        "user_id": "118",
+        "user_name": "Henry Green",
+        "user_image_url": "https://randomuser.me/api/portraits/men/42.jpg",
+        "last_message_time": "2025-02-05T11:30:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m36",
+            "content": "I saw your ad for the mini fridge. What are the dimensions?",
+            "timestamp": "2025-02-05T11:25:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m37",
+            "content": "It's 20 inches tall, 17 inches wide, and 18 inches deep. Perfect for a dorm room!",
+            "timestamp": "2025-02-05T11:30:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      },
+      {
+        "id": "19",
+        "user_id": "119",
+        "user_name": "Evelyn Baker",
+        "user_image_url": "https://randomuser.me/api/portraits/women/94.jpg",
+        "last_message_time": "2025-02-04T16:50:00Z",
+        "is_unread": false,
+        "messages": [
+          {
+            "id": "m38",
+            "content": "Is your camera still for sale? What model is it?",
+            "timestamp": "2025-02-04T16:45:00Z",
+            "is_from_current_user": false
+          },
+          {
+            "id": "m39",
+            "content": "Yes, it's a Canon EOS Rebel T7. Comes with the kit lens and a camera bag.",
+            "timestamp": "2025-02-04T16:50:00Z",
+            "is_from_current_user": true
+          }
+        ]
+      }
+    ]
+  }
