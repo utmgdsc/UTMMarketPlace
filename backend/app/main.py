@@ -97,21 +97,24 @@ async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]
 
         response_data = []
         for listing in listings:
-            # try:
-            formatted_listing = ListingsGetResponseItem(
-                id=str(listing["_id"]),
-                title=listing["title"],
-                price=listing["price"],
-                description=listing.get("description"),
-                seller_id=listing["seller_id"],
-                pictures=listing.get("pictures", []),
-                category=listing.get("category"),
-                date_posted=listing.get("date_posted"),  # need to decide on the date format
-                campus=listing.get("campus"),
-            )
-            response_data.append(formatted_listing)
-            # except Exception as e:
-            #     print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
+            try:
+                response_data.append(
+                    ListingsGetResponseItem(
+                        id=str(listing["_id"]),
+                        title=listing["title"],
+                        price=listing["price"],
+                        description=listing.get("description"),
+                        seller_id=listing["seller_id"],
+                        pictures=listing.get("pictures", []),
+                        condition=listing["condition"],
+                        category=listing.get("category"),
+                        date_posted=listing.get("date_posted"),  # need to decide on the date format
+                        campus=listing.get("campus"),
+                    )
+                )
+            except Exception as e:
+                pass
+            #   print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
 
         return ListingsGetAllResponse(listings=response_data, total=len(response_data))
 
@@ -150,7 +153,8 @@ async def post_listings(
             seller_id=body.seller_id,
             pictures=body.pictures,
             category=body.category,
-            date_posted=body.date_posted,
+            date_posted=listing_data["date_posted"],
+            condition=body.condition,
             campus=body.campus,
         )
 
