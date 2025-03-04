@@ -43,7 +43,7 @@ Future<void> main() async {
         ChangeNotifierProvider(
           create: (_) => ProfileViewModel(repo: locator<ProfileRepository>()),
         ),
-         ChangeNotifierProvider(
+        ChangeNotifierProvider(
           create: (_) => PostingViewModel(repo: locator<PostingRepository>()),
         ),
         ChangeNotifierProvider(
