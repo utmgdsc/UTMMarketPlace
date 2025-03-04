@@ -85,20 +85,36 @@ async def get_listing(
 
 
 @app.get('/listings', 
-    response_model=ListingsGetAllResponse, responses={'500': {'model': Field500ErrorResponse}},)
-async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
+    response_model=ListingsGetAllResponse, 
+    responses={'500': {'model': Field500ErrorResponse}},
+    )
+async def get_listings(
+    page: int = Query(1, description="Page number", ge=1),
+    limit: int = Query(10, description="Number of listings per page", ge=1, le=50),
+) -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
     """
-    Retrieve all listings
+    Retrieve all listings with pagination.
     """
     try:
-        # Fetch all listings from MongoDB
-        cursor = listings_collection.find()
-        listings = await cursor.to_list(length=None)  # Get all documents
+        # Calculate skip value for pagination
+        skip = (page - 1) * limit
 
-        response_data = []
-        for listing in listings:
-            # try:
-            formatted_listing = ListingsGetResponseItem(
+        # Fetch paginated listings from MongoDB
+
+        # Works in PyMongo (Sync)
+        # listings_collection.find({}, skip=10, limit=5)  
+        
+        # Async motor method:
+        cursor = listings_collection.find().skip(skip).limit(limit)
+        listings = await cursor.to_list(length=limit)  # Get `limit` documents
+
+        # Get total count for pagination info
+        total_count = await listings_collection.count_documents({})
+
+        # Convert MongoDB documents to Pydantic models
+        # try:
+        response_data = [
+            ListingsGetResponseItem(
                 id=str(listing["_id"]),
                 title=listing["title"],
                 price=listing["price"],
@@ -109,12 +125,14 @@ async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]
                 date_posted=listing.get("date_posted"),  # need to decide on the date format
                 campus=listing.get("campus"),
             )
-            response_data.append(formatted_listing)
-            # except Exception as e:
-            #     print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
-
-        return ListingsGetAllResponse(listings=response_data, total=len(response_data))
-
+            for listing in listings
+        ]
+        # except Exception as e:
+        #     print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
+        return ListingsGetAllResponse(
+            listings=response_data,
+            total=total_count
+        )
     except Exception as e:
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
@@ -156,6 +174,7 @@ async def post_listings(
 
     except Exception as e:
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
+
 
 @app.post(
     '/sign-up',
