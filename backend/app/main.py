@@ -110,7 +110,6 @@ async def get_listings(
 
         # Get total count for pagination info
         total_count = await listings_collection.count_documents({})
-        print(listings)
         # Convert MongoDB documents to Pydantic models
         response_data = []
         for listing in listings:
