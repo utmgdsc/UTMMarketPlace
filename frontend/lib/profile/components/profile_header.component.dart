@@ -25,7 +25,7 @@ class ProfileHeader extends StatelessWidget {
         'Profile',
         style: TextStyle(
           color: Colors.white,
-          fontSize: 24,
+          fontSize: 32,
           fontWeight: FontWeight.bold,
         ),
       ),

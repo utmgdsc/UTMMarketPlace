@@ -7,3 +7,4 @@ pymongo>=4.10.1
 uvicorn[standard]
 fastapi-code-generator
 motor
+

@@ -36,7 +36,7 @@
             "id": "item5",
             "name": "Running Shoes",
             "description": "Lightweight running shoes with breathable material.",
-            "price": 59.99,
+            "price": 9999999.99,
             "image_url": "https://placehold.co/400/png",
             "category": "Footwear"
         },
