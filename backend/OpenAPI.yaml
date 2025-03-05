@@ -86,6 +86,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ListingsGetAllResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500ErrorResponse"
     
     post:
       summary: Create a new listing
@@ -102,6 +108,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ListingsPostResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500ErrorResponse"
 
   /listing:
     get:
@@ -140,11 +152,30 @@ paths:
                   error:
                     type: string
                     example: "Listing not found."
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500ErrorResponse"
 
 components:
   schemas:
+    500ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Internal Server Error. Please try again later."
     ListingsGetResponseItem:
       type: object
+      required:
+        - id
+        - title
+        - price
+        - seller_id
+        - pictures
+        - condition
       properties:
         id:
           type: string
@@ -160,8 +191,26 @@ components:
           type: string
           example: "Selling my MacBook Pro in great condition!"
         seller_id:
-          type: integer
-          example: 101
+          type: string
+          example: "101"
+        pictures:
+          type: array
+          items:
+            type: string
+            example: "https://example.com/image1.jpg"
+        category:
+          type: string
+          example: "Electronics"
+        condition:
+          type: string
+          example: "Used"
+        date_posted:
+          type: string
+          format: date-time
+          example: "2025-02-22T10:00:00Z"
+        campus:
+          type: string
+          example: "UTM"
     ListingsGetAllResponse:
       type: object
       properties:
@@ -174,6 +223,12 @@ components:
           example: 10
     ListingsPostRequest:
       type: object
+      required:
+        - seller_id
+        - title
+        - price
+        - pictures
+        - condition
       properties:
         title:
           type: string
@@ -186,10 +241,26 @@ components:
           type: string
           example: "Lightly used gaming laptop, great condition!"
         seller_id:
-          type: integer
-          example: 101
+          type: string
+          example: "101"
+        pictures:
+          type: array
+          items:
+            type: string
+            example: "https://example.com/image1.jpg"
+        category:
+          type: string
+          example: "Electronics"
+        condition:
+          type: string
+          example: "Used"
+        campus:
+          type: string
+          example: "UTM"
     ListingsPostResponse:
       type: object
+      required:
+        - id
       properties:
         id:
           type: string
@@ -204,6 +275,24 @@ components:
         description:
           type: string
           example: "Lightly used gaming laptop, great condition!"
-        message:
+        seller_id:
           type: string
-          example: "Listing created successfully."
+          example: "101"
+        pictures:
+          type: array
+          items:
+            type: string
+            example: "https://example.com/image1.jpg"
+        category:
+          type: string
+          example: "Electronics"
+        condition:
+          type: string
+          example: "Used"
+        date_posted:
+          type: string
+          format: date-time
+          example: "2025-02-22T10:00:00Z"
+        campus:
+          type: string
+          example: "UTM"

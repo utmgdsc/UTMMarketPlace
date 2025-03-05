@@ -6,3 +6,4 @@ pydantic_core>=2.23.4
 pymongo>=4.10.1
 uvicorn[standard]
 fastapi-code-generator
+motor
