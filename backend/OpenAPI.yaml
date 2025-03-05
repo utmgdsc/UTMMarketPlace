@@ -232,7 +232,7 @@ components:
         listings:
           type: array
           items:
-            $ref: "#/components/schemas/ListingsGetResponseItem"
+            $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
           example: 10
