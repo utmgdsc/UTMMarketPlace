@@ -129,6 +129,16 @@ paths:
               application/json:
                 schema:
                   $ref: "#/components/schemas/ListingsPostResponse"
+          "422":
+            description: Unprocessable Entity - Invalid request body
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+                      example: "Invalid request body. Please provide all required fields."
           "500":
             description: Internal Server Error
             content:
@@ -275,11 +285,6 @@ components:
         condition:
           type: string
           example: "Used"
-        # date_posted:
-        #   type: string
-        #   required: true
-        #   format: date-time
-        #   example: "2025-02-22T10:00:00Z"
         campus:
           type: string
           example: "UTM"

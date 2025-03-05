@@ -7,6 +7,7 @@ from typing import List, Optional, Union
 import re
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.exceptions import RequestValidationError
 from passlib.hash import pbkdf2_sha256
 from pymongo.errors import DuplicateKeyError, PyMongoError
 from bson import ObjectId
@@ -38,6 +39,10 @@ app = FastAPI(
     ],
 )
 
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    raise HTTPException(status_code=422, detail="Invalid request data body")
 
 @app.get(
     '/listing/{listing_id}',
@@ -90,12 +95,13 @@ async def get_listing(
     )
 async def get_listings(
     page: int = Query(1, description="Page number", ge=1),
-    limit: int = Query(10, description="Number of listings per page", ge=1, le=50),
+    # limit: int = Query(10, description="Number of listings per page", ge=1, le=30),
 ) -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
     """
     Retrieve all listings with pagination.
     """
     try:
+        limit = 10
         # Calculate skip value for pagination
         skip = (page - 1) * limit
 
@@ -130,7 +136,7 @@ async def get_listings(
                 )
             except Exception as e:
                 pass
-                # print(f"Skipping invalid listing {listing['_id']}: {e}")  # Log invalid listings
+                print(f"Skipping invalid listing {listing['_id']}: {e}")  # Log invalid listings
         
         return ListingsGetAllResponse(
             listings=response_data,
@@ -175,6 +181,7 @@ async def post_listings(
             condition=body.condition,
             campus=body.campus,
         )
+    
 
     except Exception as e:
         # print(f"An error occurred: {str(e)}")
