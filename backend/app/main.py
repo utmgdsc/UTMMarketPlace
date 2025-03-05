@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import List, Optional, Union
 import re
 from datetime import datetime
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.exceptions import RequestValidationError
 from passlib.hash import pbkdf2_sha256
 from pymongo.errors import DuplicateKeyError, PyMongoError
@@ -38,6 +38,7 @@ app = FastAPI(
         {'url': 'http://localhost:5000', 'description': 'Local Development Server'},
     ],
 )
+
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
@@ -89,38 +90,58 @@ async def get_listing(
 
 
 @app.get('/listings', 
-    response_model=ListingsGetAllResponse, responses={'500': {'model': Field500ErrorResponse}},)
-async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
+    response_model=ListingsGetAllResponse, 
+    responses={'500': {'model': Field500ErrorResponse}},
+    )
+async def get_listings(
+    page: int = Query(1, description="Page number", ge=1),
+    # limit: int = Query(10, description="Number of listings per page", ge=1, le=30),
+) -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
     """
-    Retrieve all listings
+    Retrieve all listings with pagination.
     """
     try:
-        # Fetch all listings from MongoDB
-        cursor = listings_collection.find()
-        listings = await cursor.to_list(length=None)  # Get all documents
+        limit = 10
+        # Calculate skip value for pagination
+        skip = (page - 1) * limit
 
+        # Fetch paginated listings from MongoDB
+
+        # Works in PyMongo (Sync)
+        # listings_collection.find({}, skip=10, limit=5)  
+        
+        # Async motor method:
+        cursor = listings_collection.find().skip(skip).limit(limit)
+        listings = await cursor.to_list(length=limit)  # Get `limit` documents
+
+        # Get total count for pagination info
+        total_count = await listings_collection.count_documents({})
+        # Convert MongoDB documents to Pydantic models
         response_data = []
         for listing in listings:
             try:
                 response_data.append(
                     ListingsGetResponseItem(
-                        id=str(listing.get("_id")),
-                        title=listing.get("title"),
-                        price=listing.get("price"),
+                        id=str(listing["_id"]),
+                        title=listing["title"],
+                        price=listing["price"],
                         description=listing.get("description"),
-                        seller_id=listing.get("seller_id"),
+                        seller_id=listing["seller_id"],
                         pictures=listing.get("pictures", []),
-                        condition=listing.get("condition"),
+                        condition=listing["condition"],
                         category=listing.get("category"),
                         date_posted=listing.get("date_posted"),  # need to decide on the date format
                         campus=listing.get("campus"),
                     )
                 )
             except Exception as e:
-                print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
-
-        return ListingsGetAllResponse(listings=response_data, total=len(response_data))
-
+#                 pass
+                print(f"Skipping invalid listing {listing['_id']}: {e}")  # Log invalid listings
+        
+        return ListingsGetAllResponse(
+            listings=response_data,
+            total=total_count
+        )
     except Exception as e:
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
@@ -160,9 +181,9 @@ async def post_listings(
             condition=body.condition,
             campus=body.campus,
         )
-    except ValidationError as e:
-        return Field500ErrorResponse(error="Validation error. Please check your input data.")
+
     except Exception as e:
+        # print(f"An error occurred: {str(e)}")
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
 @app.post(
