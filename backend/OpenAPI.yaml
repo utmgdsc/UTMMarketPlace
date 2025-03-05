@@ -116,48 +116,48 @@ paths:
                   $ref: "#/components/schemas/500ErrorResponse"
 
   /listing:
-      get:
-        summary: Retrieve a single listing by ID
-        parameters:
-          - name: listingid
-            in: query
-            required: true
-            schema:
-              type: string
-              example: "65d53a49c2c5f2b9e8e1d4b5"
-        responses:
-          "200":
-            description: Listing retrieved successfully
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ListingsGetResponseItem"
-          "400":
-            description: Invalid listing ID format
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    error:
-                      type: string
-                      example: "Invalid listing ID format. Must be a valid ObjectId."
-          "404":
-            description: Listing not found
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    error:
-                      type: string
-                      example: "Listing not found."
-          "500":
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/500ErrorResponse"
+    get:
+      summary: Retrieve a single listing by ID
+      parameters:
+        - name: listingid
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "65d53a49c2c5f2b9e8e1d4b5"
+      responses:
+        "200":
+          description: Listing retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingsGetResponseItem"
+        "400":
+          description: Invalid listing ID format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid listing ID format. Must be a valid ObjectId."
+        "404":
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Listing not found."
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500ErrorResponse"
 
 components:
   schemas:
