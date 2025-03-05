@@ -77,43 +77,43 @@ paths:
                     example: "Email already registered."
 
   /listings:
-      get:
-        summary: Retrieve all listings
-        responses:
-          "200":
-            description: A list of marketplace listings
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ListingsGetAllResponse"
-          "500":
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/500ErrorResponse"
-      
-      post:
-        summary: Create a new listing
-        requestBody:
-          required: true
+    get:
+      summary: Retrieve all listings
+      responses:
+        "200":
+          description: A list of marketplace listings
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListingsPostRequest"
-        responses:
-          "201":
-            description: Listing created successfully
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ListingsPostResponse"
-          "500":
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/500ErrorResponse"
+                $ref: "#/components/schemas/ListingsGetAllResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500ErrorResponse"
+    
+    post:
+      summary: Create a new listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingsPostRequest"
+      responses:
+        "201":
+          description: Listing created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingsPostResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500ErrorResponse"
 
   /listing:
     get:
