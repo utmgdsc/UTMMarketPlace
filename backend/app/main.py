@@ -7,6 +7,7 @@ from typing import List, Optional, Union
 import re
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
+from fastapi.exceptions import RequestValidationError
 from passlib.hash import pbkdf2_sha256
 from pymongo.errors import DuplicateKeyError, PyMongoError
 from bson import ObjectId
@@ -38,6 +39,9 @@ app = FastAPI(
     ],
 )
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    raise HTTPException(status_code=422, detail="Invalid request data body")
 
 @app.get(
     '/listing/{listing_id}',
@@ -69,11 +73,11 @@ async def get_listing(
 
         # Convert MongoDB document to Pydantic model
         return ListingsGetResponseItem(
-            id=str(listing["_id"]),
-            title=listing["title"],
-            price=listing["price"],
+            id=str(listing.get("_id"),
+            title=listing.get("title"),
+            price=listing.get("price"),
             description=listing.get("description"),
-            seller_id=listing["seller_id"],
+            seller_id=listing.get("seller_id"),
             pictures=listing.get("pictures", []),
             category=listing.get("category"),
             date_posted=listing.get("date_posted"),
@@ -100,21 +104,20 @@ async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]
             try:
                 response_data.append(
                     ListingsGetResponseItem(
-                        id=str(listing["_id"]),
-                        title=listing["title"],
-                        price=listing["price"],
+                        id=str(listing.get("_id")),
+                        title=listing.get("title"),
+                        price=listing.get("price"),
                         description=listing.get("description"),
-                        seller_id=listing["seller_id"],
+                        seller_id=listing.get("seller_id"),
                         pictures=listing.get("pictures", []),
-                        condition=listing["condition"],
+                        condition=listing.get("condition"),
                         category=listing.get("category"),
                         date_posted=listing.get("date_posted"),  # need to decide on the date format
                         campus=listing.get("campus"),
                     )
                 )
             except Exception as e:
-                pass
-            #   print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
+                print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
 
         return ListingsGetAllResponse(listings=response_data, total=len(response_data))
 
@@ -157,7 +160,8 @@ async def post_listings(
             condition=body.condition,
             campus=body.campus,
         )
-
+    except ValidationError as e:
+        return Field500ErrorResponse(error="Validation error. Please check your input data.")
     except Exception as e:
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
