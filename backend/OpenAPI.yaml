@@ -254,11 +254,6 @@ components:
         condition:
           type: string
           example: "Used"
-        # date_posted:
-        #   type: string
-        #   required: true
-        #   format: date-time
-        #   example: "2025-02-22T10:00:00Z"
         campus:
           type: string
           example: "UTM"
