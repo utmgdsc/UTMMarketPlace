@@ -79,7 +79,7 @@ async def authenticate_user(username: str, password: str):
     """
     Check if the user exists and verify the password.
     """
-    user = db.users.find_one({"email": username})  # ✅ Async database query
+    user = db.users.find_one({"email": username})
 
     if not user or not pbkdf2_sha256.verify(password, user["password"]):
         return None
@@ -94,10 +94,11 @@ async def post_login(body: LoginPostRequest) -> LoginPostResponse:
     user = await authenticate_user(body.username, body.password)
 
     if not user:
-        raise HTTPException(status_code=401, detail="Incorrect email or password")
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
 
     token = jwt.encode({"email": user["email"], "id": str(user["_id"])}, JWT_SECRET, algorithm="HS256")
     return LoginPostResponse(access_token=token, token_type="bearer")
+
 
 
 @app.get('/listings', response_model=None)
