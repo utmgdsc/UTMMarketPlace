@@ -18,6 +18,7 @@ import 'package:utm_marketplace/posting_view/repository/posting.repository.dart'
 import 'package:utm_marketplace/posting_view/view_models/posting.viewmodel.dart';
 import 'package:utm_marketplace/create_listing/repository/create_listing.repository.dart';
 import 'package:utm_marketplace/create_listing/view_models/create_listing.viewmodel.dart';
+import 'package:utm_marketplace/signup/view_models/signup.viewmodel.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,9 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(
+          create: (_) => SignUpViewModel(),
+        ),
         ChangeNotifierProvider(
           create: (_) => ListingViewModel(repo: locator<ListingRepo>()),
         ),

@@ -86,7 +86,7 @@ class LoginState extends State<Login> {
         Text('Don\'t have an account?'),
         TextButton(
           onPressed: () {
-            // TODO: Implement redirect to sign up page
+            context.replace('/signup');
           },
           child: Text('Sign Up'),
         ),
