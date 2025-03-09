@@ -120,7 +120,7 @@ async def get_listing(
             date_posted=listing.get("date_posted"),
             campus=listing.get("campus"),
         )
-
+        )
     except Exception as e:
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
@@ -128,10 +128,10 @@ async def get_listing(
 @app.get('/listings', 
     response_model=ListingsGetAllResponse, responses={'500': {'model': Field500ErrorResponse}},)
 async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
+    try:
         # Fetch all listings from MongoDB
         cursor = listings_collection.find()
         listings = await cursor.to_list(length=None)  # Get all documents
-
         response_data = []
         for listing in listings:
             try:
