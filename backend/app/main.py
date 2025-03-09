@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBearer
 from jwt import decode, exceptions
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
@@ -230,7 +230,15 @@ async def post_listings(
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
 @app.post(
-    '/sign-up', response_model=None, responses={'201': {'model': SignUpPostResponse}}
+    '/sign-up',
+    response_model=None,
+    responses={
+        '201': {'model': SignUpPostResponse},
+        '400': {'model': ErrorResponse},
+        '409': {'model': ErrorResponse},
+        '422': {'model': ErrorResponse},
+        '500': {'model': ErrorResponse},
+    },
 )
 async def post_sign_up(body: SignUpPostRequest) -> Optional[SignUpPostResponse]:
     """
