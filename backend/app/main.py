@@ -1,3 +1,4 @@
+from draftAPP.models import ErrorResponse, LogInPostRequest, LogInPostResponse
 import jwt
 import re
 import os
@@ -74,8 +75,15 @@ async def authenticate_user(username: str, password: str):
     return user
 
 
-@app.post('/login', response_model=LoginPostResponse)
-async def post_login(body: LoginPostRequest) -> LoginPostResponse:
+@app.post(
+    '/login',
+    response_model=LogInPostResponse,
+    responses={
+        '200': {'model': LogInPostResponse},
+        '400': {'model': ErrorResponse}, 
+        '422': {'model': ErrorResponse}},
+)
+async def post_login(body: LogInPostRequest) -> Union[LogInPostResponse, ErrorResponse]:
     """
     Log in an existing user
     """

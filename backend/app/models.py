@@ -69,10 +69,16 @@ class ListingsPostRequest(BaseModel):
         None, example='Lightly used gaming laptop, great condition!'
     )
 
-class LoginPostRequest(BaseModel):
-    email: EmailStr = Field(..., example='student@utoronto.ca')
-    password: SecretStr = Field(..., example='P@ssword123')
+class LogInPostRequest(BaseModel):
+    email: EmailStr = Field(
+        ...,
+        description='Must be a valid University of Toronto email (utoronto.ca or mail.utoronto.ca).',
+    )
+    password: SecretStr = Field(
+        ...,
+        description='Must be at least 8 characters, contain 1 uppercase letter, 1 number.',
+    )
 
-class LoginPostResponse(BaseModel):
-    access_token: Optional[str] = Field(None, example='eyJhbGciOiJIUzI1NiIsInR...')
-    token_type: Optional[str] = Field(None, example='bearer')
+class LogInPostResponse(BaseModel):
+    user_id: int
+    message: Optional[str] = None
