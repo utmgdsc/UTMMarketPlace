@@ -137,6 +137,35 @@ paths:
           content:
             application/json:
               schema:
+                $ref: "#/components/schemas/ErrorResponse"  
+  /login:
+    post:
+      summary: Log in a user
+      description: Log in a existing user using a email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogInPostRequest"
+      responses:
+        "200":
+          description: Logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogInPostResponse"
+        "400":
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Invalid Input body
+          content:
+            application/json:
+              schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
 components:
@@ -165,6 +194,35 @@ components:
       example:
         email: "student@utoronto.ca"
         password: "P@ssword123"
+    LogInPostRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: "Must be a valid University of Toronto email (utoronto.ca or mail.utoronto.ca)."
+        password:
+          type: string
+          format: password
+          description: "Must be at least 8 characters, contain 1 uppercase letter, 1 number."
+      example:
+        email: "student@utoronto.ca"
+        password: "P@ssword123"
+    LogInPostResponse:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: integer
+        message:
+          type: string
+      example:
+        user_id: 42
+        message: "User logged in successfully."  
     SignUpPostResponse:
       type: object
       required:

@@ -96,5 +96,37 @@ class ListingGetResponse(BaseModel):
     )
 
 
+class ListingsPostRequest(BaseModel):
+    title: Optional[str] = Field(None, example='Gaming Laptop for sale')
+
+class ListingsPostResponse(BaseModel):
+    id: Optional[int] = Field(None, example=10)
+    title: Optional[str] = Field(None, example='Gaming Laptop for sale')
+    price: Optional[float] = Field(None, example=899.99)
+    description: Optional[str] = Field(
+        None, example='Lightly used gaming laptop, great condition!'
+    )
+
+class ListingsPostRequest(BaseModel):
+    title: Optional[str] = Field(None, example='Gaming Laptop for sale')
+    price: Optional[float] = Field(None, example=899.99)
+    description: Optional[str] = Field(
+        None, example='Lightly used gaming laptop, great condition!'
+    )
+
+class LogInPostRequest(BaseModel):
+    email: EmailStr = Field(
+        ...,
+        description='Must be a valid University of Toronto email (utoronto.ca or mail.utoronto.ca).',
+    )
+    password: SecretStr = Field(
+        ...,
+        description='Must be at least 8 characters, contain 1 uppercase letter, 1 number.',
+    )
+
+class LogInPostResponse(BaseModel):
+    user_id: int
+    message: Optional[str] = None
+
 class ListingGetResponse1(BaseModel):
     error: Optional[str] = Field(None, example='Listing not found.')
