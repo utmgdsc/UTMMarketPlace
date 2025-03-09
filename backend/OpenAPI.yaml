@@ -167,6 +167,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /search:
+    get:
+      summary: search listings
+      description: send a search query to the backend and return matching listings.
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of marketplace listings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchGetResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"  
 
 components:
   schemas:
@@ -177,6 +200,7 @@ components:
       properties:
         details:
           type: string
+    
     SignUpPostRequest:
       type: object
       required:
@@ -194,6 +218,7 @@ components:
       example:
         email: "student@utoronto.ca"
         password: "P@ssword123"
+    
     LogInPostRequest:
       type: object
       required:
@@ -211,6 +236,7 @@ components:
       example:
         email: "student@utoronto.ca"
         password: "P@ssword123"
+    
     LogInPostResponse:
       type: object
       required:
@@ -223,6 +249,7 @@ components:
       example:
         user_id: 42
         message: "User logged in successfully."  
+    
     SignUpPostResponse:
       type: object
       required:
@@ -235,6 +262,19 @@ components:
       example:
         user_id: 42
         message: "User registered successfully."  
+    
+    SearchGetResponse:
+      type: object
+      required:
+        - query
+      properties:
+        listings:
+          type: array
+          items:
+            $ref: "#/components/schemas/ListingGetResponseItem"
+        total:
+          type: integer
+
     ListingGetResponseItem:
       type: object
       required:
@@ -280,6 +320,7 @@ components:
         condition: "Used"
         date_posted: "2025-02-22T10:00:00Z"
         campus: "UTM"
+    
     ListingsGetResponseAll:
       type: object
       properties:
@@ -289,6 +330,7 @@ components:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
+    
     ListingsPostRequest:
       type: object
       required:
@@ -326,6 +368,7 @@ components:
         category: "Electronics"
         condition: "Used"
         campus: "UTM"
+    
     ListingsPostResponse:
       type: object
       required:
