@@ -1,4 +1,3 @@
-from draftAPP.models import ErrorResponse, LogInPostRequest, LogInPostResponse
 import jwt
 import re
 import os
@@ -34,8 +33,9 @@ from models import (
     SignUpPostResponse,
     SignUpPostResponse1,
     SignUpPostResponse2,
-    LoginPostRequest,
-    LoginPostResponse,
+    LogInPostRequest,
+    LogInPostResponse,
+    ErrorResponse
 )
 
 from .connect_db import db  # Import MongoDB connection
