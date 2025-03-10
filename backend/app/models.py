@@ -108,11 +108,16 @@ class ListingsPostResponse(BaseModel):
     )
 
 class ListingsPostRequest(BaseModel):
-    title: Optional[str] = Field(None, example='Gaming Laptop for sale')
-    price: Optional[float] = Field(None, example=899.99)
+    title: str = Field(..., example='Gaming Laptop for sale')
+    price: float = Field(..., example=899.99)
     description: Optional[str] = Field(
         None, example='Lightly used gaming laptop, great condition!'
     )
+    seller_id: str = Field(..., example='101')
+    pictures: List[str]
+    category: Optional[str] = Field(None, example='Electronics')
+    condition: str = Field(..., example='Used')
+    campus: Optional[str] = Field(None, example='UTM')
 
 class LogInPostRequest(BaseModel):
     email: EmailStr = Field(
@@ -130,3 +135,22 @@ class LogInPostResponse(BaseModel):
 
 class ListingGetResponse1(BaseModel):
     error: Optional[str] = Field(None, example='Listing not found.')
+
+class ListingGetResponseItem(BaseModel):
+    id: str
+    title: str
+    price: float
+    description: Optional[str] = None
+    seller_id: str
+    pictures: List[str]
+    category: Optional[str] = None
+    condition: str
+    date_posted: Optional[datetime] = None
+    campus: Optional[str] = None    
+
+class SearchGetResponse(BaseModel):
+    listings: Optional[List[ListingGetResponseItem]] = None
+    total: Optional[int] = None
+
+class ErrorResponse(BaseModel):
+    details: str

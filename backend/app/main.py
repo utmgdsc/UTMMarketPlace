@@ -1,4 +1,3 @@
-from draftAPP.models import ErrorResponse, LogInPostRequest, LogInPostResponse
 import jwt
 import re
 import os
@@ -10,19 +9,19 @@ from pydantic import BaseModel, ValidationError
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
-
-load_dotenv()  # Load environment variables from .env
-JWT_SECRET = os.getenv("JWT_SECRET")
 from datetime import datetime
 from fastapi.exceptions import RequestValidationError
 from passlib.hash import pbkdf2_sha256
 from pymongo.errors import DuplicateKeyError, PyMongoError
 from bson import ObjectId
 
-#importing async way of connecting to MongoDB
-from MongoClient_async import db, listings_collection
+load_dotenv()  # Load environment variables from .env
+JWT_SECRET = os.getenv("JWT_SECRET")
 
-from models import (
+#importing async way of connecting to MongoDB
+from .MongoClient_async import db, listings_collection
+
+from .models import (
     Field500ErrorResponse,
     ListingGetResponse,
     ListingGetResponse1,
@@ -34,8 +33,10 @@ from models import (
     SignUpPostResponse,
     SignUpPostResponse1,
     SignUpPostResponse2,
-    LoginPostRequest,
-    LoginPostResponse,
+    LogInPostRequest,
+    LogInPostResponse,
+    SearchGetResponse,
+    ErrorResponse,
 )
 
 from .connect_db import db  # Import MongoDB connection
@@ -124,6 +125,56 @@ async def get_listing(
     except Exception as e:
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
 
+@app.get(
+    '/search',
+    response_model=SearchGetResponse,
+    responses={'500': {'model': ErrorResponse}},
+)
+async def get_search(query: str) -> Union[SearchGetResponse, ErrorResponse]:
+    """
+    search listings
+    """
+    try:
+        cursor = listings_collection.aggregate([
+            {
+                "$search": {
+                    "index": "Full_text_index_listings",
+                    "text": {
+                        "query": query,
+                        "path": {
+                            "wildcard": "*",
+                        },
+                    },
+                },
+            },
+        ])
+        valid_listings = await cursor.to_list(length=None)
+        response_data = []
+        for listing in valid_listings:
+            try:
+                response_data.append(
+                    ListingsGetResponseItem(
+                        id=str(listing.get("_id")),
+                        title=listing.get("title"),
+                        price=listing.get("price"),
+                        description=listing.get("description"),
+                        seller_id=listing.get("seller_id"),
+                        pictures=listing.get("pictures", []),
+                        condition=listing.get("condition"),
+                        category=listing.get("category"),
+                        date_posted=listing.get("date_posted"),  # need to decide on the date format
+                        campus=listing.get("campus"),
+                    )
+                )
+            except Exception as e:
+                print(f"Skipping invalid listing {listing['_id']}: {e}")
+
+        print("HERE ARE THE RESULTS: ", valid_listings)
+        print("HERE ARE THE RESPONSE DATA: ", response_data)
+        return SearchGetResponse(listings=response_data, total=len(response_data))
+    
+    except Exception as e:
+        return ErrorResponse(details="Internal Server Error. Please try again later.")
           
 @app.get('/listings', 
     response_model=ListingsGetAllResponse, responses={'500': {'model': Field500ErrorResponse}},)
@@ -224,6 +275,7 @@ async def post_listings(
             condition=body.condition,
             campus=body.campus,
         )
+    
     except ValidationError as e:
         return Field500ErrorResponse(error="Validation error. Please check your input data.")
     except Exception as e:
@@ -262,3 +314,4 @@ async def post_sign_up(body: SignUpPostRequest) -> Optional[SignUpPostResponse]:
         raise HTTPException(status_code=409, detail="Email already registered.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+    
