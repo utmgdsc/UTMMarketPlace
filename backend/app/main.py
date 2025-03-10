@@ -22,7 +22,6 @@ JWT_SECRET = os.getenv("JWT_SECRET")
 from .MongoClient_async import db, listings_collection
 
 from .models import (
-    Field500ErrorResponse,
     ListingGetResponse,
     ListingGetResponse1,
     ListingsGetAllResponse,
@@ -87,13 +86,13 @@ async def validation_exception_handler(request, exc):
     responses={
         '400': {'model': ListingGetResponse},
         '404': {'model': ListingGetResponse1},
-        '500': {'model': Field500ErrorResponse},
+        '500': {'model': ErrorResponse},
     },
 )
 async def get_listing(
     listing_id: str,
 ) -> Union[
-    ListingsGetResponseItem, ListingGetResponse, ListingGetResponse1, Field500ErrorResponse]:
+    ListingsGetResponseItem, ListingGetResponse, ListingGetResponse1, ErrorResponse]:
     """
     Retrieve a single listing by ID
     """
@@ -123,7 +122,7 @@ async def get_listing(
         )
         )
     except Exception as e:
-        return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
+        return ErrorResponse(details="Internal Server Error. Please try again later.")
 
 @app.get(
     '/search',
@@ -177,8 +176,8 @@ async def get_search(query: str) -> Union[SearchGetResponse, ErrorResponse]:
         return ErrorResponse(details="Internal Server Error. Please try again later.")
           
 @app.get('/listings', 
-    response_model=ListingsGetAllResponse, responses={'500': {'model': Field500ErrorResponse}},)
-async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
+    response_model=ListingsGetAllResponse, responses={'500': {'model': ErrorResponse}},)
+async def get_listings() -> Union[ListingsGetAllResponse, ErrorResponse]:
     try:
         # Fetch all listings from MongoDB
         cursor = listings_collection.find()
@@ -206,7 +205,7 @@ async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]
         return ListingsGetAllResponse(listings=response_data, total=len(response_data))
 
     except Exception as e:
-        return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
+        return ErrorResponse(details="Internal Server Error. Please try again later.")
 
 async def authenticate_user(username: str, password: str):
     """
@@ -245,12 +244,12 @@ async def post_login(body: LogInPostRequest) -> Union[LogInPostResponse, ErrorRe
     response_model=None,
     responses={
         '201': {'model': ListingsPostResponse},
-        '500': {'model': Field500ErrorResponse},
+        '500': {'model': ErrorResponse},
     },
 )
 async def post_listings(
     body: ListingsPostRequest,
-) -> Optional[Union[ListingsPostResponse, Field500ErrorResponse]]:
+) -> Optional[Union[ListingsPostResponse, ErrorResponse]]:
     """
     Create a new listing
     """
@@ -277,9 +276,9 @@ async def post_listings(
         )
     
     except ValidationError as e:
-        return Field500ErrorResponse(error="Validation error. Please check your input data.")
+        return ErrorResponse(details="Validation error. Please check your input data.")
     except Exception as e:
-        return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
+        return ErrorResponse(details="Internal Server Error. Please try again later.")
 
 @app.post(
     '/sign-up',
