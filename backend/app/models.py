@@ -9,13 +9,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 
-
-class Field500ErrorResponse(BaseModel):
-    error: Optional[str] = Field(
-        None, example='Internal Server Error. Please try again later.'
-    )
-
-
 class ListingsGetResponseItem(BaseModel):
     id: str = Field(..., example='1')
     title: str = Field(..., example='MacBook Pro for sale')
@@ -130,3 +123,6 @@ class LogInPostResponse(BaseModel):
 
 class ListingGetResponse1(BaseModel):
     error: Optional[str] = Field(None, example='Listing not found.')
+
+class ErrorResponse(BaseModel):
+    details: str
