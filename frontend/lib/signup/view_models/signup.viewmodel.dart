@@ -58,13 +58,8 @@ class SignUpViewModel extends LoadingViewModel {
           SignUpModel(email: _email ?? '', password: _password ?? '');
       final response = await SignUpModel.signUp(_signupModel);
 
-      // TODO: When response status is cleaned up on backend, remove this if condition have a single line for signUpReponse assignment
       debugPrint('Sign up response: $response');
-      if (response.containsKey('user_id')) {
-        signUpResponse = 201;
-      } else {
-        signUpResponse = response['status_code'];
-      }
+      signUpResponse = response.statusCode ?? 500;
     } catch (exc) {
       debugPrint('Error in signUp: ${exc.toString()}');
       signUpResponse = 500;

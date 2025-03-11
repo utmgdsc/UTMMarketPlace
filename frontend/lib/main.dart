@@ -19,11 +19,13 @@ import 'package:utm_marketplace/posting_view/view_models/posting.viewmodel.dart'
 import 'package:utm_marketplace/create_listing/repository/create_listing.repository.dart';
 import 'package:utm_marketplace/create_listing/view_models/create_listing.viewmodel.dart';
 import 'package:utm_marketplace/signup/view_models/signup.viewmodel.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   setupLocator();
+  configureDio();
 
   runApp(
     MultiProvider(

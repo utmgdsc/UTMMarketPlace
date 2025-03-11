@@ -73,7 +73,11 @@ class SignUpState extends State<SignUp> {
         if (_formKey.currentState!.validate()) {
           await signUpViewModel.signUp();
           if (mounted) {
+            // TODO: Fix usage of BuildContext here when context changes
             if (signUpViewModel.signUpResponse == 201 && !signUpViewModel.isLoading) {
+              ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Successfully registered, please log in.')),
+              );
               context.replace('/login');
             } else if (signUpViewModel.signUpResponse == 409) {
               ScaffoldMessenger.of(context).showSnackBar(

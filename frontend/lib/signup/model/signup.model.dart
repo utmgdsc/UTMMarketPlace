@@ -21,17 +21,17 @@ class SignUpModel {
     };
   }
 
-  static Future<Map<String, dynamic>> signUp(SignUpModel signUpModel) async {
+  static Future<Response> signUp(SignUpModel signUpModel) async {
     try {
       final response = await dio.post(
         '/sign-up',
         data: signUpModel.toJson(),
       );
 
-      return response.data;
+      return response;
     } on DioException catch (e) {
       if (e.response != null) {
-        return e.response!.data;
+        return e.response!;
       } else {
         throw Exception('Failed to sign up: ${e.message}');
       }
