@@ -1,10 +1,10 @@
 import jwt
+from jwt import decode, exceptions
 import re
 import os
 from typing import List, Optional, Union
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBearer
-from jwt import decode, exceptions
 from pydantic import BaseModel, ValidationError
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
@@ -19,23 +19,18 @@ from pymongo.errors import DuplicateKeyError, PyMongoError
 from bson import ObjectId
 
 #importing async way of connecting to MongoDB
-from MongoClient_async import db, listings_collection
+from .MongoClient_async import db, listings_collection, users_collection
 
-from models import (
-    Field500ErrorResponse,
-    ListingGetResponse,
-    ListingGetResponse1,
-    ListingsGetAllResponse,
-    ListingsGetResponseItem,
+from .models import (
+    ErrorResponse,
+    ListingGetResponseItem,
+    ListingsGetResponseAll,
     ListingsPostRequest,
     ListingsPostResponse,
-    SignUpPostRequest,
-    SignUpPostResponse,
-    SignUpPostResponse1,
-    SignUpPostResponse2,
     LogInPostRequest,
     LogInPostResponse,
-    ErrorResponse
+    SignUpPostRequest,
+    SignUpPostResponse,
 )
 
 from .connect_db import db  # Import MongoDB connection
@@ -78,38 +73,36 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
   
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    raise HTTPException(status_code=422, detail="Invalid request data body")
+    raise HTTPException(status_code=422, detail="Invalid request")
 
 @app.get(
     '/listing/{listing_id}',
-    response_model=ListingsGetResponseItem,
+    response_model=ListingGetResponseItem,
     responses={
-        '400': {'model': ListingGetResponse},
-        '404': {'model': ListingGetResponse1},
-        '500': {'model': Field500ErrorResponse},
+        '400': {'model': ErrorResponse},
+        '404': {'model': ErrorResponse},
+        '422': {'model': ErrorResponse},
+        '500': {'model': ErrorResponse},
     },
 )
-async def get_listing(
-    listing_id: str,
-) -> Union[
-    ListingsGetResponseItem, ListingGetResponse, ListingGetResponse1, Field500ErrorResponse]:
+async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorResponse]:
     """
     Retrieve a single listing by ID
     """
     try:
         # Validate ObjectId
         if not ObjectId.is_valid(listing_id):
-            return ListingGetResponse(error="Invalid listing ID format. Must be a valid Id.")
+            return ListingGetResponseItem(error="Invalid listing ID format. Must be a valid Id.")
 
         # Fetch listing from MongoDB
         listing = await listings_collection.find_one({"_id": ObjectId(listing_id)})
 
         # Check if listing exists
         if not listing:
-            return ListingGetResponse1(error="Listing not found.")
+            return HTTPException(status_code=404, detail="Listing not found.")
 
         # Convert MongoDB document to Pydantic model
-        return ListingsGetResponseItem(
+        return ListingGetResponseItem(
             id=str(listing.get("_id"),
             title=listing.get("title"),
             price=listing.get("price"),
@@ -122,12 +115,15 @@ async def get_listing(
         )
         )
     except Exception as e:
-        return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
+        return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
 
           
-@app.get('/listings', 
-    response_model=ListingsGetAllResponse, responses={'500': {'model': Field500ErrorResponse}},)
-async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
+@app.get(
+    '/listings',
+    response_model=ListingsGetResponseAll,
+    responses={'500': {'model': ErrorResponse}},
+)
+async def get_listings() -> Union[ListingsGetResponseAll, ErrorResponse]:
     try:
         # Fetch all listings from MongoDB
         cursor = listings_collection.find()
@@ -136,7 +132,7 @@ async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]
         for listing in listings:
             try:
                 response_data.append(
-                    ListingsGetResponseItem(
+                    ListingGetResponseItem(
                         id=str(listing.get("_id")),
                         title=listing.get("title"),
                         price=listing.get("price"),
@@ -152,10 +148,10 @@ async def get_listings() -> Union[ListingsGetAllResponse, Field500ErrorResponse]
             except Exception as e:
                 print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
 
-        return ListingsGetAllResponse(listings=response_data, total=len(response_data))
+        return ListingsGetResponseAll(listings=response_data, total=len(response_data))
 
     except Exception as e:
-        return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
+        return ErrorResponse(details="Internal Server Error. Please try again later.")
 
 async def authenticate_user(username: str, password: str):
     """
@@ -186,7 +182,7 @@ async def post_login(body: LogInPostRequest) -> Union[LogInPostResponse, ErrorRe
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
     token = jwt.encode({"email": user["email"], "id": str(user["_id"])}, JWT_SECRET, algorithm="HS256")
-    return LoginPostResponse(access_token=token, token_type="bearer")
+    return LogInPostResponse(access_token=token, token_type="bearer")
 
 
 @app.post(
@@ -194,12 +190,13 @@ async def post_login(body: LogInPostRequest) -> Union[LogInPostResponse, ErrorRe
     response_model=None,
     responses={
         '201': {'model': ListingsPostResponse},
-        '500': {'model': Field500ErrorResponse},
+        '422': {'model': ErrorResponse},
+        '500': {'model': ErrorResponse},
     },
 )
 async def post_listings(
     body: ListingsPostRequest,
-) -> Optional[Union[ListingsPostResponse, Field500ErrorResponse]]:
+) -> Optional[Union[ListingsPostResponse, ErrorResponse]]:
     """
     Create a new listing
     """
@@ -225,9 +222,10 @@ async def post_listings(
             campus=body.campus,
         )
     except ValidationError as e:
-        return Field500ErrorResponse(error="Validation error. Please check your input data.")
+        return ErrorResponse(status_code=422, details="Validation error. Please check your input data.")
     except Exception as e:
-        return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
+        return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
+
 
 @app.post(
     '/sign-up',
@@ -240,24 +238,30 @@ async def post_listings(
         '500': {'model': ErrorResponse},
     },
 )
-async def post_sign_up(body: SignUpPostRequest) -> Optional[SignUpPostResponse]:
+async def post_sign_up(
+    body: SignUpPostRequest,
+) -> Optional[Union[SignUpPostResponse, ErrorResponse]]:
     """
     Sign up a new user.
     """
-    email = body.email
+    email = body.email.lower()
     password = body.password.get_secret_value()
 
     # Validate UofT Email
     if not re.match(r"^[a-zA-Z0-9_.+-]+@(utoronto\.ca|mail\.utoronto\.ca)$", email):
         raise HTTPException(status_code=400, detail="Invalid email format.")
+    if await users_collection.find_one({"email": email}):
+        raise HTTPException(status_code=409, detail="Email already registered.")
 
     # Hash password before storing
     hashed_password = pbkdf2_sha256.hash(password)
 
     # Store User in Database
     try:
-        result = await db.users.insert_one({"email": email, "password": hashed_password})
-        return {"user_id": str(result.inserted_id), "message": "User registered successfully."}
+        result = await users_collection.insert_one({"email": email, "password": hashed_password})
+        return JSONResponse(
+            status_code=201,
+            content={"user_id": str(result.inserted_id), "message": "User registered successfully."})
     except DuplicateKeyError:
         raise HTTPException(status_code=409, detail="Email already registered.")
     except Exception as e:
