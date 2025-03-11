@@ -22,19 +22,15 @@ from bson import ObjectId
 from .MongoClient_async import db, listings_collection, users_collection
 
 from .models import (
-    ListingGetResponse,
-    ListingGetResponse1,
-    ListingsGetAllResponse,
-    ListingsGetResponseItem,
+    ErrorResponse,
+    ListingGetResponseItem,
+    ListingsGetResponseAll,
     ListingsPostRequest,
     ListingsPostResponse,
-    SignUpPostRequest,
-    SignUpPostResponse,
-    SignUpPostResponse1,
-    SignUpPostResponse2,
     LogInPostRequest,
     LogInPostResponse,
-    ErrorResponse
+    SignUpPostRequest,
+    SignUpPostResponse,
 )
 
 from .connect_db import db  # Import MongoDB connection
@@ -77,38 +73,36 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
   
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    raise HTTPException(status_code=422, detail="Invalid request data body")
+    raise HTTPException(status_code=422, detail="Invalid request")
 
 @app.get(
     '/listing/{listing_id}',
-    response_model=ListingsGetResponseItem,
+    response_model=ListingGetResponseItem,
     responses={
-        '400': {'model': ListingGetResponse},
-        '404': {'model': ListingGetResponse1},
+        '400': {'model': ErrorResponse},
+        '404': {'model': ErrorResponse},
+        '422': {'model': ErrorResponse},
         '500': {'model': ErrorResponse},
     },
 )
-async def get_listing(
-    listing_id: str,
-) -> Union[
-    ListingsGetResponseItem, ListingGetResponse, ListingGetResponse1, ErrorResponse]:
+async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorResponse]:
     """
     Retrieve a single listing by ID
     """
     try:
         # Validate ObjectId
         if not ObjectId.is_valid(listing_id):
-            return ListingGetResponse(error="Invalid listing ID format. Must be a valid Id.")
+            return ListingGetResponseItem(error="Invalid listing ID format. Must be a valid Id.")
 
         # Fetch listing from MongoDB
         listing = await listings_collection.find_one({"_id": ObjectId(listing_id)})
 
         # Check if listing exists
         if not listing:
-            return ListingGetResponse1(error="Listing not found.")
+            return HTTPException(status_code=404, detail="Listing not found.")
 
         # Convert MongoDB document to Pydantic model
-        return ListingsGetResponseItem(
+        return ListingGetResponseItem(
             id=str(listing.get("_id"),
             title=listing.get("title"),
             price=listing.get("price"),
@@ -121,12 +115,15 @@ async def get_listing(
         )
         )
     except Exception as e:
-        return ErrorResponse(details="Internal Server Error. Please try again later.")
+        return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
 
           
-@app.get('/listings', 
-    response_model=ListingsGetAllResponse, responses={'500': {'model': ErrorResponse}},)
-async def get_listings() -> Union[ListingsGetAllResponse, ErrorResponse]:
+@app.get(
+    '/listings',
+    response_model=ListingsGetResponseAll,
+    responses={'500': {'model': ErrorResponse}},
+)
+async def get_listings() -> Union[ListingsGetResponseAll, ErrorResponse]:
     try:
         # Fetch all listings from MongoDB
         cursor = listings_collection.find()
@@ -135,7 +132,7 @@ async def get_listings() -> Union[ListingsGetAllResponse, ErrorResponse]:
         for listing in listings:
             try:
                 response_data.append(
-                    ListingsGetResponseItem(
+                    ListingGetResponseItem(
                         id=str(listing.get("_id")),
                         title=listing.get("title"),
                         price=listing.get("price"),
@@ -151,7 +148,7 @@ async def get_listings() -> Union[ListingsGetAllResponse, ErrorResponse]:
             except Exception as e:
                 print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
 
-        return ListingsGetAllResponse(listings=response_data, total=len(response_data))
+        return ListingsGetResponseAll(listings=response_data, total=len(response_data))
 
     except Exception as e:
         return ErrorResponse(details="Internal Server Error. Please try again later.")
@@ -185,7 +182,7 @@ async def post_login(body: LogInPostRequest) -> Union[LogInPostResponse, ErrorRe
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
     token = jwt.encode({"email": user["email"], "id": str(user["_id"])}, JWT_SECRET, algorithm="HS256")
-    return LoginPostResponse(access_token=token, token_type="bearer")
+    return LogInPostResponse(access_token=token, token_type="bearer")
 
 
 @app.post(
@@ -193,6 +190,7 @@ async def post_login(body: LogInPostRequest) -> Union[LogInPostResponse, ErrorRe
     response_model=None,
     responses={
         '201': {'model': ListingsPostResponse},
+        '422': {'model': ErrorResponse},
         '500': {'model': ErrorResponse},
     },
 )
@@ -224,22 +222,25 @@ async def post_listings(
             campus=body.campus,
         )
     except ValidationError as e:
-        return ErrorResponse(details="Validation error. Please check your input data.")
+        return ErrorResponse(status_code=422, details="Validation error. Please check your input data.")
     except Exception as e:
-        return ErrorResponse(details="Internal Server Error. Please try again later.")
+        return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
+
 
 @app.post(
     '/sign-up',
     response_model=None,
     responses={
         '201': {'model': SignUpPostResponse},
-        '400': {'model': SignUpPostResponse1},
-        '409': {'model': SignUpPostResponse2},
+        '400': {'model': ErrorResponse},
+        '409': {'model': ErrorResponse},
         '422': {'model': ErrorResponse},
         '500': {'model': ErrorResponse},
     },
 )
-async def post_sign_up(body: SignUpPostRequest) -> Optional[SignUpPostResponse]:
+async def post_sign_up(
+    body: SignUpPostRequest,
+) -> Optional[Union[SignUpPostResponse, ErrorResponse]]:
     """
     Sign up a new user.
     """
