@@ -34,16 +34,7 @@ class SignUpState extends State<SignUp> {
       onChanged: (value) {
       signUpViewModel.email = value;
       },
-      validator: (value) {
-      if (value == null || value.isEmpty) {
-        return 'Please enter a valid UofT email address';
-      }
-      final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@(mail\.utoronto\.ca|utoronto\.ca)$');
-      if (!emailRegex.hasMatch(value)) {
-        return 'Please enter a valid UofT email address';
-      }
-      return null;
-      },
+      validator: (value) => signUpViewModel.validateEmail(value),
     );
 
     final passwordField = TextFormField(
@@ -65,12 +56,7 @@ class SignUpState extends State<SignUp> {
       onChanged: (value) {
         signUpViewModel.password = value;
       },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter a password';
-        }
-        return null;
-      },
+      validator: (value) => signUpViewModel.validatePassword(value),
     );
 
     final confirmPasswordField = TextFormField(
@@ -79,15 +65,7 @@ class SignUpState extends State<SignUp> {
         border: OutlineInputBorder(),
         labelText: 'Confirm your password',
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please confirm your password';
-        }
-        if (value != signUpViewModel.password) {
-          return 'Passwords do not match';
-        }
-        return null;
-      },
+      validator: (value) => signUpViewModel.validateConfirmPassword(value),
     );
 
     final signupButton = ElevatedButton(

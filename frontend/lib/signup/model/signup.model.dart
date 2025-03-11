@@ -1,3 +1,4 @@
+import 'package:utm_marketplace/shared/dio/dio.dart';
 import 'package:dio/dio.dart';
 
 class SignUpModel {
@@ -21,12 +22,9 @@ class SignUpModel {
   }
 
   static Future<Map<String, dynamic>> signUp(SignUpModel signUpModel) async {
-    final dio = Dio();
-    final String endpoint = 'http://10.0.2.2:8000/sign-up';
-
     try {
       final response = await dio.post(
-        endpoint,
+        '/sign-up',
         data: signUpModel.toJson(),
       );
 
