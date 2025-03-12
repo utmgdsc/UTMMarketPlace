@@ -68,7 +68,6 @@ class ConversationListItem extends StatelessWidget {
       ),
     );
 
-    // Message preview with appropriate styling
     final messagePreview = Text(
       conversation.lastMessagePreview,
       style: TextStyle(
@@ -80,13 +79,11 @@ class ConversationListItem extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
     );
 
-    // Header row with user name and time
     final headerRow = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [userName, timeAgo],
     );
 
-    // Content column with header and message preview
     final contentColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -96,7 +93,6 @@ class ConversationListItem extends StatelessWidget {
       ],
     );
 
-    // Layout composition
     return InkWell(
       onTap: onTap,
       child: Padding(

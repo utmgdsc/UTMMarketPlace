@@ -103,6 +103,25 @@ class _PostingViewState extends State<PostingView> {
               ),
             );
 
+            final titleRow = Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(child: itemTitle),
+                IconButton(
+                  icon: Icon(
+                    postingViewModel.isSavedItem(item.id!) 
+                        ? Icons.favorite
+                        : Icons.favorite_border,
+                    color: postingViewModel.isSavedItem(item.id!) 
+                        ? Colors.red 
+                        : Colors.grey,
+                    size: 28,
+                  ),
+                  onPressed: () => postingViewModel.toggleSaved(item.id!),
+                ),
+              ],
+            );
+
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -110,7 +129,7 @@ class _PostingViewState extends State<PostingView> {
                 children: [
                   itemImage,
                   const SizedBox(height: 16.0),
-                  itemTitle,
+                  titleRow,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

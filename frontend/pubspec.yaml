@@ -74,6 +74,7 @@ flutter:
     - assets/icons/create_listing.png
     - assets/icons/settings.png
     - assets/data/messages.json
+    - assets/data/temp_saved_items.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
