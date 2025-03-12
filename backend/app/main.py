@@ -74,11 +74,11 @@ async def get_listing(
 
         # Convert MongoDB document to Pydantic model
         return ListingsGetResponseItem(
-            id=str(listing["_id"]),
-            title=listing["title"],
-            price=listing["price"],
+            id=str(listing.get("_id"),
+            title=listing.get("title"),
+            price=listing.get("price"),
             description=listing.get("description"),
-            seller_id=listing["seller_id"],
+            seller_id=listing.get("seller_id"),
             pictures=listing.get("pictures", []),
             category=listing.get("category"),
             date_posted=listing.get("date_posted"),
@@ -216,12 +216,10 @@ async def post_listings(
             condition=body.condition,
             campus=body.campus,
         )
-    
 
     except Exception as e:
         # print(f"An error occurred: {str(e)}")
         return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
-
 
 @app.post(
     '/sign-up',

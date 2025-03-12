@@ -140,7 +140,7 @@ paths:
       get:
         summary: Retrieve a single listing by ID
         parameters:
-          - name: listingid
+          - name: listing_id
             in: query
             required: true
             schema:
