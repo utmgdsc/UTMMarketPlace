@@ -79,7 +79,7 @@ Sample request body definition
 ```
 
 Things to notice:
-- Always include `summary`, `description`, and `requestBody`.
+- Always include `summary`, and `requestBody`.
   - `summary` is a one-line summary of the endpoint
   - `description` is a full description of the behaviour of that response (e.g., if the endpoint has pagination and how clients should work with it)
 - For `requestBody`
