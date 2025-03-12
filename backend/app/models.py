@@ -34,6 +34,7 @@ class ListingsGetResponseItem(BaseModel):
 class ListingsGetAllResponse(BaseModel):
     listings: Optional[List[ListingsGetResponseItem]] = None
     total: Optional[int] = Field(None, example=10)
+    next_page_token: Optional[str] = None
 
 
 class ListingsPostRequest(BaseModel):

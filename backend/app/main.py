@@ -6,14 +6,14 @@ from __future__ import annotations
 from typing import List, Optional, Union
 import re
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Header
 from fastapi.exceptions import RequestValidationError
 from passlib.hash import pbkdf2_sha256
 from pymongo.errors import DuplicateKeyError, PyMongoError
 from bson import ObjectId
 
 #importing async way of connecting to MongoDB
-from MongoClient_async import db, listings_collection
+from MongoClient_async import db, listings_collection, users_collection
 
 from models import (
     Field500ErrorResponse,
@@ -93,57 +93,92 @@ async def get_listing(
     response_model=ListingsGetAllResponse, 
     responses={'500': {'model': Field500ErrorResponse}},
     )
+@app.get('/listings', response_model=ListingsGetAllResponse, responses={'500': {'model': Field500ErrorResponse}})
 async def get_listings(
-    page: int = Query(1, description="Page number", ge=1),
-    # limit: int = Query(10, description="Number of listings per page", ge=1, le=30),
+    limit: Optional[int] = Header(5, description="Number of listings per page"),
+    next: Optional[str] = Header(None, description="Token for pagination")  # Ensure default is None
 ) -> Union[ListingsGetAllResponse, Field500ErrorResponse]:
     """
-    Retrieve all listings with pagination.
+    Retrieve listings using cursor-based pagination.
     """
     try:
-        limit = 10
-        # Calculate skip value for pagination
-        skip = (page - 1) * limit
+        # Ensure limit is within a reasonable range
+        limit = min(max(limit, 1), 30)
 
-        # Fetch paginated listings from MongoDB
+        # Initialize query
+        query = {}
+        pipeline = []
 
-        # Works in PyMongo (Sync)
-        # listings_collection.find({}, skip=10, limit=5)  
-        
-        # Async motor method:
-        cursor = listings_collection.find().skip(skip).limit(limit)
-        listings = await cursor.to_list(length=limit)  # Get `limit` documents
-
-        # Get total count for pagination info
-        total_count = await listings_collection.count_documents({})
-        # Convert MongoDB documents to Pydantic models
-        response_data = []
-        for listing in listings:
+        if next:
             try:
-                response_data.append(
-                    ListingsGetResponseItem(
-                        id=str(listing["_id"]),
-                        title=listing["title"],
-                        price=listing["price"],
-                        description=listing.get("description"),
-                        seller_id=listing["seller_id"],
-                        pictures=listing.get("pictures", []),
-                        condition=listing["condition"],
-                        category=listing.get("category"),
-                        date_posted=listing.get("date_posted"),  # need to decide on the date format
-                        campus=listing.get("campus"),
-                    )
-                )
+                query["_id"] = {"$gt": ObjectId(next)}
             except Exception as e:
-                pass
-                print(f"Skipping invalid listing {listing['_id']}: {e}")  # Log invalid listings
+                # print(f"Invalid ObjectId: {e}")  # Debugging print
+                raise HTTPException(status_code=400, detail="Invalid next format.")
+        pipeline.extend([
+            {"$match": query},
+            {"$sort": {"_id": 1}}
+        ])
+
+        pipeline.extend([
+            {"$limit": limit + 1},
+            {"$project": {
+                "id": {"$toString": "$_id"},
+                "title": 1,
+                "price": 1,
+                "description": 1,
+                "seller_id": 1,
+                "pictures": 1,
+                "condition": 1,
+                "category": 1,
+                "date_posted": 1,
+                "campus": 1,
+                "paginationToken": {"$meta": "searchSequenceToken"} if next else None
+            }}
+        ])
+
+        # Execute query
+        cursor = listings_collection.aggregate(pipeline)
+        listings = await cursor.to_list(length=limit + 1)
         
+        if not listings:
+            return ListingsGetAllResponse(listings=[], total=0, next_page_token=None)
+
+        # Check if there is a next page
+        has_next_page = len(listings) > limit
+        if has_next_page:
+            listings = listings[:-1]  # Remove extra document
+
+        if has_next_page:
+            next_page_token = str(listings[-1]["_id"]) 
+        else:
+            next_page_token = None
+
+        # Convert documents to Pydantic models
+        response_data = [
+            ListingsGetResponseItem(
+                id=str(listing["_id"]),
+                title=listing["title"],
+                price=listing["price"],
+                description=listing.get("description"),
+                seller_id=listing["seller_id"],
+                pictures=listing.get("pictures", []),
+                condition=listing["condition"],
+                category=listing.get("category"),
+                date_posted=listing.get("date_posted"),
+                campus=listing.get("campus"),
+            )
+            for listing in listings
+        ]
+
         return ListingsGetAllResponse(
             listings=response_data,
-            total=total_count
+            total=len(response_data),
+            next_page_token=next_page_token
         )
+
     except Exception as e:
-        return Field500ErrorResponse(error="Internal Server Error. Please try again later.")
+        return Field500ErrorResponse(error=f"Internal Server Error")
 
 
 @app.post(
@@ -197,7 +232,7 @@ async def post_listings(
         '409': {'model': SignUpPostResponse2},
     },
 )
-def post_sign_up(body: SignUpPostRequest) -> Optional[Union[SignUpPostResponse, SignUpPostResponse1, SignUpPostResponse2]]:
+async def post_sign_up(body: SignUpPostRequest) -> Optional[Union[SignUpPostResponse, SignUpPostResponse1, SignUpPostResponse2]]:
     """
     Sign up a new user
     """
@@ -219,7 +254,8 @@ def post_sign_up(body: SignUpPostRequest) -> Optional[Union[SignUpPostResponse, 
 
     #Send to DB
     try:
-        result = db.users.insert_one(user_data)
+        # result = db.users.insert_one(user_data)
+        result = await users_collection.insert_one(user_data)
         return {"user_id": str(result.inserted_id), "message": "User registered successfully."}
     except DuplicateKeyError:
         raise HTTPException(status_code=409, detail="Email already registered.")
