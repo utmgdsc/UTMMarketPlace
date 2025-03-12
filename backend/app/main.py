@@ -74,7 +74,7 @@ async def get_listing(
 
         # Convert MongoDB document to Pydantic model
         return ListingsGetResponseItem(
-            id=str(listing.get("_id"),
+            id=str(listing.get("_id")),
             title=listing.get("title"),
             price=listing.get("price"),
             description=listing.get("description"),
