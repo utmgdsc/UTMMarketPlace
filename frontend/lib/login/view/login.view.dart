@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
 
-// Note: There's a small issue regarding the flex Spacer widget, it's not too important
-// but would be nice to find a way that makes it so the UI elements
-// don't shift when a validator fails.
-
 class Login extends StatefulWidget {
   const Login({super.key});
 
