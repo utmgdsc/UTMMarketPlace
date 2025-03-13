@@ -115,7 +115,6 @@ async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorRes
             date_posted=listing.get("date_posted"),
             campus=listing.get("campus"),
         )
-        )
     except Exception as e:
         return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
 
@@ -123,13 +122,12 @@ async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorRes
 
 @app.get('/listings', 
     response_model=ListingsGetResponseAll, 
-    responses={'500': {'model': Field500ErrorResponse}},
-    )
-@app.get('/listings', response_model=ListingsGetResponseAll, responses={'500': {'model': Field500ErrorResponse}})
+    responses={'500': {'model': ErrorResponse}},
+)
 async def get_listings(
     limit: Optional[int] = Header(5, description="Number of listings per page"),
     next: Optional[str] = Header(None, description="Token for pagination")  # Ensure default is None
-) -> Union[ListingsGetResponseAll, Field500ErrorResponse]:
+) -> Union[ListingsGetResponseAll, ErrorResponse]:
     """
     Retrieve listings using cursor-based pagination.
     """
@@ -175,7 +173,7 @@ async def get_listings(
         listings = await cursor.to_list(length=limit + 1)
         
         if not listings:
-            return ListingsGetAllResponse(listings=[], total=0, next_page_token=None)
+            return ListingsGetResponseAll(listings=[], total=0, next_page_token=None)
 
         # Check if there is a next page
         has_next_page = len(listings) > limit
@@ -189,7 +187,7 @@ async def get_listings(
 
         # Convert documents to Pydantic models
         response_data = [
-            ListingsGetResponseItem(
+            ListingGetResponseItem(
                 id=str(listing["_id"]),
                 title=listing["title"],
                 price=listing["price"],
@@ -204,7 +202,7 @@ async def get_listings(
             for listing in listings
         ]
 
-        return ListingsGetAllResponse(
+        return ListingsGetResponseAll(
             listings=response_data,
             total=len(response_data),
             next_page_token=next_page_token
