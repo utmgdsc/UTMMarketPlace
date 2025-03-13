@@ -28,11 +28,11 @@ class SignUpState extends State<SignUp> {
 
     final emailField = TextFormField(
       decoration: InputDecoration(
-      border: OutlineInputBorder(),
-      labelText: 'Enter your UofT email',
+        border: OutlineInputBorder(),
+        labelText: 'Enter your UofT email',
       ),
       onChanged: (value) {
-      signUpViewModel.email = value;
+        signUpViewModel.email = value;
       },
       validator: (value) => signUpViewModel.validateEmail(value),
     );
@@ -70,30 +70,23 @@ class SignUpState extends State<SignUp> {
 
     final signupButton = ElevatedButton(
       onPressed: () async {
-        if (_formKey.currentState!.validate()) {
-          await signUpViewModel.signUp();
-          if (mounted) {
-            // TODO: Fix usage of BuildContext here when context changes
-            if (signUpViewModel.signUpResponse == 201 && !signUpViewModel.isLoading) {
-              ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Successfully registered, please log in.')),
-              );
-              context.replace('/login');
-            } else if (signUpViewModel.signUpResponse == 409) {
-              ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('User already registered.')),
-              );
-            } else if (signUpViewModel.signUpResponse == 500) {
-              ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Server error. Please try again later.')),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Sign up failed. Please try again.')),
-              );
-            }
+        if (!_formKey.currentState!.validate()) {
+          return;  // Don't do anything else if form is invalid
+        }
+
+        final successReason = await signUpViewModel.signUp();
+        // As of Flutter 3.7, we can use `context.mounted` to safely check
+        //  for a valid context during async gaps
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(successReason.reason)),
+          );
+
+          if (successReason.success && !signUpViewModel.isLoading) {
+            context.replace('/login');
           }
         }
+      
       },
       style: ElevatedButton.styleFrom(
         minimumSize: Size(double.infinity, 50),

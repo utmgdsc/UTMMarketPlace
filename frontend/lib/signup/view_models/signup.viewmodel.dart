@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:utm_marketplace/shared/utils.dart';
 import 'package:utm_marketplace/signup/model/signup.model.dart';
 import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
 
@@ -50,7 +51,7 @@ class SignUpViewModel extends LoadingViewModel {
     return null;
   }
 
-  Future<void> signUp() async {
+  Future<SuccessReason> signUp() async {
     try {
       isLoading = true;
 
@@ -59,10 +60,31 @@ class SignUpViewModel extends LoadingViewModel {
       final response = await SignUpModel.signUp(_signupModel);
 
       debugPrint('Sign up response: $response');
-      signUpResponse = response.statusCode ?? 500;
+      final String reason;
+      switch (response.statusCode) {
+        case 201:
+          reason = 'Successfully registered, please log in.';
+          break;
+        case 400:
+          reason = 'Invalid email or password.';
+          break;
+        case 409:
+          reason = 'User already registered.';
+          break;
+        case 500:
+          reason = 'Server error. Please try again later.';
+          break;
+        default:
+          reason = 'Sign up failed. Please try again.';
+          break; 
+      }
+      final bool success = response.statusCode != null
+          && 200 <= response.statusCode! && response.statusCode! < 300;
+
+      return (success: success, reason: reason);
     } catch (exc) {
       debugPrint('Error in signUp: ${exc.toString()}');
-      signUpResponse = 500;
+      return (success: false, reason: 'Sign up failed. Please try again.');
     } finally {
       isLoading = false;
       notifyListeners();
