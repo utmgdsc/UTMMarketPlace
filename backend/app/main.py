@@ -125,8 +125,8 @@ async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorRes
     responses={'500': {'model': ErrorResponse}},
 )
 async def get_listings(
-    limit: Optional[int] = Header(5, description="Number of listings per page"),
-    next: Optional[str] = Header(None, description="Token for pagination")  # Ensure default is None
+    limit: Optional[int] = Query(5, description="Number of listings to retrieve", ge=1, le=30), 
+    next: Optional[str] = Query(None, description="Pagination token for the next page of listings")
 ) -> Union[ListingsGetResponseAll, ErrorResponse]:
     """
     Retrieve listings using cursor-based pagination.
