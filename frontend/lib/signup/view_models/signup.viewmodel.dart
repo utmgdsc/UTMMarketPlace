@@ -5,7 +5,6 @@ import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
 
 class SignUpViewModel extends LoadingViewModel {
   SignUpModel _signupModel = SignUpModel(email: '', password: '');
-  int signUpResponse = 0;
 
   String? _email;
   String? get email => _email;
