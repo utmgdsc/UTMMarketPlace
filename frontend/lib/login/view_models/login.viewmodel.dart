@@ -80,9 +80,6 @@ class LoginViewModel extends LoadingViewModel {
         case 400:
           reason = 'Invalid email or password.';
           break;
-        case 401:
-          reason = 'Unauthorized. Please check your credentials.';
-          break;
         case 500:
           reason = 'Server error. Please try again later.';
           break;

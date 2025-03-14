@@ -31,7 +31,7 @@ class LoginModel {
       return response;
     } on DioException catch (e) {
       if (e.response != null) {
-        throw Exception('Failed to login: ${e.response!.data['detail']}');
+        return e.response!;
       } else {
         throw Exception('Failed to login: ${e.message}');
       }
