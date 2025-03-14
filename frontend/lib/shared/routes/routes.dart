@@ -10,6 +10,7 @@ import 'package:utm_marketplace/messages/view/conversation_detail.view.dart';
 import 'package:utm_marketplace/notifications/view/notifications.view.dart';
 import 'package:utm_marketplace/menu/view/menu.view.dart';
 import 'package:utm_marketplace/create_listing/view/create_listing.view.dart';
+import 'package:utm_marketplace/signup/view/signup.view.dart';
 import 'package:utm_marketplace/saved_items/view/saved_items.view.dart';
 
 final router = GoRouter(
@@ -18,6 +19,10 @@ final router = GoRouter(
     GoRoute(
       path: '/login',
       builder: (context, state) => const Login(),
+    ),
+    GoRoute(
+      path: '/signup',
+      builder: (context, state) => const SignUp(),
     ),
     GoRoute(
       path: '/create-listing',

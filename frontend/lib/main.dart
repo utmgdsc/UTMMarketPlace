@@ -18,6 +18,8 @@ import 'package:utm_marketplace/posting_view/repository/posting.repository.dart'
 import 'package:utm_marketplace/posting_view/view_models/posting.viewmodel.dart';
 import 'package:utm_marketplace/create_listing/repository/create_listing.repository.dart';
 import 'package:utm_marketplace/create_listing/view_models/create_listing.viewmodel.dart';
+import 'package:utm_marketplace/signup/view_models/signup.viewmodel.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
 import 'package:utm_marketplace/saved_items/view_models/saved_items.viewmodel.dart';
 import 'package:utm_marketplace/saved_items/repository/saved_items.repository.dart';
 
@@ -25,10 +27,14 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   setupLocator();
+  configureDio();
 
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(
+          create: (_) => SignUpViewModel(),
+        ),
         ChangeNotifierProvider(
           create: (_) => ListingViewModel(repo: locator<ListingRepo>()),
         ),

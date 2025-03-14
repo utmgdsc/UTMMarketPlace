@@ -8,5 +8,3 @@ uvicorn[standard]
 fastapi-code-generator
 pyjwt
 motor
-jwt
-
