@@ -20,175 +20,241 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - email
-                - password
-              properties:
-                email:
-                  type: string
-                  format: email
-                  example: "student@utoronto.ca"
-                  description: "Must be a valid University of Toronto email (utoronto.ca or mail.utoronto.ca)."
-                password:
-                  type: string
-                  format: password
-                  example: "P@ssword123"
-                  description: "Must be at least 8 characters, contain 1 uppercase letter, 1 number."
+              $ref: "#/components/schemas/SignUpPostRequest"
       responses:
         "201":
           description: User created successfully
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - user_id
-                properties:
-                  user_id:
-                    type: integer
-                    example: 42
-                  message:
-                    type: string
-                    example: "User registered successfully."
+                $ref: "#/components/schemas/SignUpPostResponse"
         "400":
-          description: Bad Request - Invalid email or password format
+          description: Invalid email or password
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - error
-                properties:
-                  error:
-                    type: string
-                    example: "Invalid email format. Please use a UofT email."
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: Conflict - Email already in use
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - error
-                properties:
-                  error:
-                    type: string
-                    example: "Email already registered."
-
-  /listings:
-      get:
-        summary: Retrieve all listings
-        description: Get a paginated list of marketplace listings.
-        parameters:
-          - name: page
-            in: query
-            description: "Page number (default: 1)"
-            required: false
-            schema:
-              type: integer
-              default: 1
-              minimum: 1
-            example: 1
-        responses:
-          "200":
-            description: A list of marketplace listings
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ListingsGetAllResponse"
-          "500":
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/500ErrorResponse"
-      
-      post:
-        summary: Create a new listing
-        requestBody:
-          required: true
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListingsPostRequest"
-        responses:
-          "201":
-            description: Listing created successfully
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ListingsPostResponse"
-          "422":
-            description: Unprocessable Entity - Invalid request body
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    error:
-                      type: string
-                      example: "Invalid request body. Please provide all required fields."
-          "500":
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/500ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /listings:
+    get:
+      summary: Retrieve all listings
+      parameters:
+        - name: limit
+          in: query
+          description: >-
+            Number of listings per page. Invalid values will be mapped to a
+            number between 1 and 30.
+          required: false
+          deprecated: false
+          schema:
+            type: integer
+          allowEmptyValue: false
+        - name: next
+          in: query
+          description: The last seen pagination token
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          allowEmptyValue: false
+      responses:
+        "200":
+          description: A list of marketplace listings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingsGetResponseAll"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    
+    post:
+      summary: Create a new listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingsPostRequest"
+      responses:
+        "201":
+          description: Listing created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingsPostResponse"
+        "422":
+          description: Validation error - Missing/incorrect required fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /listing:
-      get:
-        summary: Retrieve a single listing by ID
-        parameters:
-          - name: listing_id
-            in: query
-            required: true
+    get:
+      summary: Retrieve a single listing by ID
+      parameters:
+        - name: listing_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Listing retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingGetResponseItem"
+        "400":
+          description: Invalid listing ID format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Invalid Input body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"  
+  /login:
+    post:
+      summary: Log in a user
+      description: Log in a existing user using a email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
             schema:
-              type: string
-              example: "65d53a49c2c5f2b9e8e1d4b5"
-        responses:
-          "200":
-            description: Listing retrieved successfully
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ListingsGetResponseItem"
-          "400":
-            description: Invalid listing ID format
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    error:
-                      type: string
-                      example: "Invalid listing ID format. Must be a valid ObjectId."
-          "404":
-            description: Listing not found
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    error:
-                      type: string
-                      example: "Listing not found."
-          "500":
-            description: Internal Server Error
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/500ErrorResponse"
+              $ref: "#/components/schemas/LogInPostRequest"
+      responses:
+        "200":
+          description: Logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogInPostResponse"
+        "400":
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Invalid Input body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
   schemas:
-    500ErrorResponse:
+    ErrorResponse:
       type: object
+      required:
+        - details
       properties:
-        error:
+        details:
           type: string
-          example: "Internal Server Error. Please try again later."
-    ListingsGetResponseItem:
+    SignUpPostRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: "Must be a valid University of Toronto email (utoronto.ca or mail.utoronto.ca)."
+        password:
+          type: string
+          format: password
+          description: "Must be at least 8 characters, contain 1 uppercase letter, 1 number."
+      example:
+        email: "student@utoronto.ca"
+        password: "P@ssword123"
+    LogInPostRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: "Must be a valid University of Toronto email (utoronto.ca or mail.utoronto.ca)."
+        password:
+          type: string
+          format: password
+          description: "Must be at least 8 characters, contain 1 uppercase letter, 1 number."
+      example:
+        email: "student@utoronto.ca"
+        password: "P@ssword123"
+    LogInPostResponse:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: integer
+        message:
+          type: string
+      example:
+        user_id: 42
+        message: "User logged in successfully."  
+    SignUpPostResponse:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: integer
+        message:
+          type: string
+      example:
+        user_id: 42
+        message: "User registered successfully."  
+    ListingGetResponseItem:
       type: object
       required:
         - id
@@ -200,48 +266,48 @@ components:
       properties:
         id:
           type: string
-          example: "1"
         title:
           type: string
-          example: "MacBook Pro for sale"
         price:
           type: number
           format: float
-          example: 1200.99
         description:
           type: string
-          example: "Selling my MacBook Pro in great condition!"
         seller_id:
           type: string
-          example: "101"
         pictures:
           type: array
           items:
             type: string
-            example: "https://example.com/image1.jpg"
         category:
           type: string
-          example: "Electronics"
         condition:
           type: string
-          example: "Used"
         date_posted:
           type: string
           format: date-time
-          example: "2025-02-22T10:00:00Z"
         campus:
           type: string
-          example: "UTM"
-    ListingsGetAllResponse:
+      example:
+        id: "1"
+        title: "MacBook Pro for sale"
+        price: 1200.99
+        description: "Selling my MacBook Pro in great condition!"
+        seller_id: "101"
+        pictures: ["https://example.com/image1.jpg"]
+        category: "Electronics"
+        condition: "Used"
+        date_posted: "2025-02-22T10:00:00Z"
+        campus: "UTM"
+    ListingsGetResponseAll:
       type: object
       properties:
         listings:
           type: array
           items:
-            $ref: "#/components/schemas/ListingsGetResponseItem"
+            $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
-          example: 10
     ListingsPostRequest:
       type: object
       required:
@@ -253,31 +319,32 @@ components:
       properties:
         title:
           type: string
-          example: "Gaming Laptop for sale"
         price:
           type: number
           format: float
-          example: 899.99
         description:
           type: string
-          example: "Lightly used gaming laptop, great condition!"
         seller_id:
           type: string
-          example: "101"
         pictures:
           type: array
           items:
             type: string
-            example: "https://example.com/image1.jpg"
         category:
           type: string
-          example: "Electronics"
         condition:
           type: string
-          example: "Used"
         campus:
           type: string
-          example: "UTM"
+      example:
+        title: "Gaming Laptop for sale"
+        price: 899.99
+        description: "Lightly used gaming laptop, great condition!"
+        seller_id: "101"
+        pictures: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
+        category: "Electronics"
+        condition: "Used"
+        campus: "UTM"
     ListingsPostResponse:
       type: object
       required:
@@ -285,35 +352,36 @@ components:
       properties:
         id:
           type: string
-          example: "10"
         title:
           type: string
-          example: "Gaming Laptop for sale"
         price:
           type: number
           format: float
-          example: 899.99
         description:
           type: string
-          example: "Lightly used gaming laptop, great condition!"
         seller_id:
           type: string
-          example: "101"
         pictures:
           type: array
           items:
             type: string
-            example: "https://example.com/image1.jpg"
         category:
           type: string
-          example: "Electronics"
         condition:
           type: string
-          example: "Used"
         date_posted:
           type: string
           format: date-time
-          example: "2025-02-22T10:00:00Z"
         campus:
           type: string
-          example: "UTM"
+      example:
+        id: "10"
+        title: "Gaming Laptop for sale"
+        price: 899.99
+        description: "Lightly used gaming laptop, great condition!"
+        seller_id: "101"
+        pictures: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
+        category: "Electronics"
+        condition: "Used"
+        date_posted: "2025-02-22T10:00:00Z"
+        campus: "UTM"
