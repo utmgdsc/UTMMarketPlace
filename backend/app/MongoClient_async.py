@@ -16,3 +16,4 @@ users_collection = db["users"]  # Reference to listings collection
 listings_collection = db["listings"]
 users_collection = db["users"]  # Reference to listings collection
 # we can add more collections here later
+
