@@ -118,4 +118,4 @@ class ListingLoadingComponent extends StatelessWidget {
       ],
     );
   }
-} 
+}

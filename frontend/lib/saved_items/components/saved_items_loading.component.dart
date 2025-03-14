@@ -75,4 +75,4 @@ class SavedItemsLoadingComponent extends StatelessWidget {
       ),
     );
   }
-} 
+}

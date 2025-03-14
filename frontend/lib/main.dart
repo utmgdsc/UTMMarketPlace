@@ -53,7 +53,8 @@ Future<void> main() async {
               CreateListingViewModel(repo: locator<CreateListingRepository>()),
         ),
         ChangeNotifierProvider(
-          create: (_) => SavedItemsViewModel(repo: locator<SavedItemsRepository>()),
+          create: (_) =>
+              SavedItemsViewModel(repo: locator<SavedItemsRepository>()),
         ),
       ],
       child: const MyApp(),

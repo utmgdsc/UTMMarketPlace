@@ -109,11 +109,11 @@ class _PostingViewState extends State<PostingView> {
                 Expanded(child: itemTitle),
                 IconButton(
                   icon: Icon(
-                    postingViewModel.isSavedItem(item.id!) 
+                    postingViewModel.isSavedItem(item.id!)
                         ? Icons.favorite
                         : Icons.favorite_border,
-                    color: postingViewModel.isSavedItem(item.id!) 
-                        ? Colors.red 
+                    color: postingViewModel.isSavedItem(item.id!)
+                        ? Colors.red
                         : Colors.grey,
                     size: 28,
                   ),

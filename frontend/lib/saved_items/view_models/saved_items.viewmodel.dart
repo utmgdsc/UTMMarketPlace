@@ -24,4 +24,4 @@ class SavedItemsViewModel extends LoadingViewModel {
       notifyListeners();
     }
   }
-} 
+}
