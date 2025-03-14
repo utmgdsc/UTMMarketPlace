@@ -4,6 +4,7 @@ import 'package:utm_marketplace/item_listing/components/item_card/item_card.comp
 import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
 import 'package:go_router/go_router.dart';
+import 'package:utm_marketplace/item_listing/components/listing_loading.component.dart';
 
 class ListingView extends StatefulWidget {
   const ListingView({super.key});
@@ -115,6 +116,9 @@ class _ListingViewState extends State<ListingView> {
             Expanded(
               child: Consumer<ListingViewModel>(
                 builder: (_, listingViewModel, child) {
+                  if (listingViewModel.isLoading) {
+                    return const ListingLoadingComponent();
+                  }
                   if (listingViewModel.items.isEmpty) {
                     return emptyState;
                   }

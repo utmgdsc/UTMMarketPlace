@@ -98,7 +98,6 @@ class MessageBubble extends StatelessWidget {
         ],
       );
 
-      // Layout for other user's message
       return Padding(
         padding: const EdgeInsets.only(
             left: 16.0, right: 60.0, top: 8.0, bottom: 8.0),
