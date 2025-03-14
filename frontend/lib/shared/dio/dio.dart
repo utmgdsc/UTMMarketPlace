@@ -10,5 +10,5 @@ void configureDio() {
   dio.options.connectTimeout = Duration(seconds: 10);
   dio.options.receiveTimeout = Duration(seconds: 10);
 
-  dio.interceptors.add(AuthInterceptor(dio, secureStorage));
+  // dio.interceptors.add(AuthInterceptor(dio, secureStorage));
 }
