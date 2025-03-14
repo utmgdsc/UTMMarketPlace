@@ -56,6 +56,25 @@ paths:
   /listings:
     get:
       summary: Retrieve all listings
+      parameters:
+        - name: limit
+          in: query
+          description: >-
+            Number of listings per page. Invalid values will be mapped to a
+            number between 1 and 30.
+          required: false
+          deprecated: false
+          schema:
+            type: integer
+          allowEmptyValue: false
+        - name: next
+          in: query
+          description: The last seen pagination token
+          required: false
+          deprecated: false
+          schema:
+            type: string
+          allowEmptyValue: false
       responses:
         "200":
           description: A list of marketplace listings
