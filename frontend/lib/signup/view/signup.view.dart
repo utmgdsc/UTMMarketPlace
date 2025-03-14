@@ -71,7 +71,7 @@ class SignUpState extends State<SignUp> {
     final signupButton = ElevatedButton(
       onPressed: () async {
         if (!_formKey.currentState!.validate()) {
-          return;  // Don't do anything else if form is invalid
+          return; // Don't do anything else if form is invalid
         }
 
         final successReason = await signUpViewModel.signUp();
@@ -86,7 +86,6 @@ class SignUpState extends State<SignUp> {
             context.replace('/login');
           }
         }
-      
       },
       style: ElevatedButton.styleFrom(
         minimumSize: Size(double.infinity, 50),

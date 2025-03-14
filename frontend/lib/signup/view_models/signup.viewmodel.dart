@@ -75,10 +75,11 @@ class SignUpViewModel extends LoadingViewModel {
           break;
         default:
           reason = 'Sign up failed. Please try again.';
-          break; 
+          break;
       }
-      final bool success = response.statusCode != null
-          && 200 <= response.statusCode! && response.statusCode! < 300;
+      final bool success = response.statusCode != null &&
+          200 <= response.statusCode! &&
+          response.statusCode! < 300;
 
       return (success: success, reason: reason);
     } catch (exc) {
