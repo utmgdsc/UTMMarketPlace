@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
+import 'package:utm_marketplace/login/view_models/login.viewmodel.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -14,7 +16,23 @@ class LoginState extends State<Login> {
   bool _obscureText = true;
 
   @override
+  void initState() {
+    super.initState();
+    _checkToken();
+  }
+
+  Future<void> _checkToken() async {
+    final loginViewModel = Provider.of<LoginViewModel>(context, listen: false);
+    final token = await loginViewModel.getToken();
+    if (mounted && token != null && !loginViewModel.isTokenExpired(token)) {
+      context.replace('/marketplace');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final loginViewModel = Provider.of<LoginViewModel>(context);
+
     final logoText = StyleText(
       text: 'UTMarketplace',
       style: ThemeText.header.copyWith(
@@ -27,13 +45,10 @@ class LoginState extends State<Login> {
         border: OutlineInputBorder(),
         labelText: 'Enter your UofT email',
       ),
-      // TODO: REGEX for valid UofT domain email, uncomment when ready
-      // validator: (value) {
-      //   if (value == null || value.isEmpty) {
-      //     return 'Please a valid UofT email address';
-      //   }
-      //   return null;
-      // },
+      onChanged: (value) {
+        loginViewModel.email = value;
+      },
+      validator: (value) => loginViewModel.validateEmail(value),
     );
 
     final passwordField = TextFormField(
@@ -52,28 +67,35 @@ class LoginState extends State<Login> {
           },
         ),
       ),
-      // TODO: Implement email validation and password validation (backend), uncomment when ready
-      // validator: (value) {
-      //   if (value == null || value.isEmpty) {
-      //     return 'Password or email is incorrect';
-      //   }
-      //   return null;
-      // },
+      onChanged: (value) {
+        loginViewModel.password = value;
+      },
+      validator: (value) => loginViewModel.validatePassword(value),
     );
 
     final loginButton = ElevatedButton(
-      onPressed: () {
-        if (_formKey.currentState!.validate()) {
-          // TODO: Implement login functionality (backend)
-          // If this condition passed, a redirect call to the home
-          // page should be made
-          context.replace('/marketplace');
+      onPressed: () async {
+        if (!_formKey.currentState!.validate()) {
+          return;
+        }
+
+        final successReason = await loginViewModel.login();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(successReason.reason)),
+          );
+
+          if (successReason.success && !loginViewModel.isLoading) {
+            context.replace('/marketplace');
+          }
         }
       },
       style: ElevatedButton.styleFrom(
         minimumSize: Size(double.infinity, 50),
       ),
-      child: Text('Log In'),
+      child: loginViewModel.isLoading
+          ? CircularProgressIndicator(color: Colors.white)
+          : Text('Log In'),
     );
 
     final signUpRow = Row(
