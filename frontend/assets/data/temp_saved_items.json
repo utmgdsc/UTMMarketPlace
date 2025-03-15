@@ -1,0 +1,22 @@
+{
+    "items": [
+      {
+        "id": "saved1",
+        "title": "MacBook Pro M2",
+        "price": 1299.99,
+        "image_url": "https://placehold.co/400/png"
+      },
+      {
+        "id": "saved2",
+        "title": "iPhone 15 Pro",
+        "price": 999.99,
+        "image_url": "https://placehold.co/400/png"
+      },
+      {
+        "id": "saved3",
+        "title": "iPad Air",
+        "price": 599.99,
+        "image_url": "https://placehold.co/400/png"
+      }
+    ]
+  }

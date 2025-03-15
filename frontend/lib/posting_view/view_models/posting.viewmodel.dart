@@ -11,6 +11,18 @@ class PostingViewModel extends LoadingViewModel {
   });
 
   final PostingRepository repo;
+  final Set<String> _savedItemIds = {};
+
+  bool isSavedItem(String itemId) => _savedItemIds.contains(itemId);
+
+  void toggleSaved(String itemId) {
+    if (_savedItemIds.contains(itemId)) {
+      _savedItemIds.remove(itemId);
+    } else {
+      _savedItemIds.add(itemId);
+    }
+    notifyListeners();
+  }
 
   PostingModel _postingModel = PostingModel();
 

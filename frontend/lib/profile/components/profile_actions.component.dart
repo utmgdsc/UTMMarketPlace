@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileActions extends StatelessWidget {
   final bool isOwnProfile;
@@ -15,7 +16,7 @@ class ProfileActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final savedItemsButton = ElevatedButton(
-      onPressed: () {},
+      onPressed: () => context.push('/saved-items'),
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF11384A),
         minimumSize: const Size(double.infinity, 45),

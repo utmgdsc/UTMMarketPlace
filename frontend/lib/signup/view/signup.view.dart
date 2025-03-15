@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
+import 'package:utm_marketplace/signup/view_models/signup.viewmodel.dart';
 
-// Note: There's a small issue regarding the flex Spacer widget, it's not too important
-// but would be nice to find a way that makes it so the UI elements
-// don't shift when a validator fails.
-
-class Login extends StatefulWidget {
-  const Login({super.key});
+class SignUp extends StatefulWidget {
+  const SignUp({super.key});
 
   @override
-  LoginState createState() => LoginState();
+  SignUpState createState() => SignUpState();
 }
 
-class LoginState extends State<Login> {
+class SignUpState extends State<SignUp> {
   final _formKey = GlobalKey<FormState>();
   bool _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
+    final signUpViewModel = Provider.of<SignUpViewModel>(context);
+
     final logoText = StyleText(
       text: 'UTMarketplace',
       style: ThemeText.header.copyWith(
@@ -31,13 +31,10 @@ class LoginState extends State<Login> {
         border: OutlineInputBorder(),
         labelText: 'Enter your UofT email',
       ),
-      // TODO: REGEX for valid UofT domain email, uncomment when ready
-      // validator: (value) {
-      //   if (value == null || value.isEmpty) {
-      //     return 'Please a valid UofT email address';
-      //   }
-      //   return null;
-      // },
+      onChanged: (value) {
+        signUpViewModel.email = value;
+      },
+      validator: (value) => signUpViewModel.validateEmail(value),
     );
 
     final passwordField = TextFormField(
@@ -56,48 +53,59 @@ class LoginState extends State<Login> {
           },
         ),
       ),
-      // TODO: Implement email validation and password validation (backend), uncomment when ready
-      // validator: (value) {
-      //   if (value == null || value.isEmpty) {
-      //     return 'Password or email is incorrect';
-      //   }
-      //   return null;
-      // },
+      onChanged: (value) {
+        signUpViewModel.password = value;
+      },
+      validator: (value) => signUpViewModel.validatePassword(value),
     );
 
-    final loginButton = ElevatedButton(
-      onPressed: () {
-        if (_formKey.currentState!.validate()) {
-          // TODO: Implement login functionality (backend)
-          // If this condition passed, a redirect call to the home
-          // page should be made
-          context.replace('/marketplace');
+    final confirmPasswordField = TextFormField(
+      obscureText: _obscureText,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: 'Confirm your password',
+      ),
+      validator: (value) => signUpViewModel.validateConfirmPassword(value),
+    );
+
+    final signupButton = ElevatedButton(
+      onPressed: () async {
+        if (!_formKey.currentState!.validate()) {
+          return; // Don't do anything else if form is invalid
+        }
+
+        final successReason = await signUpViewModel.signUp();
+        // As of Flutter 3.7, we can use `context.mounted` to safely check
+        //  for a valid context during async gaps
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(successReason.reason)),
+          );
+
+          if (successReason.success && !signUpViewModel.isLoading) {
+            context.replace('/login');
+          }
         }
       },
       style: ElevatedButton.styleFrom(
         minimumSize: Size(double.infinity, 50),
       ),
-      child: Text('Log In'),
+      child: signUpViewModel.isLoading
+          ? CircularProgressIndicator(color: Colors.white)
+          : Text('Sign Up'),
     );
 
-    final signUpRow = Row(
+    final loginRow = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Text('Don\'t have an account?'),
+        Text('Already have an account?'),
         TextButton(
           onPressed: () {
-            context.replace('/signup');
+            context.replace('/login');
           },
-          child: Text('Sign Up'),
+          child: Text('Log In'),
         ),
       ],
-    );
-
-    final forgotPasswordButton = TextButton(
-      onPressed: () {
-        // TODO: Implement forgot password functionality
-      },
-      child: Text('Forgot Password?'),
     );
 
     return SafeArea(
@@ -132,9 +140,17 @@ class LoginState extends State<Login> {
                 ),
                 passwordField,
                 SizedBox(height: 16.0),
-                loginButton,
-                signUpRow,
-                forgotPasswordButton,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: StyleText(
+                    text: 'Confirm Password',
+                    style: ThemeText.label,
+                  ),
+                ),
+                confirmPasswordField,
+                SizedBox(height: 16.0),
+                signupButton,
+                loginRow,
                 Spacer(flex: 1),
               ],
             ),

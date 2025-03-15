@@ -1,15 +1,16 @@
 import jwt
+from jwt import decode, exceptions
 import re
 import os
 from typing import List, Optional, Union
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBearer
-from jwt import decode, exceptions
 from pydantic import BaseModel, ValidationError
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
 from datetime import datetime
+from fastapi import FastAPI, HTTPException, Query, Header
 from fastapi.exceptions import RequestValidationError
 from passlib.hash import pbkdf2_sha256
 from pymongo.errors import DuplicateKeyError, PyMongoError
@@ -19,15 +20,16 @@ load_dotenv()  # Load environment variables from .env
 JWT_SECRET = os.getenv("JWT_SECRET")
 
 #importing async way of connecting to MongoDB
-from .MongoClient_async import db, listings_collection
+from .MongoClient_async import db, listings_collection, users_collection
 
 from .models import (
-    ListingGetResponse,
-    ListingGetResponse1,
-    ListingsGetAllResponse,
-    ListingsGetResponseItem,
+    ErrorResponse,
+    ListingGetResponseItem,
+    ListingsGetResponseAll,
     ListingsPostRequest,
     ListingsPostResponse,
+    LogInPostRequest,
+    LogInPostResponse,
     SignUpPostRequest,
     SignUpPostResponse,
     SignUpPostResponse1,
@@ -78,39 +80,38 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
   
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    raise HTTPException(status_code=422, detail="Invalid request data body")
+    raise HTTPException(status_code=422, detail="Invalid request")
 
 @app.get(
     '/listing/{listing_id}',
-    response_model=ListingsGetResponseItem,
+    response_model=ListingGetResponseItem,
     responses={
-        '400': {'model': ListingGetResponse},
-        '404': {'model': ListingGetResponse1},
+        '400': {'model': ErrorResponse},
+        '404': {'model': ErrorResponse},
+        '422': {'model': ErrorResponse},
         '500': {'model': ErrorResponse},
     },
 )
-async def get_listing(
-    listing_id: str,
-) -> Union[
-    ListingsGetResponseItem, ListingGetResponse, ListingGetResponse1, ErrorResponse]:
+async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorResponse]:
     """
     Retrieve a single listing by ID
     """
     try:
         # Validate ObjectId
         if not ObjectId.is_valid(listing_id):
-            return ListingGetResponse(error="Invalid listing ID format. Must be a valid Id.")
+            return ListingGetResponseItem(error="Invalid listing ID format. Must be a valid Id.")
 
         # Fetch listing from MongoDB
         listing = await listings_collection.find_one({"_id": ObjectId(listing_id)})
 
         # Check if listing exists
         if not listing:
-            return ListingGetResponse1(error="Listing not found.")
+            return HTTPException(status_code=404, detail="Listing not found.")
 
         # Convert MongoDB document to Pydantic model
-        return ListingsGetResponseItem(
-            id=str(listing.get("_id"),
+
+        return ListingGetResponseItem(
+            id=str(listing.get("_id")),
             title=listing.get("title"),
             price=listing.get("price"),
             description=listing.get("description"),
@@ -120,8 +121,11 @@ async def get_listing(
             date_posted=listing.get("date_posted"),
             campus=listing.get("campus"),
         )
-        )
     except Exception as e:
+        return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
+
+
+
         return ErrorResponse(details="Internal Server Error. Please try again later.")
 
 @app.get(
@@ -176,36 +180,83 @@ async def get_search(query: str) -> Union[SearchGetResponse, ErrorResponse]:
         return ErrorResponse(details="Internal Server Error. Please try again later.")
           
 @app.get('/listings', 
-    response_model=ListingsGetAllResponse, responses={'500': {'model': ErrorResponse}},)
-async def get_listings() -> Union[ListingsGetAllResponse, ErrorResponse]:
+    response_model=ListingsGetResponseAll, 
+    responses={'500': {'model': ErrorResponse}},
+)
+async def get_listings(
+    limit: Optional[int] = Query(5, description="Number of listings to retrieve", ge=1, le=30), 
+    next: Optional[str] = Query(None, description="Last seen pagination token"),
+) -> Union[ListingsGetResponseAll, ErrorResponse]:
+    """
+    Retrieve listings using cursor-based pagination.
+    """
     try:
-        # Fetch all listings from MongoDB
-        cursor = listings_collection.find()
-        listings = await cursor.to_list(length=None)  # Get all documents
-        response_data = []
-        for listing in listings:
-            try:
-                response_data.append(
-                    ListingsGetResponseItem(
-                        id=str(listing.get("_id")),
-                        title=listing.get("title"),
-                        price=listing.get("price"),
-                        description=listing.get("description"),
-                        seller_id=listing.get("seller_id"),
-                        pictures=listing.get("pictures", []),
-                        condition=listing.get("condition"),
-                        category=listing.get("category"),
-                        date_posted=listing.get("date_posted"),  # need to decide on the date format
-                        campus=listing.get("campus"),
-                    )
-                )
-            except Exception as e:
-                print(f"Skipping invalid listing {listing['_id']}: {e}")  # i kept this for later and we can potentially use it for logging 
+        # Ensure limit is within a reasonable range
+        limit = min(max(limit, 1), 30)
 
-        return ListingsGetAllResponse(listings=response_data, total=len(response_data))
+        search_stage = {"$search": {
+                "index": "Full_text_index_listings",
+                "exists": { "path": "_id" },  # This is always true; essentially just gets all documents
+            }}
 
+        # Search after last seen token
+        if next:
+            search_stage["searchAfter"] = next
+
+        pipeline = [
+            search_stage,
+            {"$limit": limit},
+            {"$project": {
+                "id": {"$toString": "$_id"},
+                "title": 1,
+                "price": 1,
+                "description": 1,
+                "seller_id": 1,
+                "pictures": 1,
+                "condition": 1,
+                "category": 1,
+                "date_posted": 1,
+                "campus": 1,
+                # Provide pagination tokens generated by Atlas Search
+                #   so that clients can provide this on next query
+                "paginationToken": {"$meta": "searchSequenceToken"},
+            }}
+        ]
+
+        # Execute query
+        cursor = listings_collection.aggregate(pipeline)
+        listings = await cursor.to_list(length=limit)
+        
+        if not listings:
+            return ListingsGetResponseAll(listings=[], total=0, next_page_token=None)
+
+        # Convert documents to Pydantic models
+        response_data = [
+            ListingGetResponseItem(
+                id=str(listing["_id"]),
+                title=listing["title"],
+                price=listing["price"],
+                description=listing.get("description"),
+                seller_id=listing["seller_id"],
+                pictures=listing.get("pictures", []),
+                condition=listing["condition"],
+                category=listing.get("category"),
+                date_posted=listing.get("date_posted"),
+                campus=listing.get("campus"),
+            )
+            for listing in listings
+        ]
+
+        return ListingsGetResponseAll(
+            listings=response_data,
+            total=len(response_data),
+            # Provide the last token of this page, so that clients
+            #  can use this to get the next page
+            next_page_token=listings[-1].get("paginationToken"),
+        )
     except Exception as e:
         return ErrorResponse(details="Internal Server Error. Please try again later.")
+
 
 async def authenticate_user(username: str, password: str):
     """
@@ -236,7 +287,8 @@ async def post_login(body: LogInPostRequest) -> Union[LogInPostResponse, ErrorRe
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
     token = jwt.encode({"email": user["email"], "id": str(user["_id"])}, JWT_SECRET, algorithm="HS256")
-    return LoginPostResponse(access_token=token, token_type="bearer")
+    return LogInPostResponse(access_token=token, token_type="bearer")
+
 
 
 @app.post(
@@ -244,6 +296,7 @@ async def post_login(body: LogInPostRequest) -> Union[LogInPostResponse, ErrorRe
     response_model=None,
     responses={
         '201': {'model': ListingsPostResponse},
+        '422': {'model': ErrorResponse},
         '500': {'model': ErrorResponse},
     },
 )
@@ -274,11 +327,11 @@ async def post_listings(
             condition=body.condition,
             campus=body.campus,
         )
-    
+
     except ValidationError as e:
-        return ErrorResponse(details="Validation error. Please check your input data.")
+        return ErrorResponse(status_code=422, details="Validation error. Please check your input data.")
     except Exception as e:
-        return ErrorResponse(details="Internal Server Error. Please try again later.")
+        return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
 
 @app.post(
     '/sign-up',
@@ -291,24 +344,31 @@ async def post_listings(
         '500': {'model': ErrorResponse},
     },
 )
-async def post_sign_up(body: SignUpPostRequest) -> Optional[SignUpPostResponse]:
+
+async def post_sign_up(
+    body: SignUpPostRequest,
+) -> Optional[Union[SignUpPostResponse, ErrorResponse]]:
     """
     Sign up a new user.
     """
-    email = body.email
+    email = body.email.lower()
     password = body.password.get_secret_value()
 
     # Validate UofT Email
     if not re.match(r"^[a-zA-Z0-9_.+-]+@(utoronto\.ca|mail\.utoronto\.ca)$", email):
         raise HTTPException(status_code=400, detail="Invalid email format.")
+    if await users_collection.find_one({"email": email}):
+        raise HTTPException(status_code=409, detail="Email already registered.")
 
     # Hash password before storing
     hashed_password = pbkdf2_sha256.hash(password)
 
     # Store User in Database
     try:
-        result = await db.users.insert_one({"email": email, "password": hashed_password})
-        return {"user_id": str(result.inserted_id), "message": "User registered successfully."}
+        result = await users_collection.insert_one({"email": email, "password": hashed_password})
+        return JSONResponse(
+            status_code=201,
+            content={"user_id": str(result.inserted_id), "message": "User registered successfully."})
     except DuplicateKeyError:
         raise HTTPException(status_code=409, detail="Email already registered.")
     except Exception as e:
