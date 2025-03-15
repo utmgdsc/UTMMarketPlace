@@ -32,9 +32,21 @@ class LoginViewModel extends LoadingViewModel {
     return await storage.read(key: 'jwt_token');
   }
 
-  bool isTokenExpired(String token) {
-    return JwtDecoder.isExpired(token);
+  bool isTokenExpired(String? token) {
+    if (token == null) {
+      debugPrint('Token is null');
+      return true;
+    }
+    try {
+      debugPrint('Login Viewmodel Token: $token');
+      return JwtDecoder.isExpired(token);
+    } catch (e, stackTrace) {
+      debugPrint('Error in JwtDecoder.isExpired: $e');
+      debugPrint('Stack trace: $stackTrace');
+      return true;
+    }
   }
+
   // -----------------------------------------------------------
 
   // Validation methods
