@@ -49,6 +49,7 @@ def test_login_success(client, load_payload, load_response):
 ```
 
 ## Running Tests
+Ensure the FastAPI server is running.
 
 Run all tests with:
 ```sh
