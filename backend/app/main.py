@@ -12,7 +12,7 @@ from fastapi.requests import Request
 
 load_dotenv()  # Load environment variables from .env
 JWT_SECRET = os.getenv("JWT_SECRET")
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, HTTPException, Query, Header
 from fastapi.exceptions import RequestValidationError
 from passlib.hash import pbkdf2_sha256
@@ -358,7 +358,17 @@ async def post_login(body: LogInPostRequest) -> Union[LogInPostResponse, ErrorRe
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
-    token = jwt.encode({"email": user["email"], "id": str(user["_id"])}, JWT_SECRET, algorithm="HS256")
+    expiration = datetime.now(timezone.utc) + timedelta(hours=1)
+
+    token = jwt.encode(
+        {
+            "email": user["email"],
+            "id": str(user["_id"]),
+            "exp": expiration
+        },
+        JWT_SECRET,
+        algorithm="HS256"
+    )
     return LogInPostResponse(access_token=token, token_type="bearer")
 
 
