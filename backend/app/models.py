@@ -64,6 +64,11 @@ class SignUpPostResponse(BaseModel):
     message: Optional[str] = None
 
 
+class SearchGetResponse(BaseModel):
+    listings: Optional[List[ListingGetResponseItem]] = None
+    total: Optional[int] = None
+    next_page_token: Optional[str] = None
+
 class ListingGetResponseItem(BaseModel):
     id: str
     title: str

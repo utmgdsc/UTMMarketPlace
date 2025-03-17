@@ -34,6 +34,7 @@ from models import (
     SignUpPostResponse,
     UserGetResponse,
     UserPutRequest,
+    SearchGetResponse
 )
 
 from connect_db import db  # Import MongoDB connection
@@ -92,9 +93,35 @@ async def authenticate_user(email: str, password):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    raise HTTPException(status_code=422, detail="Invalid request")
+    raise HTTPException(status_code=422, detail=f"Invalid request {exc}")
 
 ######################################## LISTINGS ENDPOINTS ########################################
+@app.get(
+    '/search',
+    response_model=SearchGetResponse,
+    responses={'500': {'model': ErrorResponse}},
+)
+async def get_search(
+    query: Optional[str] = Query(None, description="Made it optional to avoid crashes"),
+    limit: Optional[int] = Query(5, description="Number of listings to retrieve", ge=1, le=30), 
+    next: Optional[str] = Query(None, description="Last seen pagination token")
+    ) -> Union[SearchGetResponse, ErrorResponse]:
+    """
+    search listings
+    """
+    try:
+        limit = min(max(limit, 1), 30)
+        try:
+            listings = await get_listings(query, limit, next)
+            
+            return SearchGetResponse(listings=listings.listings, 
+                                total=listings.total,
+                                next_page_token=listings.next_page_token)
+        except ErrorResponse as e:
+                    return e
+    except Exception as e:
+        return ErrorResponse(details="Internal Server Error. Please try again later.")
+
 
 @app.get('/listing/{listing_id}',
     response_model=ListingGetResponseItem,
@@ -143,6 +170,7 @@ async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorRes
     responses={'500': {'model': ErrorResponse}},
 )
 async def get_listings(
+    query: Optional[str] = Query(None, description="query"),
     limit: Optional[int] = Query(5, description="Number of listings to retrieve", ge=1, le=30), 
     next: Optional[str] = Query(None, description="Last seen pagination token"),
 ) -> Union[ListingsGetResponseAll, ErrorResponse]:
@@ -150,17 +178,33 @@ async def get_listings(
     Retrieve listings using cursor-based pagination.
     """
     try:
-        # Ensure limit is within a reasonable range
-        limit = min(max(limit, 1), 30)
+        limit = min(max(limit, 1), 30)  # Ensure limit stays between 1 and 30
 
-        search_stage = {"$search": {
-                "index": "Full_text_index_listings",
-                "exists": { "path": "_id" },  # This is always true; essentially just gets all documents
-            }}
-
-        # Search after last seen token
+        if query:
+            print("GOT Query", query)
+            search_stage = {
+                "$search": {
+                    "index": "Full_text_index_listings",
+                    "text": {
+                        "query": query,
+                        "path": {
+                            "wildcard": "*",
+                        },
+                    },
+                },
+            }
+        else:
+            print("NO QUERY")
+            search_stage = {
+                "$search": {
+                    "index": "Full_text_index_listings",
+                    "exists": {"path": "_id"},  # This is always true; essentially just gets all documents
+                }
+            }
+            
         if next:
-            search_stage["searchAfter"] = next
+            search_stage["$search"]["searchAfter"] = next
+            # print(f"Using next token: {next}")  # Debugging: Check next token value
 
         pipeline = [
             search_stage,
@@ -215,6 +259,7 @@ async def get_listings(
         )
     except Exception as e:
         return ErrorResponse(details="Internal Server Error. Please try again later.")
+        # return ErrorResponse(details=f"Internal Server Error. Please try again later. {e}")
 
 
 @app.post('/listings',
