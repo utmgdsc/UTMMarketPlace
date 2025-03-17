@@ -3,7 +3,6 @@ import 'package:utm_marketplace/login/model/login.model.dart';
 import 'package:utm_marketplace/shared/secure_storage/secure_storage.dart';
 import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
 import 'package:utm_marketplace/shared/utils.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginViewModel extends LoadingViewModel {
   final storage = secureStorage;
@@ -22,32 +21,6 @@ class LoginViewModel extends LoadingViewModel {
     _password = value;
     notifyListeners();
   }
-
-  // JWT Operations --------------------------------------------
-  Future<void> storeToken(String token) async {
-    await storage.write(key: 'jwt_token', value: token);
-  }
-
-  Future<String?> getToken() async {
-    return await storage.read(key: 'jwt_token');
-  }
-
-  bool isTokenExpired(String? token) {
-    if (token == null) {
-      debugPrint('Token is null');
-      return true;
-    }
-    try {
-      debugPrint('Login Viewmodel Token: $token');
-      return JwtDecoder.isExpired(token);
-    } catch (e, stackTrace) {
-      debugPrint('Error in JwtDecoder.isExpired: $e');
-      debugPrint('Stack trace: $stackTrace');
-      return true;
-    }
-  }
-
-  // -----------------------------------------------------------
 
   // Validation methods
   String? validateEmail(String? value) {

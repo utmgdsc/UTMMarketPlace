@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
 import 'package:utm_marketplace/login/view_models/login.viewmodel.dart';
+import 'package:utm_marketplace/shared/utils.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -22,9 +23,8 @@ class LoginState extends State<Login> {
   }
 
   Future<void> _checkToken() async {
-    final loginViewModel = Provider.of<LoginViewModel>(context, listen: false);
-    final token = await loginViewModel.getToken();
-    if (mounted && token != null && !loginViewModel.isTokenExpired(token)) {
+    final token = await getToken();
+    if (mounted && token != null && !isTokenExpired(token)) {
       context.replace('/marketplace');
     }
   }

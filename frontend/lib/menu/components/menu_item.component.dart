@@ -35,8 +35,11 @@ class MenuItemComponent extends StatelessWidget {
           ),
           onTap: () {
             if (isLogout) {
-              secureStorage.delete(key: 'jwt_token');
-              context.go('/login');
+              secureStorage.delete(key: 'jwt_token').then((_) {
+                if (context.mounted) {
+                  context.go('/login');
+                }
+              });
             } else {
               context.push(item.route);
             }

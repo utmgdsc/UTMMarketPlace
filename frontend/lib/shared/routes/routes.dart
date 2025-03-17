@@ -1,12 +1,10 @@
 import 'package:go_router/go_router.dart';
 import 'package:utm_marketplace/login/view/login.view.dart';
-import 'package:utm_marketplace/login/view_models/login.viewmodel.dart';
 import 'package:utm_marketplace/profile/view/profile.view.dart';
 import 'package:utm_marketplace/item_listing/view/listing.view.dart';
 import 'package:utm_marketplace/posting_view/view/posting.view.dart';
 
 import 'package:utm_marketplace/shared/components/shell/shell.layout.dart';
-import 'package:provider/provider.dart';
 import 'package:utm_marketplace/messages/view/messages.view.dart';
 import 'package:utm_marketplace/messages/view/conversation_detail.view.dart';
 import 'package:utm_marketplace/notifications/view/notifications.view.dart';
@@ -20,10 +18,7 @@ final router = GoRouter(
   routes: [
     GoRoute(
       path: '/login',
-      builder: (context, state) => ChangeNotifierProvider(
-        create: (_) => LoginViewModel(),
-        child: const Login(),
-      ),
+      builder: (context, state) => const Login(),
     ),
     GoRoute(
       path: '/signup',

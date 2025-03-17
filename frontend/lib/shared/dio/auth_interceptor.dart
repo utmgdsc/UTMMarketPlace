@@ -23,7 +23,12 @@ class AuthInterceptor extends Interceptor {
       DioException err, ErrorInterceptorHandler handler) async {
     if (_isUnauthorized(err) && _shouldRefresh(err.requestOptions)) {
       // Attempt refresh if not already happening
-      _refreshTokenFuture ??= _refreshAccessToken();
+      try {
+        _refreshTokenFuture ??= _refreshAccessToken();
+      } catch (e) {
+        _refreshTokenFuture = null;
+        return handler.next(err);
+      }
 
       final newToken = await _refreshTokenFuture;
       if (newToken != null) {
@@ -60,7 +65,7 @@ class AuthInterceptor extends Interceptor {
     try {
       final refreshToken = await secureStorage.read(key: 'refresh_token');
       if (refreshToken == null) {
-        throw Exception('No refresh token available');
+        return null;
       }
 
       // TODO: Finalize the refresh token endpoint with backend team
