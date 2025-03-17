@@ -113,11 +113,8 @@ async def get_search(
     try:
         limit = min(max(limit, 1), 30)
         try:
-            print("NEXT IS: ", next)
             listings = await get_listings(query=query, limit=limit, next=next)
-            print("NEXT PAGE TOKEN: ", listings.next_page_token, "\n")
-            print("LISTINGS: ", listings.listings, "\n")
-        
+       
             return SearchGetResponse(listings=listings.listings, 
                                 total=listings.total,
                                 next_page_token=listings.next_page_token)
@@ -184,13 +181,27 @@ async def get_listings(
     try:
         limit = min(max(limit, 1), 30)  # Ensure limit stays between 1 and 30
 
-        # Build the search query
-        search_stage = {
-            "$search": {
-                "index": "Full_text_index_listings",
-                "text": {"query": query, "path": {"wildcard": "*"}} if query else {"exists": {"path": "_id"}}
+        if query:
+            print("GOT Query", query)
+            search_stage = {
+                "$search": {
+                    "index": "Full_text_index_listings",
+                    "text": {
+                        "query": query,
+                        "path": {
+                            "wildcard": "*",
+                        },
+                    },
+                },
             }
-        }
+        else:
+            print("NO QUERY")
+            search_stage = {
+                "$search": {
+                    "index": "Full_text_index_listings",
+                    "exists": {"path": "_id"},  # This is always true; essentially just gets all documents
+                }
+            }
         
         # If `next` (pagination token) is provided, pass it as a string (NO decoding)
         if next:
