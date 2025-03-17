@@ -13,53 +13,6 @@ from pydantic import BaseModel, EmailStr, Field, SecretStr
 class ErrorResponse(BaseModel):
     details: str
 
-class ListingsGetResponseItem(BaseModel):
-    id: str = Field(..., example='1')
-    title: str = Field(..., example='MacBook Pro for sale')
-    price: float = Field(..., example=1200.99)
-    description: Optional[str] = Field(
-        None, example='Selling my MacBook Pro in great condition!'
-    )
-    seller_id: str = Field(..., example='101')
-    pictures: List[str]
-    category: Optional[str] = Field(None, example='Electronics')
-    condition: str = Field(..., example='Used')
-    date_posted: Optional[datetime] = Field(None, example='2025-02-22T10:00:00Z')
-    campus: Optional[str] = Field(None, example='UTM')
-
-
-class ListingsGetAllResponse(BaseModel):
-    listings: Optional[List[ListingsGetResponseItem]] = None
-    total: Optional[int] = Field(None, example=10)
-
-
-class ListingsPostRequest(BaseModel):
-    title: str = Field(..., example='Gaming Laptop for sale')
-    price: float = Field(..., example=899.99)
-    description: Optional[str] = Field(
-        None, example='Lightly used gaming laptop, great condition!'
-    )
-    seller_id: str = Field(..., example='101')
-    pictures: List[str]
-    category: Optional[str] = Field(None, example='Electronics')
-    condition: str = Field(..., example='Used')
-    campus: Optional[str] = Field(None, example='UTM')
-
-
-class ListingsPostResponse(BaseModel):
-    id: str = Field(..., example='10')
-    title: Optional[str] = Field(None, example='Gaming Laptop for sale')
-    price: Optional[float] = Field(None, example=899.99)
-    description: Optional[str] = Field(
-        None, example='Lightly used gaming laptop, great condition!'
-    )
-    seller_id: Optional[str] = Field(None, example='101')
-    pictures: Optional[List[str]] = None
-    category: Optional[str] = Field(None, example='Electronics')
-    condition: Optional[str] = Field(None, example='Used')
-    date_posted: Optional[datetime] = Field(None, example='2025-02-22T10:00:00Z')
-    campus: Optional[str] = Field(None, example='UTM')
-
 
 class SignUpPostRequest(BaseModel):
     email: EmailStr = Field(
@@ -72,48 +25,6 @@ class SignUpPostRequest(BaseModel):
     )
 
 
-class SignUpPostResponse(BaseModel):
-    user_id: int = Field(..., example=42)
-    message: Optional[str] = Field(None, example='User registered successfully.')
-
-
-class SignUpPostResponse1(BaseModel):
-    error: str = Field(..., example='Invalid email format. Please use a UofT email.')
-
-
-class SignUpPostResponse2(BaseModel):
-    error: str = Field(..., example='Email already registered.')
-
-
-class ListingGetResponse(BaseModel):
-    error: Optional[str] = Field(
-        None, example='Invalid listing ID format. Must be a valid ObjectId.'
-    )
-
-
-class ListingsPostRequest(BaseModel):
-    title: Optional[str] = Field(None, example='Gaming Laptop for sale')
-
-class ListingsPostResponse(BaseModel):
-    id: Optional[int] = Field(None, example=10)
-    title: Optional[str] = Field(None, example='Gaming Laptop for sale')
-    price: Optional[float] = Field(None, example=899.99)
-    description: Optional[str] = Field(
-        None, example='Lightly used gaming laptop, great condition!'
-    )
-
-class ListingsPostRequest(BaseModel):
-    title: str = Field(..., example='Gaming Laptop for sale')
-    price: float = Field(..., example=899.99)
-    description: Optional[str] = Field(
-        None, example='Lightly used gaming laptop, great condition!'
-    )
-    seller_id: str = Field(..., example='101')
-    pictures: List[str]
-    category: Optional[str] = Field(None, example='Electronics')
-    condition: str = Field(..., example='Used')
-    campus: Optional[str] = Field(None, example='UTM')
-
 class LogInPostRequest(BaseModel):
     email: EmailStr = Field(
         ...,
@@ -124,16 +35,39 @@ class LogInPostRequest(BaseModel):
         description='Must be at least 8 characters, contain 1 uppercase letter, 1 number.',
     )
 
-
 class LogInPostResponse(BaseModel):
-    user_id: int
-    message: Optional[str] = None
+    access_token: str
+    token_type: str
+
+class UserGetResponse(BaseModel):
+    display_name: str
+    profile_picture: Optional[str]
+    email: Optional[str]
+    rating: float
+    user_id: str
+    location: Optional[str]
+    rating_count: int
+    saved_posts: Optional[List[str]] = None
+
+class UserPutRequest(BaseModel):
+    display_name: Optional[str]
+    profile_picture: Optional[str]
+    email: Optional[EmailStr]
+    location: Optional[str]
+    rating: Optional[float]
+    rating_count: Optional[int]
+    saved_posts: Optional[List[str]]
 
 
 class SignUpPostResponse(BaseModel):
-    user_id: int
+    user_id: str
     message: Optional[str] = None
 
+
+class SearchGetResponse(BaseModel):
+    listings: Optional[List[ListingGetResponseItem]] = None
+    total: Optional[int] = None
+    next_page_token: Optional[str] = None
 
 class ListingGetResponseItem(BaseModel):
     id: str
@@ -176,23 +110,3 @@ class ListingsPostResponse(BaseModel):
     condition: Optional[str] = None
     date_posted: Optional[datetime] = None
     campus: Optional[str] = None
-
-
-class ListingGetResponseItem(BaseModel):
-    id: str
-    title: str
-    price: float
-    description: Optional[str] = None
-    seller_id: str
-    pictures: List[str]
-    category: Optional[str] = None
-    condition: str
-    date_posted: Optional[datetime] = None
-    campus: Optional[str] = None    
-
-class SearchGetResponse(BaseModel):
-    listings: Optional[List[ListingGetResponseItem]] = None
-    total: Optional[int] = None
-
-class ErrorResponse(BaseModel):
-    details: str
