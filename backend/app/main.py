@@ -34,8 +34,6 @@ from .models import (
     SignUpPostResponse,
 )
 
-from .connect_db import db  # Import MongoDB connection
-
 app = FastAPI(
     title='UTM Marketplace API',
     description='API specification for a campus-wide marketplace app',
@@ -203,7 +201,7 @@ async def authenticate_user(username: str, password: str):
     """
     Check if the user exists and verify the password.
     """
-    user = db.users.find_one({"email": username})
+    user = await db.users.find_one({"email": username})
 
     if not user or not pbkdf2_sha256.verify(password, user["password"]):
         return None
@@ -222,7 +220,7 @@ async def post_login(body: LogInPostRequest) -> Union[LogInPostResponse, ErrorRe
     """
     Log in an existing user
     """
-    user = await authenticate_user(body.username, body.password)
+    user = await authenticate_user(body.email, body.password)
 
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
