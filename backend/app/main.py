@@ -34,6 +34,7 @@ from models import (
     SignUpPostResponse,
     UserGetResponse,
     UserPutRequest,
+    UserPutResponse,
     SearchGetResponse
 )
 
@@ -93,7 +94,7 @@ async def authenticate_user(email: str, password):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    raise HTTPException(status_code=422, detail=f"Invalid request {exc}")
+    raise HTTPException(status_code=422, detail=f"Invalid request.")
 
 ######################################## LISTINGS ENDPOINTS ########################################
 @app.get(
@@ -118,7 +119,7 @@ async def get_search(
                                 total=listings.total,
                                 next_page_token=listings.next_page_token)
         except ErrorResponse as e:
-                    return e
+            return e
     except Exception as e:
         return ErrorResponse(details="Internal Server Error. Please try again later.")
 
@@ -310,6 +311,7 @@ async def post_listings(
 @app.get('/user/{userid}',
     response_model=UserGetResponse,
     responses={
+        '200': {'model': UserGetResponse},
         '400': {'model': ErrorResponse},
         '404': {'model': ErrorResponse},
         '422': {'model': ErrorResponse},
@@ -341,8 +343,9 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
 
 
 @app.put('/user/{userid}',
-    response_model=UserGetResponse,
+    response_model=None,
     responses={
+        '201': {'model': UserPutResponse},
         '400': {'model': ErrorResponse},
         '403': {'model': ErrorResponse},
         '404': {'model': ErrorResponse},
@@ -350,7 +353,7 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
         '500': {'model': ErrorResponse},
     },
 )
-async def update_user(userid: str, body: UserPutRequest, current_user: dict = Depends(get_current_user)) -> Union[UserGetResponse, ErrorResponse]:
+async def update_user(userid: str, body: UserPutRequest, current_user: dict = Depends(get_current_user)) -> Union[UserPutResponse, ErrorResponse]:
     """
     Update user details only if the user matches.
     """
@@ -364,20 +367,22 @@ async def update_user(userid: str, body: UserPutRequest, current_user: dict = De
             raise HTTPException(status_code=404, detail="User not found")
 
         update_data = body.dict(exclude_unset=True)
+        
+        # checking if email is valid format
+        if "email" in update_data:
+            if not re.match(r"^[a-zA-Z0-9_.+-]+@(utoronto\.ca|mail\.utoronto\.ca)$", update_data["email"]):
+                raise HTTPException(status_code=400, detail="Invalid email format.")
 
         await users_collection.update_one({"_id": ObjectId(userid)}, {"$set": update_data})
 
         updated_user = await users_collection.find_one({"_id": ObjectId(userid)})
 
-        return UserGetResponse(
+        return UserPutResponse(
             display_name=updated_user["display_name"],
             profile_picture= updated_user.get("profile_picture"),
             email=updated_user["email"],
-            rating=updated_user.get("rating", 0),
             user_id=str(updated_user["_id"]),
             location=updated_user.get("location", ""),
-            rating_count=updated_user.get("rating_count", 0),
-            saved_posts=updated_user.get("saved_posts", []),
         )
         
     except Exception as e:

@@ -198,7 +198,7 @@ paths:
             schema:
               $ref: "#/components/schemas/UserGetResponse"
       responses:
-        "201":
+        "200":
           description: User updated successfully
           content:
             application/json:
@@ -511,20 +511,27 @@ components:
           type: email
         location:
           type: str
-        rating: 
-          type: float
-        rating_count:
-          type: int 
-        saved_posts:
-          type: array
-          items:
-            type: string
       example:
         display_name: "Drake"
         profile_picture: "https://example.com/image1.jpg"
         email: zesty123@utoronto.ca
         location: "Toronto"
-        rating: 4.2
-        rating_count: 6
-        saved_posts: ["60d5f9b8f8d2c8b8e8e1d4b6"]
-    
+    UserPutResponse:  
+      type: object
+      required:
+      properties:
+        display_name:
+          type: str
+        profile_picture:
+          type: str
+        email:
+          type: email
+        user_id:
+          type: str
+        location:
+          type: str
+      example:
+        display_name: "John"
+        user_id: "101"
+        profile_picture: "https://example.com/image1.jpg"
+        location: "Toronto"

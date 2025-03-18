@@ -54,9 +54,13 @@ class UserPutRequest(BaseModel):
     profile_picture: Optional[str]
     email: Optional[EmailStr]
     location: Optional[str]
-    rating: Optional[float]
-    rating_count: Optional[int]
-    saved_posts: Optional[List[str]]
+
+class UserPutResponse(BaseModel):
+    display_name: Optional[str]
+    profile_picture: Optional[str]
+    email: Optional[EmailStr]
+    user_id: Optional[str]
+    location: Optional[str]
 
 
 class SignUpPostResponse(BaseModel):
