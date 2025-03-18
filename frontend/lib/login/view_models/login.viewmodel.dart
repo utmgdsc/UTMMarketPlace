@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
-import 'package:utm_marketplace/shared/utils.dart';
-import 'package:utm_marketplace/signup/model/signup.model.dart';
+import 'package:utm_marketplace/login/model/login.model.dart';
+import 'package:utm_marketplace/shared/secure_storage/secure_storage.dart';
 import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
+import 'package:utm_marketplace/shared/utils.dart';
 
-class SignUpViewModel extends LoadingViewModel {
-  SignUpModel _signupModel = SignUpModel(email: '', password: '');
+class LoginViewModel extends LoadingViewModel {
+  final storage = secureStorage;
+  LoginModel _loginModel = LoginModel(email: '', password: '');
 
   String? _email;
   String? get email => _email;
@@ -40,49 +42,42 @@ class SignUpViewModel extends LoadingViewModel {
     return null;
   }
 
-  String? validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
-    }
-    if (value != password) {
-      return 'Passwords do not match';
-    }
-    return null;
-  }
-
-  Future<SuccessReason> signUp() async {
+  Future<SuccessReason> login() async {
     try {
       isLoading = true;
 
-      _signupModel =
-          SignUpModel(email: _email ?? '', password: _password ?? '');
-      final response = await SignUpModel.signUp(_signupModel);
+      _loginModel = LoginModel(email: _email ?? '', password: _password ?? '');
+      final response = await LoginModel.login(_loginModel);
 
-      debugPrint('Sign up response: $response');
+      debugPrint('Login response: $response');
       final String reason;
       switch (response.statusCode) {
-        case 201:
-          reason = 'Successfully registered, please log in.';
+        case 200:
+          final token = response.data['access_token'];
+          await storeToken(token);
+          if (!isTokenExpired(token)) {
+            debugPrint('Token is valid');
+          } else {
+            debugPrint('Token is expired');
+          }
+          reason = 'Login successful';
           break;
         case 400:
           reason = 'Invalid email or password.';
-          break;
-        case 409:
-          reason = 'User already registered.';
           break;
         case 500:
           reason = 'Server error. Please try again later.';
           break;
         default:
-          reason = 'Sign up failed. Please try again.';
+          reason = 'Login failed. Please try again.';
           break;
       }
       final success = (response.statusCode ?? 0) >= 200 && response.statusCode! < 300;
 
       return (success: success, reason: reason);
     } catch (exc) {
-      debugPrint('Error in signUp: ${exc.toString()}');
-      return (success: false, reason: 'Sign up failed. Please try again.');
+      debugPrint('Error in login: ${exc.toString()}');
+      return (success: false, reason: 'Login failed. Please try again.');
     } finally {
       isLoading = false;
       notifyListeners();
