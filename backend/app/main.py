@@ -20,9 +20,9 @@ from pymongo.errors import DuplicateKeyError, PyMongoError
 from bson import ObjectId
 
 #importing async way of connecting to MongoDB
-from MongoClient_async import db, listings_collection, users_collection
+from app.MongoClient_async import db, listings_collection, users_collection
 
-from models import (
+from app.models import (
     ErrorResponse,
     ListingGetResponseItem,
     ListingsGetResponseAll,
@@ -37,8 +37,6 @@ from models import (
     UserPutResponse,
     SearchGetResponse
 )
-
-from connect_db import db  # Import MongoDB connection
 
 app = FastAPI(
     title='UTM Marketplace API',
@@ -260,10 +258,10 @@ async def get_listings(
         )
     except Exception as e:
         return ErrorResponse(details="Internal Server Error. Please try again later.")
-        # return ErrorResponse(details=f"Internal Server Error. Please try again later. {e}")
 
 
-@app.post('/listings',
+@app.post(
+    '/listings',
     response_model=None,
     responses={
         '201': {'model': ListingsPostResponse},
