@@ -35,16 +35,43 @@ class LogInPostRequest(BaseModel):
         description='Must be at least 8 characters, contain 1 uppercase letter, 1 number.',
     )
 
-
 class LogInPostResponse(BaseModel):
-    user_id: int
-    message: Optional[str] = None
+    access_token: str
+    token_type: str
+
+class UserGetResponse(BaseModel):
+    display_name: str
+    profile_picture: Optional[str]
+    email: Optional[str]
+    rating: float
+    user_id: str
+    location: Optional[str]
+    rating_count: int
+    saved_posts: Optional[List[str]] = None
+
+class UserPutRequest(BaseModel):
+    display_name: Optional[str]
+    profile_picture: Optional[str]
+    email: Optional[EmailStr]
+    location: Optional[str]
+
+class UserPutResponse(BaseModel):
+    display_name: Optional[str]
+    profile_picture: Optional[str]
+    email: Optional[EmailStr]
+    user_id: Optional[str]
+    location: Optional[str]
 
 
 class SignUpPostResponse(BaseModel):
-    user_id: int
+    user_id: str
     message: Optional[str] = None
 
+
+class SearchGetResponse(BaseModel):
+    listings: Optional[List[ListingGetResponseItem]] = None
+    total: Optional[int] = None
+    next_page_token: Optional[str] = None
 
 class ListingGetResponseItem(BaseModel):
     id: str
