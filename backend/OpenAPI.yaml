@@ -157,6 +157,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"  
+  
   /login:
     post:
       summary: Log in a user
@@ -186,6 +187,87 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
+  /user:
+    get:
+      summary: Get user details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserGetResponse"
+      responses:
+        "200":
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGetResponse"
+        "400":
+          description: Invalid id format
+          content:
+            application/json:
+              schema:
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      summary: Update User details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPutRequest"
+      responses:
+        "201":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGetResponse"
+        "400":
+          description: Invalid id format or invalid email input format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Unauthorized (user mismatch)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 
 components:
   schemas:
@@ -385,3 +467,71 @@ components:
         condition: "Used"
         date_posted: "2025-02-22T10:00:00Z"
         campus: "UTM"
+    UserGetResponse:    
+      type: object
+      required:
+        - display_name
+        - user_id
+        - rating
+        - rating_count
+      properties:
+        display_name:
+          type: str
+        profile_picture:
+          type: str
+        email:
+          type: email
+        user_id:
+          type: str
+        location:
+          type: str
+        rating: 
+          type: float
+        rating_count:
+          type: int 
+        saved_posts:
+          type: array
+          items:
+            type: string
+      example:
+        display_name: "John"
+        user_id: "101"
+        profile_picture: "https://example.com/image1.jpg"
+        location: "Toronto"
+        rating: 4.2
+        rating_count: 6
+    UserPutRequest:
+      type: object
+      properties:
+        display_name:
+          type: str
+        profile_picture:
+          type: str
+        email:
+          type: email
+        location:
+          type: str
+      example:
+        display_name: "Drake"
+        profile_picture: "https://example.com/image1.jpg"
+        email: zesty123@utoronto.ca
+        location: "Toronto"
+    UserPutResponse:  
+      type: object
+      required:
+      properties:
+        display_name:
+          type: str
+        profile_picture:
+          type: str
+        email:
+          type: email
+        user_id:
+          type: str
+        location:
+          type: str
+      example:
+        display_name: "John"
+        user_id: "101"
+        profile_picture: "https://example.com/image1.jpg"
+        location: "Toronto"
