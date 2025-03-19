@@ -31,6 +31,8 @@ class _CreateListingViewState extends State<CreateListingView> {
     _titleController.dispose();
     _priceController.dispose();
     _descriptionController.dispose();
+    viewModel.clearImages();
+    viewModel.clearCondition();
     super.dispose();
   }
 
