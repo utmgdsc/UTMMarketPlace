@@ -104,6 +104,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ListingsPostResponse"
+        "401":
+          description: Unauthorized - User not logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "422":
           description: Validation error - Missing/incorrect required fields
           content:
@@ -393,7 +399,6 @@ components:
     ListingsPostRequest:
       type: object
       required:
-        - seller_id
         - title
         - price
         - pictures

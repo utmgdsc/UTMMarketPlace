@@ -92,7 +92,7 @@ async def authenticate_user(email: str, password):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    raise HTTPException(status_code=422, detail=f"Invalid request.")
+    raise HTTPException(status_code=422, detail="Invalid request.")
 
 ######################################## LISTINGS ENDPOINTS ########################################
 @app.get(
@@ -263,8 +263,10 @@ async def get_listings(
 @app.post(
     '/listings',
     response_model=None,
+    status_code=201,
     responses={
         '201': {'model': ListingsPostResponse},
+        '401': {'model': ErrorResponse},
         '422': {'model': ErrorResponse},
         '500': {'model': ErrorResponse},
     },
@@ -290,7 +292,7 @@ async def post_listings(
             title=body.title,
             price=body.price,
             description=body.description,
-            seller_id=current_user["id"],
+            seller_id=listing_data["seller_id"],
             pictures=body.pictures,
             category=body.category,
             date_posted=listing_data["date_posted"],
