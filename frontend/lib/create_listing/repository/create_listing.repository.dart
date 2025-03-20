@@ -6,7 +6,6 @@ import 'package:utm_marketplace/shared/secure_storage/secure_storage.dart';
 
 class CreateListingRepository {
   Future<bool> createListing(CreateListingModel listing) async {
-    await Future.delayed(const Duration(seconds: 1));
     try {
       final token = await secureStorage.read(key: 'jwt_token');
       debugPrint('Creating listing with data: ${listing.toJson()}');

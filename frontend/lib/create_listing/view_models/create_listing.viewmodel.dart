@@ -127,6 +127,7 @@ class CreateListingViewModel extends LoadingViewModel {
         price: price,
         description: description,
         condition: _condition,
+        // TODO: Once backend solidifies the image upload, change this to use the image URLs
         images: _images.map((image) => image.path).toList(),
       );
 
