@@ -127,6 +127,7 @@ class CreateListingViewModel extends LoadingViewModel {
         price: price,
         description: description,
         condition: _condition,
+        // TODO: Change encryption method for images when backend is ready
         images: await Future.wait(_images.map((image) async {
           final bytes = await image.readAsBytes();
           return base64Encode(bytes);
