@@ -1,10 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 class ItemCard extends StatelessWidget {
   final String? id;
   final String name;
   final double price;
-  final String? imageUrl;
+  final List<String>? imageUrls;
   final String? category;
 
   const ItemCard({
@@ -12,25 +13,42 @@ class ItemCard extends StatelessWidget {
     this.id,
     required this.name,
     required this.price,
-    this.imageUrl,
+    this.imageUrls,
     this.category,
   });
 
   @override
   Widget build(BuildContext context) {
-    final imageWidget = imageUrl != null
-        ? Container(
-            width: double.infinity,
-            height: 250.0,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-              image: DecorationImage(
-                image: NetworkImage(imageUrl!),
+    final imageWidgets = imageUrls != null && imageUrls!.isNotEmpty
+      ? Container(
+        height: 250.0,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+        ),
+        child: Builder(
+          builder: (context) {
+            // TODO: Change this once image storage is officially implemented
+            try {
+              return Image.memory(
+                base64Decode(imageUrls!.first),
                 fit: BoxFit.cover,
-              ),
-            ),
-          )
-        : SizedBox.shrink();
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.network(
+                    'https://placehold.co/400/png',
+                    fit: BoxFit.cover,
+                  );
+                },
+              );
+            } catch (e) {
+              return Image.network(
+                'https://placehold.co/400/png',
+                fit: BoxFit.cover,
+              );
+            }
+          },
+        ),
+      )
+      : SizedBox.shrink();
 
     final nameWidget = Text(
       name,
@@ -56,7 +74,7 @@ class ItemCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          imageWidget,
+          imageWidgets,
           Padding(
             padding: const EdgeInsets.all(1.0),
             child: Column(
