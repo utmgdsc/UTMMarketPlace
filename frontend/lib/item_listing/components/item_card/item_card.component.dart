@@ -4,7 +4,7 @@ class ItemCard extends StatelessWidget {
   final String? id;
   final String name;
   final double price;
-  final String? imageUrl;
+  final List<String>? imageUrls;
   final String? category;
 
   const ItemCard({
@@ -12,22 +12,27 @@ class ItemCard extends StatelessWidget {
     this.id,
     required this.name,
     required this.price,
-    this.imageUrl,
+    this.imageUrls,
     this.category,
   });
 
   @override
   Widget build(BuildContext context) {
-    final imageWidget = imageUrl != null
+    final imageWidgets = imageUrls != null && imageUrls!.isNotEmpty
         ? Container(
-            width: double.infinity,
             height: 250.0,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(4.0)),
-              image: DecorationImage(
-                image: NetworkImage(imageUrl!),
-                fit: BoxFit.cover,
-              ),
+            ),
+            child: Image.network(
+              imageUrls!.first,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.network(
+                  'https://placehold.co/400/png',
+                  fit: BoxFit.cover,
+                );
+              },
             ),
           )
         : SizedBox.shrink();
@@ -56,7 +61,7 @@ class ItemCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          imageWidget,
+          imageWidgets,
           Padding(
             padding: const EdgeInsets.all(1.0),
             child: Column(

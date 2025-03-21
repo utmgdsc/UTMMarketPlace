@@ -12,6 +12,7 @@ final GetIt locator = GetIt.instance;
 
 void setupLocator() {
   locator.registerFactory<ListingRepo>(() => ListingRepoImpl());
+  // locator.registerFactory<PostingRepository>(() => PostingRepositoryImpl());
   locator.registerLazySingleton(() => MessageRepository());
   locator.registerLazySingleton(() => NotificationRepository());
   locator.registerLazySingleton(() => MenuRepository());

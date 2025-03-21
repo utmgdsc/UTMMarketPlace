@@ -1,54 +1,95 @@
 import 'dart:convert';
 
-ListingModel listingModelFromJson(String str) =>
-    ListingModel.fromJson(json.decode(str));
+import 'package:flutter/material.dart';
+
+ListingModel listingModelFromJson(String str) {
+  debugPrint('decoding json: $str');
+  debugPrint('decoded json: ${json.decode(str)}');
+  return ListingModel.fromJson(json.decode(str));
+}
 
 String listingModelToJson(ListingModel data) => json.encode(data.toJson());
 
 class ListingModel {
   ListingModel({
     this.items = const [],
+    this.total,
+    this.nextPageToken,
   });
 
   List<Item> items;
+  int? total;
+  String? nextPageToken;
 
   factory ListingModel.fromJson(Map<String, dynamic> json) => ListingModel(
-        items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
+        items: json["listings"] == null
+            ? []
+            : List<Item>.from(json["listings"].map((x) => Item.fromJson(x))),
+        total: json["total"],
+        nextPageToken: json["next_page_token"],
       );
 
   Map<String, dynamic> toJson() => {
-        "items": List<dynamic>.from(items.map((x) => x.toJson())),
+        "listings": List<dynamic>.from(items.map((x) => x.toJson())),
+        "total": total,
+        "next_page_token": nextPageToken,
       };
 }
 
 class Item {
   Item({
     this.id,
-    required this.name,
+    required this.title,
     required this.price,
-    this.imageUrl,
+    this.description,
+    required this.sellerId,
+    this.pictures = const [],
+    required this.condition,
     this.category,
+    this.datePosted,
+    this.campus,
+    this.paginationToken,
   });
 
   String? id;
-  String name;
+  String title;
   double price;
-  String? imageUrl;
+  String? description;
+  String sellerId;
+  List<String> pictures;
+  String condition;
   String? category;
+  String? datePosted;
+  String? campus;
+  String? paginationToken;
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
         id: json["id"],
-        name: json["name"],
-        price: json["price"].toDouble(),
-        imageUrl: json["image_url"],
+        title: json["title"],
+        price: (json["price"] ?? 0).toDouble(),
+        description: json["description"],
+        sellerId: json["seller_id"],
+        pictures: json["pictures"] == null
+            ? []
+            : List<String>.from(json["pictures"].map((x) => x)),
+        condition: json["condition"],
         category: json["category"],
+        datePosted: json["date_posted"],
+        campus: json["campus"],
+        paginationToken: json["paginationToken"],
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        "name": name,
+        "title": title,
         "price": price,
-        "image_url": imageUrl,
+        "description": description,
+        "seller_id": sellerId,
+        "pictures": List<dynamic>.from(pictures.map((x) => x)),
+        "condition": condition,
         "category": category,
+        "date_posted": datePosted,
+        "campus": campus,
+        "paginationToken": paginationToken,
       };
 }
