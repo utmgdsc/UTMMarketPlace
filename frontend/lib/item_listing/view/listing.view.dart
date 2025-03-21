@@ -24,12 +24,12 @@ class _ListingViewState extends State<ListingView> {
     viewModel = Provider.of<ListingViewModel>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      viewModel.fetchData();
+      viewModel.fetchData(limit: 6);
     });
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent) {
-        viewModel.fetchMoreData();
+        viewModel.fetchMoreData(limit: 6);
       }
     });
   }
