@@ -27,6 +27,7 @@ class ItemCard extends StatelessWidget {
         ),
         child: Builder(
           builder: (context) {
+            // TODO: Change this once image storage is officially implemented
             try {
               return Image.memory(
                 base64Decode(imageUrls!.first),
