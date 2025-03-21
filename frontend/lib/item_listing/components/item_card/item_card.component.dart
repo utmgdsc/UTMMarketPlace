@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 class ItemCard extends StatelessWidget {
@@ -19,23 +20,34 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageWidgets = imageUrls != null && imageUrls!.isNotEmpty
-        ? Container(
-            height: 250.0,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-            ),
-            child: Image.network(
-              imageUrls!.first,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.network(
-                  'https://placehold.co/400/png',
-                  fit: BoxFit.cover,
-                );
-              },
-            ),
-          )
-        : SizedBox.shrink();
+      ? Container(
+        height: 250.0,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+        ),
+        child: Builder(
+          builder: (context) {
+            try {
+              return Image.memory(
+                base64Decode(imageUrls!.first),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.network(
+                    'https://placehold.co/400/png',
+                    fit: BoxFit.cover,
+                  );
+                },
+              );
+            } catch (e) {
+              return Image.network(
+                'https://placehold.co/400/png',
+                fit: BoxFit.cover,
+              );
+            }
+          },
+        ),
+      )
+      : SizedBox.shrink();
 
     final nameWidget = Text(
       name,
