@@ -1,4 +1,4 @@
-// import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:utm_marketplace/create_listing/model/create_listing.model.dart';
@@ -127,8 +127,10 @@ class CreateListingViewModel extends LoadingViewModel {
         price: price,
         description: description,
         condition: _condition,
-        // TODO: Once backend solidifies the image upload, change this to use the image URLs
-        images: _images.map((image) => image.path).toList(),
+        images: await Future.wait(_images.map((image) async {
+          final bytes = await image.readAsBytes();
+          return base64Encode(bytes);
+        }).toList()),
       );
 
       if (!listing.isValid) {

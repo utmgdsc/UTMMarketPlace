@@ -95,7 +95,7 @@ class ImageSelector extends StatelessWidget {
         return GestureDetector(
           onTap: () async {
             final List<XFile> images =
-                await picker.pickMultipleMedia();
+                await picker.pickMultiImage();
             if (images.isNotEmpty) {
               for (var image in images) {
                 model.addMedia(image);
