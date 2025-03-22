@@ -1,0 +1,22 @@
+{
+  "listings": [
+    {
+      "title": "MacBook Pro 2021",
+      "price": 1200.00,
+      "description": "Like new condition, only used for 6 months",
+      "pictures": ["https://example.com/macbook1.jpg"],
+      "category": "Electronics",
+      "condition": "Used",
+      "campus": "UTM"
+    },
+    {
+      "title": "Calculus Textbook",
+      "price": 50.00,
+      "description": "MAT102 textbook, great condition",
+      "pictures": ["https://example.com/textbook1.jpg"],
+      "category": "Books",
+      "condition": "Used",
+      "campus": "UTM"
+    }
+  ]
+} 
