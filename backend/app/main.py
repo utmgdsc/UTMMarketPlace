@@ -223,7 +223,14 @@ async def get_search(
             except ErrorResponse as e:
                 return ErrorResponse(details="Internal Server Error. Please try again later.")
         
+        if type == "price-low-to-high":
+            cursor = listings_collection.find().sort("price", 1)
+            listings = await cursor.to_list(length=limit)
         
+        if type == "price-high-to-low":
+            cursor = listings_collection.find().sort("price", -1)
+            listings = await cursor.to_list(length=limit)
+
         
         # Prepping to return
         response_data = [
