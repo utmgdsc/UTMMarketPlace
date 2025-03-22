@@ -78,7 +78,6 @@ async def paginate(
                 },
             }
         else:
-            print("NO QUERY")
             search_stage = {
                 "$search": {
                     "index": "Full_text_index_listings",
@@ -140,7 +139,7 @@ async def paginate(
             total=len(response_data),
             # Provide the last token of this page, so that clients
             #  can use this to get the next page
-            next_page_token=listings[-1].get("paginationToken"),
+            next_page_token=listings[-1].get("paginationToken")
         )
     except Exception as e:
         print(f"Error in get_listings: {str(e)}")  # Debugging: Print error logs
@@ -197,25 +196,65 @@ async def validation_exception_handler(request, exc):
     responses={'500': {'model': ErrorResponse}},
 )
 async def get_search(
-    query: Optional[str] = Query(None, description="query"), #optional for the sake of pagination
+    query: Optional[str] = Query(None, description="query"), # Used in for full text search
+    condition: Optional[str] = Query(None, description="listing condition"), # Used for sorting by condition
     limit: Optional[int] = Query(5, description="Number of listings to retrieve", ge=1, le=30), 
-    next: Optional[str] = Query(None, description="Last seen pagination token")
+    next: Optional[str] = Query(None, description="Last seen pagination token"),
+    type: str = Query(None, description="Type of search")
     ) -> Union[SearchGetResponse, ErrorResponse]:
     """
     search listings
     """
+    print("TYPE: ", type)
+    print("CONDITION: ", condition)
+    limit = min(max(limit, 1), 30)
     try:
-        limit = min(max(limit, 1), 30)
-        try:
-            listings = await get_listings(query=query, limit=limit, next=next)
-       
-            return SearchGetResponse(listings=listings.listings, 
+        # Funneling the type of search
+        if type == "full-text":
+            try:
+                listings = await get_listings(query=query, limit=limit, next=next)
+            except ErrorResponse as e:
+                        return e
+        
+        if type == "condition":
+            try:
+                cursor = listings_collection.find({"condition": condition})
+                listings = await cursor.to_list(length=limit) 
+            except ErrorResponse as e:
+                return ErrorResponse(details="Internal Server Error. Please try again later.")
+        
+        
+        
+        # Prepping to return
+        response_data = [
+            ListingGetResponseItem(
+                id=str(listing["_id"]),
+                title=listing["title"],
+                price=listing["price"],
+                description=listing.get("description"),
+                seller_id=listing["seller_id"],
+                pictures=listing.get("pictures", []),
+                condition=listing["condition"],
+                category=listing.get("category"),
+                date_posted=listing.get("date_posted"),
+                campus=listing.get("campus"),
+            )
+            for listing in listings
+        ]
+
+        print("RESPONSE DATA: ", response_data)
+        listings = ListingsGetResponseAll(
+            listings=response_data,
+            total=len(response_data),
+            next_page_token=listings[-1].get("paginationToken")
+        )        
+
+        return SearchGetResponse(listings=listings.listings,
                                 total=listings.total,
                                 next_page_token=listings.next_page_token)
-        except ErrorResponse as e:
-                    return e
     except Exception as e:
         return ErrorResponse(details="Internal Server Error. Please try again later.")
+            
 
 
 @app.get('/listing/{listing_id}',
