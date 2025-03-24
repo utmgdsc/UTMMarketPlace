@@ -31,8 +31,8 @@ async def create_test_listings(load_payload):
     base_listing = load_payload("listings.json")["listings"][0]
     listings = []
     
-    # Create 50 listings with different titles
-    for i in range(5):
+    # Create 10 listings with different titles
+    for i in range(10):  # Changed from 5 to 10 to test pagination
         listing = base_listing.copy()
         listing["title"] = f"Test Listing {i+1}"
         listing["price"] = 100 + i
@@ -45,11 +45,43 @@ async def create_test_listings(load_payload):
 
 @pytest.mark.asyncio
 async def test_listings_pagination(client, load_payload):
-    # First, create 50 test listings
+    # First, create test listings
     await create_test_listings(load_payload)
     
-    # Test first page (default limit is 5)
+    # Test first page
     response = client.get("/listings")
     assert response.status_code == 200
-    assert response.json() == 50
+    data = response.json()
+    
+    # Check first page structure
+    assert len(data["listings"]) == 5
+    assert "next_page_token" in data
+    first_page_ids = {listing["id"] for listing in data["listings"]}
+    
+    next_token = data["next_page_token"]
+    
+    # Get second page
+    response = client.get(f"/listings?next={next_token}")
+    assert response.status_code == 200
+    data = response.json()
+    
+    # Check second page
+    assert len(data["listings"]) == 5  # Should get next 5 items
+    second_page_ids = {listing["id"] for listing in data["listings"]}
+    
+    # Verify no duplicate listings between pages
+    assert not first_page_ids.intersection(second_page_ids)
+    
+    # Test with custom limit
+    response = client.get("/listings?limit=10")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["listings"]) == 10
+    
+    # Test with invalid limit (should be capped to 30)
+    response = client.get("/listings?limit=50")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["listings"]) <= 30
+    
     
