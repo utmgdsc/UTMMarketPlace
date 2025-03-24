@@ -25,40 +25,52 @@ class ListingModel {
 
 class Item {
   final String id;
-  final String title;
+  final String name;
+  final String description;
   final double price;
   final String? imageUrl;
+  final String category;
   final String condition;
   final DateTime? datePosted;
+  final String? campus;
 
   Item({
     required this.id,
-    required this.title,
+    required this.name,
+    required this.description,
     required this.price,
     this.imageUrl,
-    required this.condition,
+    required this.category,
+    this.condition = 'Used',
     this.datePosted,
+    this.campus,
   });
 
   factory Item.fromJson(Map<String, dynamic> json) {
     return Item(
-      id: json['id'],
-      title: json['title'],
-      price: json['price'].toDouble(),
-      imageUrl: json['image_url'],
-      condition: json['condition'],
-      datePosted: json['date_posted'] != null 
-          ? DateTime.parse(json['date_posted']) 
-          : null,
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      price: (json['price'] is int) 
+          ? (json['price'] as int).toDouble() 
+          : json['price'].toDouble(),
+      imageUrl: json['image_url'] as String?,
+      category: json['category'] as String,
+      condition: json['condition'] as String? ?? 'Used',
+      datePosted: DateTime.now(),
+      campus: json['campus'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        "title": title,
+        "name": name,
+        "description": description,
         "price": price,
         "image_url": imageUrl,
+        "category": category,
         "condition": condition,
         "date_posted": datePosted?.toIso8601String(),
+        "campus": campus,
       };
 }

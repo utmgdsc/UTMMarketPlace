@@ -5,7 +5,6 @@ import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart'
 import 'package:utm_marketplace/shared/themes/theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:utm_marketplace/item_listing/components/listing_loading.component.dart';
-import 'package:utm_marketplace/item_listing/components/filter_bottom_sheet/filter_bottom_sheet.component.dart';
 
 class ListingView extends StatefulWidget {
   const ListingView({super.key});
@@ -28,22 +27,29 @@ class _ListingViewState extends State<ListingView> {
     });
   }
 
-  void _showFilterBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (context, scrollController) => SingleChildScrollView(
-          controller: scrollController,
-          child: const FilterBottomSheet(),
-        ),
+  Widget _buildItemGrid(ListingViewModel listingViewModel) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(hPad, 8.0, hPad, 8.0),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: itemCardDelegate(),
+        itemCount: listingViewModel.items.length,
+        itemBuilder: (context, index) {
+          final item = listingViewModel.items[index];
+          return GestureDetector(
+            onTap: () {
+              context.push('/item/${item.id}');
+            },
+            child: ItemCard(
+              id: item.id,
+              name: item.name,
+              price: item.price,
+              category: item.condition,
+              imageUrl: item.imageUrl ?? '',
+            ),
+          );
+        },
       ),
     );
   }
@@ -103,7 +109,7 @@ class _ListingViewState extends State<ListingView> {
                 Icons.filter_list,
                 color: Colors.grey[600],
               ),
-              onPressed: () => _showFilterBottomSheet(context),
+              onPressed: () => viewModel.showFilterBottomSheet(context),
             ),
           ),
         ],
@@ -145,30 +151,7 @@ class _ListingViewState extends State<ListingView> {
                     children: [
                       searchBar,
                       trendingLabel,
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(hPad, 8.0, hPad, 8.0),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          gridDelegate: itemCardDelegate(),
-                          itemCount: listingViewModel.items.length,
-                          itemBuilder: (context, index) {
-                            final item = listingViewModel.items[index];
-                            return GestureDetector(
-                              onTap: () {
-                                context.push('/item/${item.id}');
-                              },
-                              child: ItemCard(
-                                id: item.id,
-                                name: item.title,
-                                price: item.price,
-                                category: item.condition,
-                                imageUrl: item.imageUrl ?? '',
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                      _buildItemGrid(listingViewModel),
                     ],
                   );
                 },

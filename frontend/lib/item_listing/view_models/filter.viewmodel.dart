@@ -10,12 +10,14 @@ class FilterViewModel extends LoadingViewModel {
   String? _condition;
   double? _minPrice;
   double? _maxPrice;
+  String? _campus;
 
   SortOrder? get sortOrder => _sortOrder;
   DateTime? get dateFrom => _dateFrom;
   String? get condition => _condition;
   double? get minPrice => _minPrice;
   double? get maxPrice => _maxPrice;
+  String? get campus => _campus;
 
   void setSortOrder(SortOrder? value) {
     _sortOrder = value;
@@ -42,6 +44,11 @@ class FilterViewModel extends LoadingViewModel {
     notifyListeners();
   }
 
+  void setCampus(String? value) {
+    _campus = value;
+    notifyListeners();
+  }
+
   Future<void> openDatePicker(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -60,6 +67,7 @@ class FilterViewModel extends LoadingViewModel {
     _condition = null;
     _minPrice = null;
     _maxPrice = null;
+    _campus = null;
     notifyListeners();
   }
 
@@ -71,6 +79,7 @@ class FilterViewModel extends LoadingViewModel {
       condition: _condition,
       minPrice: _minPrice,
       maxPrice: _maxPrice,
+      campus: _campus,
     );
     listingViewModel.applyFilters(filters);
   }

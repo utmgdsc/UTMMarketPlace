@@ -10,6 +10,7 @@ class FilterOptions {
   final String? condition;
   final double? minPrice;
   final double? maxPrice;
+  final String? campus;
 
   FilterOptions({
     this.sortOrder,
@@ -17,6 +18,7 @@ class FilterOptions {
     this.condition,
     this.minPrice,
     this.maxPrice,
+    this.campus,
   });
 
   bool get hasFilters =>
@@ -24,7 +26,8 @@ class FilterOptions {
       dateFrom != null ||
       condition != null ||
       minPrice != null ||
-      maxPrice != null;
+      maxPrice != null ||
+      campus != null;
 
   // Helper method to format date for display
   String get formattedDateFrom {
@@ -39,6 +42,7 @@ class FilterOptions {
     String? condition,
     double? minPrice,
     double? maxPrice,
+    String? campus,
   }) {
     return FilterOptions(
       sortOrder: sortOrder ?? this.sortOrder,
@@ -46,6 +50,7 @@ class FilterOptions {
       condition: condition ?? this.condition,
       minPrice: minPrice ?? this.minPrice,
       maxPrice: maxPrice ?? this.maxPrice,
+      campus: campus ?? this.campus,
     );
   }
 
