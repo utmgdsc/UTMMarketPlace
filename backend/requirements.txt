@@ -8,3 +8,4 @@ uvicorn[standard]
 fastapi-code-generator
 pyjwt
 motor
+python-dateutil
