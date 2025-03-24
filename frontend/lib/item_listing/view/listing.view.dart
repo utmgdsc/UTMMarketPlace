@@ -5,6 +5,7 @@ import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart'
 import 'package:utm_marketplace/shared/themes/theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:utm_marketplace/item_listing/components/listing_loading.component.dart';
+import 'package:utm_marketplace/item_listing/components/filter_bottom_sheet/filter_bottom_sheet.component.dart';
 
 class ListingView extends StatefulWidget {
   const ListingView({super.key});
@@ -25,6 +26,26 @@ class _ListingViewState extends State<ListingView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       viewModel.fetchData();
     });
+  }
+
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => SingleChildScrollView(
+          controller: scrollController,
+          child: const FilterBottomSheet(),
+        ),
+      ),
+    );
   }
 
   @override
@@ -71,7 +92,7 @@ class _ListingViewState extends State<ListingView> {
               ),
             ),
           ),
-          SizedBox(width: 8.0),
+          const SizedBox(width: 8.0),
           Container(
             decoration: BoxDecoration(
               color: Colors.grey[200],
@@ -82,9 +103,7 @@ class _ListingViewState extends State<ListingView> {
                 Icons.filter_list,
                 color: Colors.grey[600],
               ),
-              onPressed: () {
-                debugPrint('Filter button pressed');
-              },
+              onPressed: () => _showFilterBottomSheet(context),
             ),
           ),
         ],
@@ -141,9 +160,9 @@ class _ListingViewState extends State<ListingView> {
                               },
                               child: ItemCard(
                                 id: item.id,
-                                name: item.name,
+                                name: item.title,
                                 price: item.price,
-                                category: item.category,
+                                category: item.condition,
                                 imageUrl: item.imageUrl ?? '',
                               ),
                             );
