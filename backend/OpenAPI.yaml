@@ -194,6 +194,75 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /search:
+    get:
+      summary: search listings
+      description: send a search query to the backend and return matching listings.
+      parameters:
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+          description: can be left blank so that other filters can be applied independently
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 5
+            minimum: 1
+            maximum: 30
+          description: number of listings to retrieve
+        - name: next
+          in: query
+          required: false
+          schema:
+            type: string
+          description: last seen pagination token
+        - name: price_type
+          in: query
+          required: false
+          schema:
+            type: string
+          description: type of sorting i.e high -> low or low -> high
+        - name: lower_price
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: lower limit for price filter
+        - name: upper_price
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: upper limit for price filter
+        - name: condition
+          in: query
+          required: false
+          schema:
+            type: string
+          description: type of condition i.e New, Used, fair, etc
+        - name: date_range
+          in: query
+          required: false
+          schema:
+            type: string
+          description: earlier date for date filtering
+        - name: campus
+          in: query
+          required: false
+          schema:
+            type: string
+          description: location of listing
+      responses:
+        "200":
+          description: A list of marketplace listings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchGetResponse"
   /user:
     get:
       summary: Get user details
@@ -284,6 +353,7 @@ components:
       properties:
         details:
           type: string
+    
     SignUpPostRequest:
       type: object
       required:
@@ -301,6 +371,7 @@ components:
       example:
         email: "student@utoronto.ca"
         password: "P@ssword123"
+    
     LogInPostRequest:
       type: object
       required:
@@ -318,6 +389,7 @@ components:
       example:
         email: "student@utoronto.ca"
         password: "P@ssword123"
+    
     LogInPostResponse:
       type: object
       required:
@@ -330,6 +402,7 @@ components:
       example:
         user_id: 42
         message: "User logged in successfully."  
+    
     SignUpPostResponse:
       type: object
       required:
@@ -342,6 +415,19 @@ components:
       example:
         user_id: 42
         message: "User registered successfully."  
+    
+    SearchGetResponse:
+      type: object
+      required:
+        - query
+      properties:
+        listings:
+          type: array
+          items:
+            $ref: "#/components/schemas/ListingGetResponseItem"
+        total:
+          type: integer
+
     ListingGetResponseItem:
       type: object
       required:
@@ -387,6 +473,7 @@ components:
         condition: "Used"
         date_posted: "2025-02-22T10:00:00Z"
         campus: "UTM"
+    
     ListingsGetResponseAll:
       type: object
       properties:
@@ -396,6 +483,7 @@ components:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
+    
     ListingsPostRequest:
       type: object
       required:
@@ -432,6 +520,7 @@ components:
         category: "Electronics"
         condition: "Used"
         campus: "UTM"
+    
     ListingsPostResponse:
       type: object
       required:
