@@ -157,6 +157,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"  
+
   /login:
     post:
       summary: Log in a user
@@ -186,6 +187,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
   /search:
     get:
       summary: search listings
@@ -256,6 +258,150 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"  
 
+  /saved_items:
+    post:
+      summary: Save a listing to a users saved posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavedItemsPostRequest"
+      responses:
+        "200":
+          description: Post saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedItemsPostResponse"
+        "422":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      summary: Retrieve saved items for a user
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: The unique identifier of the user whose saved items are being retrieved.
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Number of saved items per page.
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+        - name: next
+          in: query
+          required: false
+          description: Pagination token to retrieve the next set of results
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved listings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  saved_items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ListingGetResponseItem"
+                  total:
+                    tpye: integer
+                example:
+                  saved_items:
+                  - id: "1"
+                    title: "MacBook Pro for sale"
+                    price: 1200.99
+                    description: "Selling my MacBook Pro in great condition!"
+                    seller_id: "101"
+                    pictures: ["https://example.com/image1.jpg"]
+                    category: "Electronics"
+                    condition: "Used"
+                    date_posted: "2025-02-22T10:00:00Z"
+                    campus: "UTM"
+                    total: 1
+        "400":
+          description: Bad Request - Missing or invalid user_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Saved items not found for the specified user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"  
+  delete:
+    summary: Delete a saved item
+    description: Remove a listing from a user's saved items collection.
+    parameters:
+      - name: saved_item_id
+        in: path
+        required: true
+        description: The unique identifier of the saved item to delete.
+        schema:
+          type: string
+      - name: user_id
+        in: query
+        required: true
+        description: The unique identifier of the user who owns the saved item.
+        schema:
+          type: string
+    responses:
+      "200":
+        description: Saved item successfully deleted.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+              example:
+                message: "Saved item deleted successfully."
+      "400":
+        description: Bad Request - Missing or invalid saved_item_id or user_id.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ErrorResponse"
+      "404":
+        description: Saved item not found.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ErrorResponse"
+      "500":
+        description: Internal Server Error.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ErrorResponse"
+              
 components:
   schemas:
     ErrorResponse:
@@ -474,3 +620,34 @@ components:
         condition: "Used"
         date_posted: "2025-02-22T10:00:00Z"
         campus: "UTM"
+    
+    SavedItemsPostRequest:
+      type: object
+      required:
+        - user_id
+        - id
+      properties:
+        user_id:
+          type: integer
+          format: id
+          description: "Must be a id linking to a registered and logged in user"
+        id:
+          type: integer
+          format: id
+          description: "Must be id linking to a listing"
+      example:
+        user_id: 1001
+        id: 1
+
+    SavedItemsPostResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+        message:
+          type: string
+      example:
+        id: 1
+        message: "Post saved successfully"
