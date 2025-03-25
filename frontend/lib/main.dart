@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:utm_marketplace/login/view_models/login.viewmodel.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
 import 'package:utm_marketplace/shared/routes/routes.dart';
 import 'package:utm_marketplace/item_listing/repository/listing_repo.dart';
@@ -32,6 +33,9 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(
+          create: (_) => LoginViewModel(),
+        ),
         ChangeNotifierProvider(
           create: (_) => SignUpViewModel(),
         ),

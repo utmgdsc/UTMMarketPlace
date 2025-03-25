@@ -9,3 +9,5 @@ fastapi-code-generator
 pyjwt
 motor
 python-dateutil
+pytest
+pytest-asyncio

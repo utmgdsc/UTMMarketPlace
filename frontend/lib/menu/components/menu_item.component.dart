@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:utm_marketplace/menu/model/menu.model.dart';
+import 'package:utm_marketplace/shared/secure_storage/secure_storage.dart';
 
 class MenuItemComponent extends StatelessWidget {
   final MenuItem item;
@@ -34,7 +35,11 @@ class MenuItemComponent extends StatelessWidget {
           ),
           onTap: () {
             if (isLogout) {
-              context.go('/login');
+              secureStorage.delete(key: 'jwt_token').then((_) {
+                if (context.mounted) {
+                  context.go('/login');
+                }
+              });
             } else {
               context.push(item.route);
             }

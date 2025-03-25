@@ -58,6 +58,13 @@ class UserPutRequest(BaseModel):
     rating_count: Optional[int]
     saved_posts: Optional[List[str]]
 
+class UserPutResponse(BaseModel):
+    display_name: Optional[str]
+    profile_picture: Optional[str]
+    email: Optional[EmailStr]
+    user_id: Optional[str]
+    location: Optional[str]
+
 
 class SignUpPostResponse(BaseModel):
     user_id: str
@@ -92,7 +99,7 @@ class ListingsPostRequest(BaseModel):
     title: str
     price: float
     description: Optional[str] = None
-    seller_id: str
+    seller_id: Optional[str] = None
     pictures: List[str]
     category: Optional[str] = None
     condition: str
