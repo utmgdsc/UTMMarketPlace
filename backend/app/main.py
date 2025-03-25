@@ -390,8 +390,6 @@ async def post_listings(
         listing_data = body.dict()
         listing_data["date_posted"] = datetime.now(timezone.utc).isoformat()  # Ensure date is handled properly
         listing_data["seller_id"] = current_user["id"]
-        listing_data["date_posted"] = datetime.now(timezone.utc).isoformat()  # Ensure date is handled properly
-        listing_data["seller_id"] = current_user["id"]
 
         # Insert into MongoDB
         result = await listings_collection.insert_one(listing_data)
@@ -409,8 +407,6 @@ async def post_listings(
             condition=body.condition,
             campus=body.campus,
         )
-    except exceptions.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired, login again")
     except exceptions.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired, login again")
     except ValidationError as e:
