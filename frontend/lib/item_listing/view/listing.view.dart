@@ -27,6 +27,33 @@ class _ListingViewState extends State<ListingView> {
     });
   }
 
+  Widget _buildItemGrid(ListingViewModel listingViewModel) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(hPad, 8.0, hPad, 8.0),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: itemCardDelegate(),
+        itemCount: listingViewModel.items.length,
+        itemBuilder: (context, index) {
+          final item = listingViewModel.items[index];
+          return GestureDetector(
+            onTap: () {
+              context.push('/item/${item.id}');
+            },
+            child: ItemCard(
+              id: item.id,
+              name: item.name,
+              price: item.price,
+              category: item.condition,
+              imageUrl: item.imageUrl ?? '',
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
@@ -71,7 +98,7 @@ class _ListingViewState extends State<ListingView> {
               ),
             ),
           ),
-          SizedBox(width: 8.0),
+          const SizedBox(width: 8.0),
           Container(
             decoration: BoxDecoration(
               color: Colors.grey[200],
@@ -82,9 +109,7 @@ class _ListingViewState extends State<ListingView> {
                 Icons.filter_list,
                 color: Colors.grey[600],
               ),
-              onPressed: () {
-                debugPrint('Filter button pressed');
-              },
+              onPressed: () => viewModel.showFilterBottomSheet(context),
             ),
           ),
         ],
@@ -126,30 +151,7 @@ class _ListingViewState extends State<ListingView> {
                     children: [
                       searchBar,
                       trendingLabel,
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(hPad, 8.0, hPad, 8.0),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          gridDelegate: itemCardDelegate(),
-                          itemCount: listingViewModel.items.length,
-                          itemBuilder: (context, index) {
-                            final item = listingViewModel.items[index];
-                            return GestureDetector(
-                              onTap: () {
-                                context.push('/item/${item.id}');
-                              },
-                              child: ItemCard(
-                                id: item.id,
-                                name: item.name,
-                                price: item.price,
-                                category: item.category,
-                                imageUrl: item.imageUrl ?? '',
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                      _buildItemGrid(listingViewModel),
                     ],
                   );
                 },

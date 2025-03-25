@@ -23,6 +23,7 @@ import 'package:utm_marketplace/signup/view_models/signup.viewmodel.dart';
 import 'package:utm_marketplace/shared/dio/dio.dart';
 import 'package:utm_marketplace/saved_items/view_models/saved_items.viewmodel.dart';
 import 'package:utm_marketplace/saved_items/repository/saved_items.repository.dart';
+import 'package:utm_marketplace/item_listing/view_models/filter.viewmodel.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,6 +66,9 @@ Future<void> main() async {
         ChangeNotifierProvider(
           create: (_) =>
               SavedItemsViewModel(repo: locator<SavedItemsRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => FilterViewModel(),
         ),
       ],
       child: const MyApp(),
