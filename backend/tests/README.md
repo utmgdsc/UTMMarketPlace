@@ -70,3 +70,8 @@ Run tests with detailed output:
 ```sh
 pytest -v --tb=long
 ```
+
+Run tests with no warnings:
+```sh
+pytest -v --disable-warnings
+```
