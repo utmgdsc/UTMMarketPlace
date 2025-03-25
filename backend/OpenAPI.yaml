@@ -493,6 +493,43 @@ paths:
                 schema:
                   $ref: "#/components/schemas/ErrorResponse"
 
+  /settings:
+    put:
+      summary: Update user settings
+      description: Update the settings for a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsPutRequest"
+      responses:
+        "200":
+          description: Settings updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingsPutResponse"
+        "400":
+          description: Bad Request - Missing or invalid settings data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+
 components:
   schemas:
     ErrorResponse:
@@ -804,3 +841,51 @@ components:
           type: string
           format: date-time
           description: The time when the message was sent.
+
+    SettingsPutRequest:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          description: The unique identifier of the user whose settings are being updated.
+        notifications:
+          type: boolean
+          description: Flag indicating whether notifications are enabled.
+        theme:
+          type: string
+          description: The UI theme preference (e.g., "light" or "dark").
+        text_size:
+          type: integer
+          description: The preferred text font size.
+      example:
+        user_id: "101"
+        notifications: true
+        theme: "dark"
+        text_size: 12
+    
+    SettingsPutResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: The unique identifier of the user.
+        notifications:
+          type: boolean
+          description: Current notification setting.
+        theme:
+          type: string
+          description: Current UI theme preference.
+        text_size:
+          type: integer
+          description: Current text size setting.
+        message:
+          type: string
+          description: Confirmation message.
+      example:
+        user_id: "101"
+        notifications: true
+        theme: "dark"
+        text_size: 12
+        message: "User settings updated successfully."
