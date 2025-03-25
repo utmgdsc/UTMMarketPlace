@@ -140,7 +140,6 @@ async def get_search(
 
         if next:
             search_stage["$search"]["searchAfter"] = next
-            print(f"Using next token: {next}")  # Debugging: Check next token value
 
         #Selecting which order to sort price by
         if price_type == "price-high-to-low":
@@ -154,6 +153,7 @@ async def get_search(
             {
                 "$match": {
                     "price": {"$gte": lower_price, "$lte": upper_price}}} if price_type is not None else None,
+            #Price filter
             {
                 "$sort": {
                     "price": price_order}} if price_order in [1, -1] else None,
@@ -183,6 +183,8 @@ async def get_search(
                 "paginationToken": {"$meta": "searchSequenceToken"},
             }}
         ]
+
+        #Clean the pipeline of any None values
         pipeline = [stage for stage in pipeline if stage is not None]
 
         cursor = listings_collection.aggregate(pipeline)                   
