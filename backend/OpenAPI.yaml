@@ -355,53 +355,144 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"  
-  delete:
-    summary: Delete a saved item
-    description: Remove a listing from a user's saved items collection.
-    parameters:
-      - name: saved_item_id
-        in: path
+    delete:
+      summary: Delete a saved item
+      description: Remove a listing from a user's saved items collection.
+      parameters:
+        - name: saved_item_id
+          in: path
+          required: true
+          description: The unique identifier of the saved item to delete.
+          schema:
+            type: string
+        - name: user_id
+          in: query
+          required: true
+          description: The unique identifier of the user who owns the saved item.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved item successfully deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: "Saved item deleted successfully."
+        "400":
+          description: Bad Request - Missing or invalid saved_item_id or user_id.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Saved item not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /messages:
+    post:
+      summary: Send a message
+      description: Create and send a new message from one user to another.
+      requestBody:
         required: true
-        description: The unique identifier of the saved item to delete.
-        schema:
-          type: string
-      - name: user_id
-        in: query
-        required: true
-        description: The unique identifier of the user who owns the saved item.
-        schema:
-          type: string
-    responses:
-      "200":
-        description: Saved item successfully deleted.
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                message:
-                  type: string
-              example:
-                message: "Saved item deleted successfully."
-      "400":
-        description: Bad Request - Missing or invalid saved_item_id or user_id.
-        content:
-          application/json:
+              $ref: "#/components/schemas/MessagesPostRequest"
+      responses:
+        "201":
+          description: Message sent successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessagesPostResponse"
+        "400":
+          description: Bad Request - Missing or invalid input data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+        summary: Retrieve messages between two users
+        description: Retrieve a list of messages exchanged between a sender and a recipient.
+        parameters:
+          - name: sender_id
+            in: query
+            required: true
+            description: The unique identifier of the sender.
             schema:
-              $ref: "#/components/schemas/ErrorResponse"
-      "404":
-        description: Saved item not found.
-        content:
-          application/json:
+              type: string
+          - name: recipient_id
+            in: query
+            required: true
+            description: The unique identifier of the recipient.
             schema:
-              $ref: "#/components/schemas/ErrorResponse"
-      "500":
-        description: Internal Server Error.
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ErrorResponse"
-              
+              type: string
+        responses:
+          "200":
+            description: A list of messages exchanged between the specified users.
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    messages:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/MessageGetResponseItem"
+                    total:
+                      type: integer
+                  example:
+                    messages:
+                      - message_id: "501"
+                        sender_id: "101"
+                        recipient_id: "202"
+                        content: "Hello, how are you?"
+                        timestamp: "2025-03-25T14:00:00Z"
+                      - message_id: "502"
+                        sender_id: "202"
+                        recipient_id: "101"
+                        content: "I'm good, thanks for asking!"
+                        timestamp: "2025-03-25T14:05:00Z"
+                    total: 2
+          "400":
+            description: Bad Request - Missing or invalid query parameters.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+          "404":
+            description: No messages found for the specified query.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+          "500":
+            description: Internal Server Error.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     ErrorResponse:
@@ -651,3 +742,65 @@ components:
       example:
         id: 1
         message: "Post saved successfully"
+
+    MessagesPostRequest:
+      type: object
+      required:
+        - sender_id
+        - recipient_id
+        - content
+      properties:
+        sender_id:
+          type: string
+          description: The unique identifier of the user sending the message.
+        recipient_id:
+          type: string
+          description: The unique identifier of the user receiving the message.
+        content:
+          type: string
+          description: The content of the message.
+      example:
+        sender_id: "101"
+        recipient_id: "202"
+        content: "Hello, is this still available?"
+
+    MessagesPostResponse:
+      type: object
+      required:
+        - message_id
+      properties:
+        message_id:
+          type: string
+          description: The unique identifier of the created message.
+        message:
+          type: string
+          description: Confirmation message.
+      example:
+        message_id: "501"
+        message: "Message sent successfully."
+
+    MessageGetResponseItem:
+      type: object
+      required:
+        - message_id
+        - sender_id
+        - recipient_id
+        - content
+        - timestamp
+      properties:
+        message_id:
+          type: string
+          description: Unique identifier for the message.
+        sender_id:
+          type: string
+          description: Identifier for the user who sent the message.
+        recipient_id:
+          type: string
+          description: Identifier for the user who received the message.
+        content:
+          type: string
+          description: The content of the message.
+        timestamp:
+          type: string
+          format: date-time
+          description: The time when the message was sent.
