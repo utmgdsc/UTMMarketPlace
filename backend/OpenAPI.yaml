@@ -157,6 +157,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"  
+
   /login:
     post:
       summary: Log in a user
@@ -186,6 +187,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
   /search:
     get:
       summary: search listings
@@ -240,8 +242,14 @@ paths:
           in: query
           required: false
           schema:
-            type: str
+            type: string
           description: earlier date for date filtering
+        - name: campus
+          in: query
+          required: false
+          schema:
+            type: string
+          description: location of listing
       responses:
         "200":
           description: A list of marketplace listings

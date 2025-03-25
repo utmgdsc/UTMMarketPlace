@@ -112,6 +112,7 @@ async def get_search(
     upper_price: Optional[int] = Query(int(10**9), description="upper end of price filter"),
     condition: Optional[str] = Query(None, description="Filters such as condition, price, FILL IN"),
     date_range: Optional[str] = Query(None, description="Lower end of date filter"),
+    campus: Optional[str] = Query(None, description="Campus location of listings")
     ) -> Union[SearchGetResponse, ErrorResponse]:
     """
     search listings
@@ -146,7 +147,7 @@ async def get_search(
             price_order = -1
         elif price_type == "price-low-to-high":
             price_order = 1
-        print(datetime.now())
+
         pipeline = [
             search_stage,
             #Lower and upper limits of price (0 -> +inf by default)
@@ -166,6 +167,9 @@ async def get_search(
                 "$match": {
                     "date_posted": {"$gte": dateutil_parse(date_range).isoformat()}}}
                 if date_range is not None else None,
+            {
+                "$match": {
+                    "campus": campus}} if campus else None,
             {"$limit": limit},
             {"$project": {
                 "id": {"$toString": "$_id"},
