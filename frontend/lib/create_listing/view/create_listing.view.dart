@@ -31,6 +31,8 @@ class _CreateListingViewState extends State<CreateListingView> {
     _titleController.dispose();
     _priceController.dispose();
     _descriptionController.dispose();
+    viewModel.clearImages();
+    viewModel.clearCondition();
     super.dispose();
   }
 
@@ -60,7 +62,18 @@ class _CreateListingViewState extends State<CreateListingView> {
     );
 
     if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Posting successfully created!'),
+      ),
+      );
       context.pop();
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Error in posting. Please try again later.'),
+      ),
+      );
     }
   }
 
