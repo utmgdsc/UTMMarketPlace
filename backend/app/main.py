@@ -368,6 +368,7 @@ async def get_listings(
         return ErrorResponse(details="Internal Server Error. Please try again later.")
 
 
+
 @app.post(
     '/listings',
     response_model=None,

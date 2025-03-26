@@ -104,12 +104,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ListingsPostResponse"
-        "401":
-          description: Unauthorized - User not logged in
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
         "422":
           description: Validation error - Missing/incorrect required fields
           content:
@@ -163,7 +157,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"  
-  
+
   /login:
     post:
       summary: Log in a user
@@ -248,14 +242,8 @@ paths:
           in: query
           required: false
           schema:
-            type: string
+            type: str
           description: earlier date for date filtering
-        - name: campus
-          in: query
-          required: false
-          schema:
-            type: string
-          description: location of listing
       responses:
         "200":
           description: A list of marketplace listings
@@ -263,7 +251,284 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SearchGetResponse"
-  /user:
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"  
+
+  /saved_items:
+    post:
+      summary: Save a listing to a users saved posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavedItemsPostRequest"
+      responses:
+        "200":
+          description: Post saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedItemsPostResponse"
+        "422":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      summary: Retrieve saved items for a user
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: The unique identifier of the user whose saved items are being retrieved.
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Number of saved items per page.
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+        - name: next
+          in: query
+          required: false
+          description: Pagination token to retrieve the next set of results
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved listings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  saved_items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ListingGetResponseItem"
+                  total:
+                    tpye: integer
+                example:
+                  saved_items:
+                  - id: "1"
+                    title: "MacBook Pro for sale"
+                    price: 1200.99
+                    description: "Selling my MacBook Pro in great condition!"
+                    seller_id: "101"
+                    pictures: ["https://example.com/image1.jpg"]
+                    category: "Electronics"
+                    condition: "Used"
+                    date_posted: "2025-02-22T10:00:00Z"
+                    campus: "UTM"
+                    total: 1
+        "400":
+          description: Bad Request - Missing or invalid user_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Saved items not found for the specified user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"  
+    delete:
+      summary: Delete a saved item
+      description: Remove a listing from a user's saved items collection.
+      parameters:
+        - name: saved_item_id
+          in: path
+          required: true
+          description: The unique identifier of the saved item to delete.
+          schema:
+            type: string
+        - name: user_id
+          in: query
+          required: true
+          description: The unique identifier of the user who owns the saved item.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved item successfully deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: "Saved item deleted successfully."
+        "400":
+          description: Bad Request - Missing or invalid saved_item_id or user_id.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Saved item not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /messages:
+    post:
+      summary: Send a message
+      description: Create and send a new message from one user to another.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessagesPostRequest"
+      responses:
+        "201":
+          description: Message sent successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessagesPostResponse"
+        "400":
+          description: Bad Request - Missing or invalid input data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+        summary: Retrieve messages between two users
+        description: Retrieve a list of messages exchanged between a sender and a recipient.
+        parameters:
+          - name: sender_id
+            in: query
+            required: true
+            description: The unique identifier of the sender.
+            schema:
+              type: string
+          - name: recipient_id
+            in: query
+            required: true
+            description: The unique identifier of the recipient.
+            schema:
+              type: string
+        responses:
+          "200":
+            description: A list of messages exchanged between the specified users.
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    messages:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/MessageGetResponseItem"
+                    total:
+                      type: integer
+                  example:
+                    messages:
+                      - message_id: "501"
+                        sender_id: "101"
+                        recipient_id: "202"
+                        content: "Hello, how are you?"
+                        timestamp: "2025-03-25T14:00:00Z"
+                      - message_id: "502"
+                        sender_id: "202"
+                        recipient_id: "101"
+                        content: "I'm good, thanks for asking!"
+                        timestamp: "2025-03-25T14:05:00Z"
+                    total: 2
+          "400":
+            description: Bad Request - Missing or invalid query parameters.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+          "404":
+            description: No messages found for the specified query.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+          "500":
+            description: Internal Server Error.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+
+  /settings:
+    put:
+      summary: Update user settings
+      description: Update the settings for a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsPutRequest"
+      responses:
+        "200":
+          description: Settings updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingsPutResponse"
+        "400":
+          description: Bad Request - Missing or invalid settings data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+/user:
     get:
       summary: Get user details
       requestBody:
@@ -487,6 +752,7 @@ components:
     ListingsPostRequest:
       type: object
       required:
+        - seller_id
         - title
         - price
         - pictures
@@ -561,6 +827,147 @@ components:
         condition: "Used"
         date_posted: "2025-02-22T10:00:00Z"
         campus: "UTM"
+    
+    SavedItemsPostRequest:
+      type: object
+      required:
+        - user_id
+        - id
+      properties:
+        user_id:
+          type: integer
+          format: id
+          description: "Must be a id linking to a registered and logged in user"
+        id:
+          type: integer
+          format: id
+          description: "Must be id linking to a listing"
+      example:
+        user_id: 1001
+        id: 1
+
+    SavedItemsPostResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+        message:
+          type: string
+      example:
+        id: 1
+        message: "Post saved successfully"
+
+    MessagesPostRequest:
+      type: object
+      required:
+        - sender_id
+        - recipient_id
+        - content
+      properties:
+        sender_id:
+          type: string
+          description: The unique identifier of the user sending the message.
+        recipient_id:
+          type: string
+          description: The unique identifier of the user receiving the message.
+        content:
+          type: string
+          description: The content of the message.
+      example:
+        sender_id: "101"
+        recipient_id: "202"
+        content: "Hello, is this still available?"
+
+    MessagesPostResponse:
+      type: object
+      required:
+        - message_id
+      properties:
+        message_id:
+          type: string
+          description: The unique identifier of the created message.
+        message:
+          type: string
+          description: Confirmation message.
+      example:
+        message_id: "501"
+        message: "Message sent successfully."
+
+    MessageGetResponseItem:
+      type: object
+      required:
+        - message_id
+        - sender_id
+        - recipient_id
+        - content
+        - timestamp
+      properties:
+        message_id:
+          type: string
+          description: Unique identifier for the message.
+        sender_id:
+          type: string
+          description: Identifier for the user who sent the message.
+        recipient_id:
+          type: string
+          description: Identifier for the user who received the message.
+        content:
+          type: string
+          description: The content of the message.
+        timestamp:
+          type: string
+          format: date-time
+          description: The time when the message was sent.
+
+    SettingsPutRequest:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          description: The unique identifier of the user whose settings are being updated.
+        notifications:
+          type: boolean
+          description: Flag indicating whether notifications are enabled.
+        theme:
+          type: string
+          description: The UI theme preference (e.g., "light" or "dark").
+        text_size:
+          type: integer
+          description: The preferred text font size.
+      example:
+        user_id: "101"
+        notifications: true
+        theme: "dark"
+        text_size: 12
+    
+    SettingsPutResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: The unique identifier of the user.
+        notifications:
+          type: boolean
+          description: Current notification setting.
+        theme:
+          type: string
+          description: Current UI theme preference.
+        text_size:
+          type: integer
+          description: Current text size setting.
+        message:
+          type: string
+          description: Confirmation message.
+      example:
+        user_id: "101"
+        notifications: true
+        theme: "dark"
+        text_size: 12
+        message: "User settings updated successfully."
     UserGetResponse:    
       type: object
       required:
@@ -629,3 +1036,4 @@ components:
         user_id: "101"
         profile_picture: "https://example.com/image1.jpg"
         location: "Toronto"
+  
