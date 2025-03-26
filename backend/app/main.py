@@ -22,9 +22,9 @@ from bson import ObjectId
 from dateutil.parser import parse as dateutil_parse
 
 #importing async way of connecting to MongoDB
-from .MongoClient_async import db, listings_collection, users_collection
+from app.MongoClient_async import db, listings_collection, users_collection
 
-from .models import (
+from app.models import (
     ErrorResponse,
     ListingGetResponseItem,
     ListingsGetResponseAll,
@@ -36,10 +36,9 @@ from .models import (
     SignUpPostResponse,
     UserGetResponse,
     UserPutRequest,
+    UserPutResponse,
     SearchGetResponse
 )
-
-from .connect_db import db  # Import MongoDB connection
 
 app = FastAPI(
     title='UTM Marketplace API',
@@ -95,7 +94,7 @@ async def authenticate_user(email: str, password):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    raise HTTPException(status_code=422, detail="Invalid request")
+    raise HTTPException(status_code=422, detail="Invalid request.")
 
 ######################################## LISTINGS ENDPOINTS ########################################
 @app.get(
@@ -112,6 +111,7 @@ async def get_search(
     upper_price: Optional[int] = Query(int(10**9), description="upper end of price filter"),
     condition: Optional[str] = Query(None, description="Filters such as condition, price, FILL IN"),
     date_range: Optional[str] = Query(None, description="Lower end of date filter"),
+    campus: Optional[str] = Query(None, description="Campus location of listings")
     ) -> Union[SearchGetResponse, ErrorResponse]:
     """
     search listings
@@ -146,7 +146,7 @@ async def get_search(
             price_order = -1
         elif price_type == "price-low-to-high":
             price_order = 1
-        print(datetime.now())
+
         pipeline = [
             search_stage,
             #Lower and upper limits of price (0 -> +inf by default)
@@ -166,6 +166,9 @@ async def get_search(
                 "$match": {
                     "date_posted": {"$gte": dateutil_parse(date_range).isoformat()}}}
                 if date_range is not None else None,
+            {
+                "$match": {
+                    "campus": campus}} if campus else None,
             {"$limit": limit},
             {"$project": {
                 "id": {"$toString": "$_id"},
@@ -274,6 +277,7 @@ async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorRes
     responses={'500': {'model': ErrorResponse}},
 )
 async def get_listings(
+    query: Optional[str] = Query(None, description="query"),
     limit: Optional[int] = Query(5, description="Number of listings to retrieve", ge=1, le=30), 
     next: Optional[str] = Query(None, description="Last seen pagination token"),
 ) -> Union[ListingsGetResponseAll, ErrorResponse]:
@@ -281,17 +285,33 @@ async def get_listings(
     Retrieve listings using cursor-based pagination.
     """
     try:
-        # Ensure limit is within a reasonable range
-        limit = min(max(limit, 1), 30)
+        limit = min(max(limit, 1), 30)  # Ensure limit stays between 1 and 30
 
-        search_stage = {"$search": {
-                "index": "Full_text_index_listings",
-                "exists": { "path": "_id" },  # This is always true; essentially just gets all documents
-            }}
-
-        # Search after last seen token
+        if query:
+            print("GOT Query", query)
+            search_stage = {
+                "$search": {
+                    "index": "Full_text_index_listings",
+                    "text": {
+                        "query": query,
+                        "path": {
+                            "wildcard": "*",
+                        },
+                    },
+                },
+            }
+        else:
+            print("NO QUERY")
+            search_stage = {
+                "$search": {
+                    "index": "Full_text_index_listings",
+                    "exists": {"path": "_id"},  # This is always true; essentially just gets all documents
+                }
+            }
+            
         if next:
-            search_stage["searchAfter"] = next
+            search_stage["$search"]["searchAfter"] = next
+            # print(f"Using next token: {next}")  # Debugging: Check next token value
 
         pipeline = [
             search_stage,
@@ -348,10 +368,14 @@ async def get_listings(
         return ErrorResponse(details="Internal Server Error. Please try again later.")
 
 
-@app.post('/listings',
+
+@app.post(
+    '/listings',
     response_model=None,
+    status_code=201,
     responses={
         '201': {'model': ListingsPostResponse},
+        '401': {'model': ErrorResponse},
         '422': {'model': ErrorResponse},
         '500': {'model': ErrorResponse},
     },
@@ -396,6 +420,7 @@ async def post_listings(
 @app.get('/user/{userid}',
     response_model=UserGetResponse,
     responses={
+        '200': {'model': UserGetResponse},
         '400': {'model': ErrorResponse},
         '404': {'model': ErrorResponse},
         '422': {'model': ErrorResponse},
@@ -427,8 +452,9 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
 
 
 @app.put('/user/{userid}',
-    response_model=UserGetResponse,
+    response_model=None,
     responses={
+        '201': {'model': UserPutResponse},
         '400': {'model': ErrorResponse},
         '403': {'model': ErrorResponse},
         '404': {'model': ErrorResponse},
@@ -436,7 +462,7 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
         '500': {'model': ErrorResponse},
     },
 )
-async def update_user(userid: str, body: UserPutRequest, current_user: dict = Depends(get_current_user)) -> Union[UserGetResponse, ErrorResponse]:
+async def update_user(userid: str, body: UserPutRequest, current_user: dict = Depends(get_current_user)) -> Union[UserPutResponse, ErrorResponse]:
     """
     Update user details only if the user matches.
     """
@@ -450,20 +476,22 @@ async def update_user(userid: str, body: UserPutRequest, current_user: dict = De
             raise HTTPException(status_code=404, detail="User not found")
 
         update_data = body.dict(exclude_unset=True)
+        
+        # checking if email is valid format
+        if "email" in update_data:
+            if not re.match(r"^[a-zA-Z0-9_.+-]+@(utoronto\.ca|mail\.utoronto\.ca)$", update_data["email"]):
+                raise HTTPException(status_code=400, detail="Invalid email format.")
 
         await users_collection.update_one({"_id": ObjectId(userid)}, {"$set": update_data})
 
         updated_user = await users_collection.find_one({"_id": ObjectId(userid)})
 
-        return UserGetResponse(
+        return UserPutResponse(
             display_name=updated_user["display_name"],
             profile_picture= updated_user.get("profile_picture"),
             email=updated_user["email"],
-            rating=updated_user.get("rating", 0),
             user_id=str(updated_user["_id"]),
             location=updated_user.get("location", ""),
-            rating_count=updated_user.get("rating_count", 0),
-            saved_posts=updated_user.get("saved_posts", []),
         )
         
     except Exception as e:
