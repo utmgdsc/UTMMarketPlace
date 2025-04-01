@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:utm_marketplace/profile/components/edit_profile_dialog.component.dart';
 
 class ProfileHeader extends StatelessWidget {
   final String name;
@@ -31,6 +32,21 @@ class ProfileHeader extends StatelessWidget {
       ),
       backgroundColor: Colors.transparent,
       elevation: 0,
+      leading: isOwnProfile
+          ? IconButton(
+              icon: const Icon(Icons.edit, color: Colors.white),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => EditProfileDialog(
+                    userId: 'me', // Since this is own profile
+                    currentName: name,
+                    currentImageUrl: imageUrl,
+                  ),
+                );
+              },
+            )
+          : null,
       actions: isOwnProfile
           ? [
               IconButton(
