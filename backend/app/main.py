@@ -22,9 +22,9 @@ from bson import ObjectId
 from dateutil.parser import parse as dateutil_parse
 
 #importing async way of connecting to MongoDB
-from app.MongoClient_async import db, listings_collection, users_collection
+from MongoClient_async import db, listings_collection, users_collection
 
-from app.models import (
+from models import (
     ErrorResponse,
     ListingGetResponseItem,
     ListingsGetResponseAll,
@@ -413,6 +413,131 @@ async def post_listings(
         return ErrorResponse(status_code=422, details="Validation error. Please check your input data.")
     except Exception as e:
         return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
+    
+######################################## SAVED POSTS ENDPOINTS ###################################
+
+@app.post("/saved_items", responses={
+    200: {"description": "Item saved successfully."},
+    400: {"model": ErrorResponse},
+    404: {"model": ErrorResponse},
+    409: {"model": ErrorResponse},
+    500: {"model": ErrorResponse},
+})
+async def save_item(
+    id: str = Query(..., description="ID of the item to save"),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Save an item to the user's saved list.
+    """
+    try:
+        # Validate the ID format
+        if not ObjectId.is_valid(id):
+            raise HTTPException(status_code=400, detail="Invalid listing ID format.")
+
+        # Check if the listing exists
+        listing = await listings_collection.find_one({"_id": ObjectId(id)})
+        if not listing:
+            raise HTTPException(status_code=404, detail="Listing not found.")
+
+        # Check if the user exists
+        user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
+        if not user:
+            raise HTTPException(status_code=400, detail="User not found. Please log in or sign up.")
+
+        # Check if the item is already saved
+        saved_posts = user.get("saved_posts", [])
+        if id in saved_posts:
+            raise HTTPException(status_code=409, detail="Item already saved.")
+
+        if len(saved_posts) >= 30:
+            raise HTTPException(status_code=400, detail="You can only save up to 30 items.")
+
+    
+        saved_posts.append(id)
+        await users_collection.update_one({"_id": ObjectId(current_user["id"])}, {"$set": {"saved_posts": saved_posts}})
+        return {"message": "Item saved successfully."}
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error. Please try again later. {e}")
+
+
+@app.get("/saved_items",
+    response_model=ListingsGetResponseAll,
+    responses={
+        200: {"description": "List of saved listings"},
+        400: {"model": ErrorResponse},
+        500: {"model": ErrorResponse},
+    },
+)
+async def get_saved_items(current_user: dict = Depends(get_current_user)):
+    try:
+        user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
+        if not user:
+            raise HTTPException(status_code=400, detail="User not found")
+
+        saved_ids = user.get("saved_posts", [])
+        if not saved_ids:
+            return [], 0
+
+        # Convert only valid ObjectIds
+        object_ids = [ObjectId(item_id) for item_id in saved_ids if ObjectId.is_valid(item_id)]
+
+        listings_cursor = listings_collection.find({"_id": {"$in": object_ids}})
+        listings = await listings_cursor.to_list(length=30)
+
+        response_data = [
+            ListingGetResponseItem(
+                id=str(listing["_id"]),
+                title=listing.get("title"),
+                price=listing.get("price"),
+                description=listing.get("description"),
+                seller_id=listing.get("seller_id"),
+                pictures=listing.get("pictures", []),
+                condition=listing.get("condition"),
+                category=listing.get("category"),
+                date_posted=listing.get("date_posted"),
+                campus=listing.get("campus"),
+            )
+            for listing in listings
+        ]
+        return ListingsGetResponseAll(
+            listings=response_data,
+            total=len(response_data),
+            )
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(detail="Internal Server Error. Please try again later.")
+
+
+@app.delete("/saved_items", responses={
+    200: {"description": "Item removed from saved list."},
+    400: {"model": ErrorResponse},
+    404: {"model": ErrorResponse},
+    500: {"model": ErrorResponse},
+})
+async def delete_saved_item(id: str = Query(..., description="ID of the item to remove"), current_user: dict = Depends(get_current_user)):
+    try:
+        user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
+        if not user:
+            raise HTTPException(status_code=400, detail="User not found")
+
+        saved_posts = user.get("saved_posts", [])
+        if id not in saved_posts:
+            raise HTTPException(status_code=404, detail="Item not found in saved list")
+
+        saved_posts.remove(id)
+        await users_collection.update_one({"_id": ObjectId(current_user["id"])}, {"$set": {"saved_posts": saved_posts}})
+        return {"message": "Item removed from saved list."}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        return ErrorResponse(detail="Internal Server Error. Please try again later.")
+
 
 ######################################## USER ENDPOINTS ########################################
 
