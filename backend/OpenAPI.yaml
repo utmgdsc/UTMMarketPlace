@@ -402,6 +402,60 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+    /conversations:
+    get:
+      summary: Retrieve user conversations
+      description: Returns a list of conversations the user is involved in.
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: The ID of the user whose conversations are being retrieved.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of user conversations.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        conversation_id:
+                          type: string
+                        participant_ids:
+                          type: array
+                          items:
+                            type: string
+                        last_message:
+                          type: string
+                        last_timestamp:
+                          type: string
+                          format: date-time
+                example:
+                  conversations:
+                    - conversation_id: "abc123"
+                      participant_ids: ["101", "202"]
+                      last_message: "See you soon!"
+                      last_timestamp: "2025-04-04T18:00:00Z"
+        "400":
+          description: Missing or invalid user_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /messages:
     post:
       summary: Send a message
@@ -493,6 +547,60 @@ paths:
                 schema:
                   $ref: "#/components/schemas/ErrorResponse"
 
+  /conversations:
+    get:
+      summary: Retrieve user conversations
+      description: Returns a list of conversations the user is involved in.
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: The ID of the user whose conversations are being retrieved.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of user conversations.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        conversation_id:
+                          type: string
+                        participant_ids:
+                          type: array
+                          items:
+                            type: string
+                        last_message:
+                          type: string
+                        last_timestamp:
+                          type: string
+                          format: date-time
+                example:
+                  conversations:
+                    - conversation_id: "abc123"
+                      participant_ids: ["101", "202"]
+                      last_message: "See you soon!"
+                      last_timestamp: "2025-04-04T18:00:00Z"
+        "400":
+          description: Missing or invalid user_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /settings:
     put:
       summary: Update user settings
@@ -528,7 +636,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-/user:
+
+  /user:
     get:
       summary: Get user details
       requestBody:
