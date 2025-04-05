@@ -242,7 +242,7 @@ paths:
           in: query
           required: false
           schema:
-            type: str
+            type: string
           description: earlier date for date filtering
       responses:
         "200":
@@ -268,7 +268,7 @@ paths:
             schema:
               $ref: "#/components/schemas/SavedItemsPostRequest"
       responses:
-        "200":
+        "201":
           description: Post saved successfully
           content:
             application/json:
@@ -344,7 +344,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Saved items not found for the specified user
+          description: User not found
           content:
             application/json:
               schema:
@@ -419,7 +419,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MessagesPostResponse"
-        "400":
+        "422":
           description: Bad Request - Missing or invalid input data.
           content:
             application/json:
@@ -510,7 +510,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SettingsPutResponse"
-        "400":
+        "422":
           description: Bad Request - Missing or invalid settings data.
           content:
             application/json:
