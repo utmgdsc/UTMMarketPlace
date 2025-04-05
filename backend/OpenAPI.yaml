@@ -88,7 +88,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-    
+
     post:
       summary: Create a new listing
       requestBody:
@@ -156,7 +156,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"  
+                $ref: "#/components/schemas/ErrorResponse"
 
   /login:
     post:
@@ -256,7 +256,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"  
+                $ref: "#/components/schemas/ErrorResponse"
 
   /saved_items:
     post:
@@ -304,17 +304,17 @@ paths:
                     type: integer
                 example:
                   saved_items:
-                  - id: "1"
-                    title: "MacBook Pro for sale"
-                    price: 1200.99
-                    description: "Selling my MacBook Pro in great condition!"
-                    seller_id: "101"
-                    pictures: ["https://example.com/image1.jpg"]
-                    category: "Electronics"
-                    condition: "Used"
-                    date_posted: "2025-02-22T10:00:00Z"
-                    campus: "UTM"
-                    total: 1
+                    - id: "1"
+                      title: "MacBook Pro for sale"
+                      price: 1200.99
+                      description: "Selling my MacBook Pro in great condition!"
+                      seller_id: "101"
+                      pictures: ["https://example.com/image1.jpg"]
+                      category: "Electronics"
+                      condition: "Used"
+                      date_posted: "2025-02-22T10:00:00Z"
+                      campus: "UTM"
+                      total: 1
         "400":
           description: Bad Request - Missing or invalid user_id
           content:
@@ -332,7 +332,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"  
+                $ref: "#/components/schemas/ErrorResponse"
     delete:
       summary: Delete a saved item
       description: Remove a listing from a user's saved items collection.
@@ -464,66 +464,66 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     get:
-        summary: Retrieve messages between two users
-        description: Retrieve a list of messages exchanged between two users.
-        parameters:
-          - name: user1
-            in: query
-            required: true
-            description: The unique identifier of first participant of the conversation.
-            schema:
-              type: string
-          - name: user2
-            in: query
-            required: true
-            description: The unique identifier of the second participant of the conversation.
-            schema:
-              type: string
-        responses:
-          "200":
-            description: A list of messages exchanged between the specified users.
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    messages:
-                      type: array
-                      items:
-                        $ref: "#/components/schemas/MessageGetResponseItem"
-                    total:
-                      type: integer
-                  example:
-                    messages:
-                      - message_id: "501"
-                        sender_id: "101"
-                        recipient_id: "202"
-                        content: "Hello, how are you?"
-                        timestamp: "2025-03-25T14:00:00Z"
-                      - message_id: "502"
-                        sender_id: "202"
-                        recipient_id: "101"
-                        content: "I'm good, thanks for asking!"
-                        timestamp: "2025-03-25T14:05:00Z"
-                    total: 2
-          "400":
-            description: Bad Request - Missing or invalid query parameters.
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ErrorResponse"
-          "404":
-            description: No messages found for the specified query.
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ErrorResponse"
-          "500":
-            description: Internal Server Error.
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/ErrorResponse"
+      summary: Retrieve messages between two users
+      description: Retrieve a list of messages exchanged between two users.
+      parameters:
+        - name: user1
+          in: query
+          required: true
+          description: The unique identifier of first participant of the conversation.
+          schema:
+            type: string
+        - name: user2
+          in: query
+          required: true
+          description: The unique identifier of the second participant of the conversation.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of messages exchanged between the specified users.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MessageGetResponseItem"
+                  total:
+                    type: integer
+                example:
+                  messages:
+                    - message_id: "501"
+                      sender_id: "101"
+                      recipient_id: "202"
+                      content: "Hello, how are you?"
+                      timestamp: "2025-03-25T14:00:00Z"
+                    - message_id: "502"
+                      sender_id: "202"
+                      recipient_id: "101"
+                      content: "I'm good, thanks for asking!"
+                      timestamp: "2025-03-25T14:05:00Z"
+                  total: 2
+        "400":
+          description: Bad Request - Missing or invalid query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No messages found for the specified query.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /settings:
     put:
@@ -565,12 +565,12 @@ paths:
     get:
       summary: Get user details
       parameters:
-          - name: user_id
-            in: query
-            required: true
-            description: The user id to retrieve
-            schema:
-              type: string
+        - name: user_id
+          in: query
+          required: true
+          description: The user id to retrieve
+          schema:
+            type: string
       responses:
         "200":
           description: User details retrieved successfully
@@ -643,7 +643,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-
 components:
   schemas:
     ErrorResponse:
@@ -653,7 +652,7 @@ components:
       properties:
         details:
           type: string
-    
+
     SignUpPostRequest:
       type: object
       required:
@@ -671,7 +670,7 @@ components:
       example:
         email: "student@utoronto.ca"
         password: "P@ssword123"
-    
+
     LogInPostRequest:
       type: object
       required:
@@ -689,7 +688,7 @@ components:
       example:
         email: "student@utoronto.ca"
         password: "P@ssword123"
-    
+
     LogInPostResponse:
       type: object
       required:
@@ -701,8 +700,8 @@ components:
           type: string
       example:
         user_id: 42
-        message: "User logged in successfully."  
-    
+        message: "User logged in successfully."
+
     SignUpPostResponse:
       type: object
       required:
@@ -714,8 +713,8 @@ components:
           type: string
       example:
         user_id: 42
-        message: "User registered successfully."  
-    
+        message: "User registered successfully."
+
     SearchGetResponse:
       type: object
       required:
@@ -773,7 +772,7 @@ components:
         condition: "Used"
         date_posted: "2025-02-22T10:00:00Z"
         campus: "UTM"
-    
+
     ListingsGetResponseAll:
       type: object
       properties:
@@ -783,7 +782,7 @@ components:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
-    
+
     ListingsPostRequest:
       type: object
       required:
@@ -817,11 +816,12 @@ components:
         price: 899.99
         description: "Lightly used gaming laptop, great condition!"
         seller_id: "101"
-        pictures: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
+        pictures:
+          ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
         category: "Electronics"
         condition: "Used"
         campus: "UTM"
-    
+
     ListingsPostResponse:
       type: object
       required:
@@ -857,12 +857,13 @@ components:
         price: 899.99
         description: "Lightly used gaming laptop, great condition!"
         seller_id: "101"
-        pictures: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
+        pictures:
+          ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
         category: "Electronics"
         condition: "Used"
         date_posted: "2025-02-22T10:00:00Z"
         campus: "UTM"
-    
+
     SavedItemsPostRequest:
       type: object
       required:
@@ -973,7 +974,7 @@ components:
         notifications: true
         theme: "dark"
         text_size: 12
-    
+
     SettingsPutResponse:
       type: object
       properties:
@@ -986,15 +987,12 @@ components:
         text_size:
           type: integer
           description: Current text size setting.
-        message:
-          type: string
-          description: Confirmation message.
       example:
         notifications: true
         theme: "dark"
         text_size: 12
         message: "User settings updated successfully."
-    UserGetResponse:    
+    UserGetResponse:
       type: object
       required:
         - display_name
@@ -1013,10 +1011,10 @@ components:
           type: string
         location:
           type: string
-        rating: 
+        rating:
           type: number
         rating_count:
-          type: integer 
+          type: integer
         saved_posts:
           type: array
           items:
@@ -1045,4 +1043,3 @@ components:
         profile_picture: "https://example.com/image1.jpg"
         email: drakedrake@utoronto.ca
         location: "Toronto"
-  
