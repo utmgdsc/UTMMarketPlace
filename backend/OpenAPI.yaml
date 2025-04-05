@@ -260,7 +260,7 @@ paths:
 
   /saved_items:
     post:
-      summary: Save a listing to a users saved posts
+      summary: Save a listing to a users saved posts. This endpoint requires authentication.
       requestBody:
         required: true
         content:
@@ -287,29 +287,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     get:
-      summary: Retrieve saved items for a user
-      parameters:
-        - name: user_id
-          in: query
-          required: true
-          description: The unique identifier of the user whose saved items are being retrieved.
-          schema:
-            type: string
-        - name: limit
-          in: query
-          required: false
-          description: Number of saved items per page.
-          schema:
-            type: integer
-            default: 10
-            minimum: 1
-            maximum: 50
-        - name: next
-          in: query
-          required: false
-          description: Pagination token to retrieve the next set of results
-          schema:
-            type: string
+      summary: Retrieve saved items for a user. User id is determined based on JWT.
       responses:
         "200":
           description: Saved listings retrieved successfully
@@ -365,12 +343,6 @@ paths:
           description: The unique identifier of the saved item to delete.
           schema:
             type: string
-        - name: user_id
-          in: query
-          required: true
-          description: The unique identifier of the user who owns the saved item.
-          schema:
-            type: string
       responses:
         "200":
           description: Saved item successfully deleted.
@@ -390,7 +362,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Saved item not found.
+          description: Item not saved by user or item not found
           content:
             application/json:
               schema:
@@ -449,6 +421,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Bad Request - Missing or invalid input data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: Internal Server Error
           content:
@@ -487,18 +465,18 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
     get:
         summary: Retrieve messages between two users
-        description: Retrieve a list of messages exchanged between a sender and a recipient.
+        description: Retrieve a list of messages exchanged between two users.
         parameters:
-          - name: sender_id
+          - name: user1
             in: query
             required: true
-            description: The unique identifier of the sender.
+            description: The unique identifier of first participant of the conversation.
             schema:
               type: string
-          - name: recipient_id
+          - name: user2
             in: query
             required: true
-            description: The unique identifier of the recipient.
+            description: The unique identifier of the second participant of the conversation.
             schema:
               type: string
         responses:
@@ -888,19 +866,13 @@ components:
     SavedItemsPostRequest:
       type: object
       required:
-        - user_id
         - id
       properties:
-        user_id:
-          type: integer
-          format: id
-          description: "Must be a id linking to a registered and logged in user"
         id:
           type: integer
           format: id
           description: "Must be id linking to a listing"
       example:
-        user_id: 1001
         id: 1
 
     SavedItemsPostResponse:
@@ -941,6 +913,8 @@ components:
       type: object
       required:
         - message_id
+        - message
+        - timestamp
       properties:
         message_id:
           type: string
@@ -948,9 +922,14 @@ components:
         message:
           type: string
           description: Confirmation message.
+        timestamp:
+          type: string
+          format: date-time
+          description: The time when the message was sent.
       example:
         message_id: "501"
         message: "Message sent successfully."
+        timestamp: 2012-04-23T18:25:43.511Z
 
     MessageGetResponseItem:
       type: object
@@ -980,12 +959,7 @@ components:
 
     SettingsPutRequest:
       type: object
-      required:
-        - user_id
       properties:
-        user_id:
-          type: string
-          description: The unique identifier of the user whose settings are being updated.
         notifications:
           type: boolean
           description: Flag indicating whether notifications are enabled.
@@ -996,7 +970,6 @@ components:
           type: integer
           description: The preferred text font size.
       example:
-        user_id: "101"
         notifications: true
         theme: "dark"
         text_size: 12
@@ -1004,9 +977,6 @@ components:
     SettingsPutResponse:
       type: object
       properties:
-        user_id:
-          type: string
-          description: The unique identifier of the user.
         notifications:
           type: boolean
           description: Current notification setting.
@@ -1020,7 +990,6 @@ components:
           type: string
           description: Confirmation message.
       example:
-        user_id: "101"
         notifications: true
         theme: "dark"
         text_size: 12
