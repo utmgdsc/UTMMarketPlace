@@ -871,7 +871,6 @@ components:
       properties:
         id:
           type: integer
-          format: id
           description: "Must be id linking to a listing"
       example:
         id: 1
