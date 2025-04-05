@@ -13,6 +13,8 @@ servers:
 paths:
   /sign-up:
     post:
+      tags:
+        - authentication
       summary: Sign up a new user
       description: Registers a new user using an email and password.
       requestBody:
@@ -55,6 +57,8 @@ paths:
 
   /listings:
     get:
+      tags:
+        - listings
       summary: Retrieve all listings
       parameters:
         - name: limit
@@ -90,6 +94,8 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 
     post:
+      tags:
+        - listings
       summary: Create a new listing
       requestBody:
         required: true
@@ -119,6 +125,8 @@ paths:
 
   /listing:
     get:
+      tags:
+        - listings
       summary: Retrieve a single listing by ID
       parameters:
         - name: listing_id
@@ -160,6 +168,8 @@ paths:
 
   /login:
     post:
+      tags:
+        - authentication
       summary: Log in a user
       description: Log in a existing user using a email and password.
       requestBody:
@@ -190,6 +200,8 @@ paths:
 
   /search:
     get:
+      tags:
+        - listings
       summary: search listings
       description: send a search query to the backend and return matching listings.
       parameters:
@@ -260,6 +272,8 @@ paths:
 
   /saved_items:
     post:
+      tags:
+        - saved_items
       summary: Save a listing to a users saved posts. This endpoint requires authentication.
       requestBody:
         required: true
@@ -287,6 +301,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     get:
+      tags:
+        - saved_items
       summary: Retrieve saved items for a user. User id is determined based on JWT.
       responses:
         "200":
@@ -334,6 +350,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     delete:
+      tags:
+        - saved_items
       summary: Delete a saved item
       description: Remove a listing from a user's saved items collection.
       parameters:
@@ -376,6 +394,8 @@ paths:
 
   /conversations:
     get:
+      tags:
+        - messages
       summary: Retrieve user conversations
       description: Returns a list of conversations the user is involved in.
       parameters:
@@ -436,6 +456,8 @@ paths:
 
   /messages:
     post:
+      tags:
+        - messages
       summary: Send a message
       description: Create and send a new message from one user to another.
       requestBody:
@@ -464,6 +486,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     get:
+      tags:
+        - messages
       summary: Retrieve messages between two users
       description: Retrieve a list of messages exchanged between two users.
       parameters:
@@ -527,6 +551,8 @@ paths:
 
   /settings:
     put:
+      tags:
+        - settings
       summary: Update user settings
       description: Update the settings for a user.
       requestBody:
@@ -563,6 +589,8 @@ paths:
 
   /user:
     get:
+      tags:
+        - user
       summary: Get user details
       parameters:
         - name: user_id
@@ -604,6 +632,8 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 
     put:
+      tags:
+        - user
       summary: Update User details
       requestBody:
         required: true
