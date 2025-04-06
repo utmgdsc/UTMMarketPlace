@@ -880,6 +880,7 @@ components:
           type: array
           items:
             type: string
+            description: base64-encoded image 
         category:
           type: string
         condition:
@@ -891,7 +892,7 @@ components:
         price: 899.99
         description: "Lightly used gaming laptop, great condition!"
         seller_id: "101"
-        pictures: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
+        pictures: ["<base64_string_1>", "<base64_string_2>"]
         category: "Electronics"
         condition: "Used"
         campus: "UTM"

@@ -13,6 +13,7 @@ import base64
 import json
 load_dotenv()  # Load environment variables from .env
 JWT_SECRET = os.getenv("JWT_SECRET")
+STATIC_DIR = os.getenv("STATIC_DIR")
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, HTTPException, Query, Header
 from fastapi.exceptions import RequestValidationError
@@ -387,6 +388,7 @@ async def post_listings(
     Create a new listing
     """
     try:
+
         # Prepare data for MongoDB
         listing_data = body.dict()
         listing_data["date_posted"] = datetime.now(timezone.utc).isoformat()  # Ensure date is handled properly
@@ -395,6 +397,24 @@ async def post_listings(
         # Insert into MongoDB
         result = await listings_collection.insert_one(listing_data)
 
+        image_urls = []
+
+        os.makedirs(STATIC_DIR, exist_ok=True)
+
+        for idx, image_b64 in enumerate(body.pictures):
+            try:
+                img_data = base64.b64decode(image_b64)
+            except Exception:
+                raise HTTPException(status_code=422, detail="Invalid base64 image format")
+        
+            filename = f"{result.inserted_id}_{idx}.jpg"
+            filepath = os.path.join(STATIC_DIR, filename)
+
+            with open(filepath, "wb") as f:
+                f.write(img_data)
+            
+            image_urls.append(f"/static/{filename}")
+
         # Return the created listing
         return ListingsPostResponse(
             id=str(result.inserted_id),
@@ -402,7 +422,7 @@ async def post_listings(
             price=body.price,
             description=body.description,
             seller_id=current_user["id"],
-            pictures=body.pictures,
+            pictures=image_urls,
             category=body.category,
             date_posted=listing_data["date_posted"],
             condition=body.condition,
