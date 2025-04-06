@@ -39,7 +39,7 @@ class ProfileViewModel extends LoadingViewModel {
     String? imageUrl,
   }) async {
     if (_profileModel == null) return false;
-    
+
     try {
       _isUpdating = true;
       notifyListeners();

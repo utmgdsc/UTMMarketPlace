@@ -37,7 +37,8 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await _imagePicker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
@@ -61,7 +62,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     }
 
     final success = await viewModel.updateProfile(
-      userId: 'me',  // Since this is always editing own profile
+      userId: 'me', // Since this is always editing own profile
       name: _nameController.text,
       imageUrl: imageUrl,
     );
@@ -174,4 +175,4 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
       ),
     );
   }
-} 
+}
