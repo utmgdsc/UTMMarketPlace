@@ -5,51 +5,64 @@ enum SortOrder {
 }
 
 class FilterOptions {
-  final SortOrder? sortOrder;
-  final DateTime? dateFrom;
+  final String? priceType;
+  final DateTime? dateRange;
   final String? condition;
-  final double? minPrice;
-  final double? maxPrice;
+  final double? lowerPrice;
+  final double? upperPrice;
   final String? campus;
 
   FilterOptions({
-    this.sortOrder,
-    this.dateFrom,
+    this.priceType,
+    this.dateRange,
     this.condition,
-    this.minPrice,
-    this.maxPrice,
+    this.lowerPrice,
+    this.upperPrice,
     this.campus,
   });
 
   bool get hasFilters =>
-      sortOrder != null ||
-      dateFrom != null ||
+      priceType != null ||
+      dateRange != null ||
       condition != null ||
-      minPrice != null ||
-      maxPrice != null ||
+      lowerPrice != null ||
+      upperPrice != null ||
       campus != null;
 
   // Helper method to format date for display
   String get formattedDateFrom {
-    if (dateFrom == null) return 'All time';
-    return '${dateFrom!.month}/${dateFrom!.day}/${dateFrom!.year}';
+    if (dateRange == null) return 'All time';
+    return '${dateRange!.month}/${dateRange!.day}/${dateRange!.year}';
+  }
+
+  // Convert SortOrder to backend price_type
+  static String? sortOrderToPriceType(SortOrder? order) {
+    if (order == null) return null;
+    switch (order) {
+      case SortOrder.priceLowToHigh:
+        return 'price-low-to-high';
+      case SortOrder.priceHighToLow:
+        return 'price-high-to-low';
+      case SortOrder.dateRecent:
+        return 'date-recent';
+    }
   }
 
   // Copy with method for immutability
   FilterOptions copyWith({
-    SortOrder? sortOrder,
-    DateTime? dateFrom,
+    String? priceType,
+    DateTime? dateRange,
     String? condition,
-    double? minPrice,
-    double? maxPrice,
+    double? lowerPrice,
+    double? upperPrice,
     String? campus,
   }) {
     return FilterOptions(
-      sortOrder: sortOrder ?? this.sortOrder,
-      dateFrom: dateFrom ?? this.dateFrom,
+      priceType: priceType ?? this.priceType,
+      dateRange: dateRange ?? this.dateRange,
       condition: condition ?? this.condition,
-      minPrice: minPrice ?? this.minPrice,
-      maxPrice: maxPrice ?? this.maxPrice,
+      lowerPrice: lowerPrice ?? this.lowerPrice,
+      upperPrice: upperPrice ?? this.upperPrice,
       campus: campus ?? this.campus,
     );
   }

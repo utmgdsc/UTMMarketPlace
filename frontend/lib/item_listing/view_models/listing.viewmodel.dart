@@ -39,34 +39,31 @@ class ListingViewModel extends LoadingViewModel {
       if (filters.campus != null && item.campus != filters.campus) {
         return false;
       }
-      if (filters.minPrice != null && item.price < filters.minPrice!) {
+      if (filters.lowerPrice != null && item.price < filters.lowerPrice!) {
         return false;
       }
-      if (filters.maxPrice != null && item.price > filters.maxPrice!) {
+      if (filters.upperPrice != null && item.price > filters.upperPrice!) {
         return false;
       }
-      if (filters.dateFrom != null && 
-          (item.datePosted == null || item.datePosted!.isBefore(filters.dateFrom!))) {
+      if (filters.dateRange != null && 
+          (item.datePosted == null || item.datePosted!.isBefore(filters.dateRange!))) {
         return false;
       }
       return true;
     }).toList();
 
-    if (filters.sortOrder != null) {
-      switch (filters.sortOrder) {
-        case SortOrder.priceLowToHigh:
-          _filteredItems.sort((a, b) => a.price.compareTo(b.price));
-          break;
-        case SortOrder.priceHighToLow:
-          _filteredItems.sort((a, b) => b.price.compareTo(a.price));
-          break;
-        case SortOrder.dateRecent:
-          _filteredItems.sort((a, b) => (b.datePosted ?? DateTime.now())
-              .compareTo(a.datePosted ?? DateTime.now()));
-          break;
-        default:
-          break;
-      }
+    final sortType = filters.priceType ?? 'date-recent';
+    switch (sortType) {
+      case 'price-low-to-high':
+        _filteredItems.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case 'price-high-to-low':
+        _filteredItems.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case 'date-recent':
+        _filteredItems.sort((a, b) => 
+          (b.datePosted ?? DateTime.now()).compareTo(a.datePosted ?? DateTime.now()));
+        break;
     }
 
     notifyListeners();

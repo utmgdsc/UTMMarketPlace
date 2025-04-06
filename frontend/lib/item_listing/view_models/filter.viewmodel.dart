@@ -6,17 +6,17 @@ import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
 
 class FilterViewModel extends LoadingViewModel {
   SortOrder? _sortOrder;
-  DateTime? _dateFrom;
+  DateTime? _dateRange;
   String? _condition;
-  double? _minPrice;
-  double? _maxPrice;
+  double? _lowerPrice;
+  double? _upperPrice;
   String? _campus;
 
   SortOrder? get sortOrder => _sortOrder;
-  DateTime? get dateFrom => _dateFrom;
+  DateTime? get dateRange => _dateRange;
   String? get condition => _condition;
-  double? get minPrice => _minPrice;
-  double? get maxPrice => _maxPrice;
+  double? get lowerPrice => _lowerPrice;
+  double? get upperPrice => _upperPrice;
   String? get campus => _campus;
 
   void setSortOrder(SortOrder? value) {
@@ -24,8 +24,8 @@ class FilterViewModel extends LoadingViewModel {
     notifyListeners();
   }
 
-  void setDateFrom(DateTime? value) {
-    _dateFrom = value;
+  void setDateRange(DateTime? value) {
+    _dateRange = value;
     notifyListeners();
   }
 
@@ -34,13 +34,13 @@ class FilterViewModel extends LoadingViewModel {
     notifyListeners();
   }
 
-  void setMinPrice(double? value) {
-    _minPrice = value;
+  void setLowerPrice(double? value) {
+    _lowerPrice = value;
     notifyListeners();
   }
 
-  void setMaxPrice(double? value) {
-    _maxPrice = value;
+  void setUpperPrice(double? value) {
+    _upperPrice = value;
     notifyListeners();
   }
 
@@ -57,16 +57,16 @@ class FilterViewModel extends LoadingViewModel {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      setDateFrom(picked);
+      setDateRange(picked);
     }
   }
 
   void clearFilters() {
     _sortOrder = null;
-    _dateFrom = null;
+    _dateRange = null;
     _condition = null;
-    _minPrice = null;
-    _maxPrice = null;
+    _lowerPrice = null;
+    _upperPrice = null;
     _campus = null;
     notifyListeners();
   }
@@ -74,11 +74,11 @@ class FilterViewModel extends LoadingViewModel {
   void applyFilters(BuildContext context) {
     final listingViewModel = Provider.of<ListingViewModel>(context, listen: false);
     final filters = FilterOptions(
-      sortOrder: _sortOrder,
-      dateFrom: _dateFrom,
+      priceType: FilterOptions.sortOrderToPriceType(_sortOrder),
+      dateRange: _dateRange,
       condition: _condition,
-      minPrice: _minPrice,
-      maxPrice: _maxPrice,
+      lowerPrice: _lowerPrice,
+      upperPrice: _upperPrice,
       campus: _campus,
     );
     listingViewModel.applyFilters(filters);

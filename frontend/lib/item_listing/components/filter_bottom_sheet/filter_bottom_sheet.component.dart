@@ -200,27 +200,27 @@ class FilterBottomSheet extends StatelessWidget {
   }
 
   String _getPriceRangeText(FilterViewModel viewModel) {
-    if (viewModel.minPrice == null && viewModel.maxPrice == null) {
+    if (viewModel.lowerPrice == null && viewModel.upperPrice == null) {
       return 'Any price';
     }
-    if (viewModel.minPrice != null && viewModel.maxPrice == null) {
-      return 'From \$${viewModel.minPrice!.toStringAsFixed(2)}';
+    if (viewModel.lowerPrice != null && viewModel.upperPrice == null) {
+      return 'From \$${viewModel.lowerPrice!.toStringAsFixed(2)}';
     }
-    if (viewModel.minPrice == null && viewModel.maxPrice != null) {
-      return 'Up to \$${viewModel.maxPrice!.toStringAsFixed(2)}';
+    if (viewModel.lowerPrice == null && viewModel.upperPrice != null) {
+      return 'Up to \$${viewModel.upperPrice!.toStringAsFixed(2)}';
     }
-    return '\$${viewModel.minPrice!.toStringAsFixed(2)} - \$${viewModel.maxPrice!.toStringAsFixed(2)}';
+    return '\$${viewModel.lowerPrice!.toStringAsFixed(2)} - \$${viewModel.upperPrice!.toStringAsFixed(2)}';
   }
 
   void _showPriceRangeDialog(BuildContext context, FilterViewModel viewModel) {
     showDialog(
       context: context,
       builder: (context) => PriceRangeDialog(
-        initialMinPrice: viewModel.minPrice,
-        initialMaxPrice: viewModel.maxPrice,
-        onApply: (min, max) {
-          viewModel.setMinPrice(min);
-          viewModel.setMaxPrice(max);
+        initialLowerPrice: viewModel.lowerPrice,
+        initialUpperPrice: viewModel.upperPrice,
+        onApply: (lower, upper) {
+          viewModel.setLowerPrice(lower);
+          viewModel.setUpperPrice(upper);
           Navigator.pop(context);
         },
       ),
@@ -251,7 +251,7 @@ class FilterBottomSheet extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  viewModel.dateFrom?.toString() ?? 'All time',
+                  viewModel.dateRange?.toString() ?? 'All time',
                   style: const TextStyle(fontSize: 16),
                 ),
                 Icon(Icons.calendar_today, color: Colors.grey[600]),
@@ -345,14 +345,14 @@ class FilterBottomSheet extends StatelessWidget {
 }
 
 class PriceRangeDialog extends StatefulWidget {
-  final double? initialMinPrice;
-  final double? initialMaxPrice;
+  final double? initialLowerPrice;
+  final double? initialUpperPrice;
   final Function(double?, double?) onApply;
 
   const PriceRangeDialog({
     super.key,
-    this.initialMinPrice,
-    this.initialMaxPrice,
+    this.initialLowerPrice,
+    this.initialUpperPrice,
     required this.onApply,
   });
 
@@ -361,17 +361,17 @@ class PriceRangeDialog extends StatefulWidget {
 }
 
 class _PriceRangeDialogState extends State<PriceRangeDialog> {
-  late TextEditingController _minController;
-  late TextEditingController _maxController;
+  late TextEditingController _lowerController;
+  late TextEditingController _upperController;
 
   @override
   void initState() {
     super.initState();
-    _minController = TextEditingController(
-      text: widget.initialMinPrice?.toString() ?? '',
+    _lowerController = TextEditingController(
+      text: widget.initialLowerPrice?.toString() ?? '',
     );
-    _maxController = TextEditingController(
-      text: widget.initialMaxPrice?.toString() ?? '',
+    _upperController = TextEditingController(
+      text: widget.initialUpperPrice?.toString() ?? '',
     );
   }
 
@@ -383,19 +383,19 @@ class _PriceRangeDialogState extends State<PriceRangeDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
-            controller: _minController,
+            controller: _lowerController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: 'Minimum Price',
+              labelText: 'Lower Price',
               prefixText: '\$',
             ),
           ),
           const SizedBox(height: 16),
           TextField(
-            controller: _maxController,
+            controller: _upperController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: 'Maximum Price',
+              labelText: 'Upper Price',
               prefixText: '\$',
             ),
           ),
@@ -408,9 +408,9 @@ class _PriceRangeDialogState extends State<PriceRangeDialog> {
         ),
         TextButton(
           onPressed: () {
-            final min = double.tryParse(_minController.text);
-            final max = double.tryParse(_maxController.text);
-            widget.onApply(min, max);
+            final lower = double.tryParse(_lowerController.text);
+            final upper = double.tryParse(_upperController.text);
+            widget.onApply(lower, upper);
           },
           child: const Text('Apply'),
         ),
@@ -420,8 +420,8 @@ class _PriceRangeDialogState extends State<PriceRangeDialog> {
 
   @override
   void dispose() {
-    _minController.dispose();
-    _maxController.dispose();
+    _lowerController.dispose();
+    _upperController.dispose();
     super.dispose();
   }
 }
