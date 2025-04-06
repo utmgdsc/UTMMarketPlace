@@ -722,15 +722,16 @@ components:
     LogInPostResponse:
       type: object
       required:
-        - user_id
+        - access_token
+        - token_type
       properties:
-        user_id:
-          type: integer
-        message:
+        access_token:
+          type: string
+        token_type:
           type: string
       example:
-        user_id: 42
-        message: "User logged in successfully."
+        access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkiOiJ2YWx1ZSIsImtleTIiOiJ2YWx1ZTIiLCJpYXQiOjE2MzQxNzgxMTB9.vnXM0oxw05QH1Vs6RsvYp6LaEqFFqZ-NExQMXBgP7Mk"
+        token_type: "bearer"
 
     SignUpPostResponse:
       type: object
