@@ -76,7 +76,6 @@ class ProfileViewModel extends LoadingViewModel {
       return false;
     } finally {
       _isUpdating = false;
-      notifyListeners();
     }
   }
 }

@@ -39,7 +39,6 @@ class ProfileHeader extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (context) => EditProfileDialog(
-                    userId: 'me', // Since this is own profile
                     currentName: name,
                     currentImageUrl: imageUrl,
                   ),

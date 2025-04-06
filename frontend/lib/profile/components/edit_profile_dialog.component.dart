@@ -5,13 +5,11 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class EditProfileDialog extends StatefulWidget {
-  final String userId;
   final String currentName;
   final String currentImageUrl;
 
   const EditProfileDialog({
     super.key,
-    required this.userId,
     required this.currentName,
     required this.currentImageUrl,
   });
@@ -55,6 +53,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     });
 
     final viewModel = context.read<ProfileViewModel>();
+    final currentContext = context;
     String? imageUrl;
     if (_imageFile != null) {
       // TODO: Implement image upload and get URL
@@ -62,16 +61,16 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     }
 
     final success = await viewModel.updateProfile(
-      userId: widget.userId,
+      userId: 'me',  // Since this is always editing own profile
       name: _nameController.text,
       imageUrl: imageUrl,
     );
 
-    if (mounted) {
+    if (currentContext.mounted) {
       if (success) {
-        Navigator.pop(context);
+        Navigator.pop(currentContext);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(currentContext).showSnackBar(
           const SnackBar(
             content: Text('Failed to update profile. Please try again.'),
             backgroundColor: Colors.red,
