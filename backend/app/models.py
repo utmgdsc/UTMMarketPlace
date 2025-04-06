@@ -117,3 +117,19 @@ class ListingsPostResponse(BaseModel):
     condition: Optional[str] = None
     date_posted: Optional[datetime] = None
     campus: Optional[str] = None
+
+class SavedItemsPostRequest(BaseModel):
+    id: str = Field(..., description='Must be id linking to a listing')
+
+
+class SavedItemsPostResponse(BaseModel):
+    message: Optional[str] = None
+
+
+class SavedItemsGetResponse(BaseModel):
+    saved_items: Optional[List[ListingGetResponseItem]] = None
+    total: Optional[int] = None
+
+
+class SavedItemsDeleteResponse(BaseModel):
+    message: Optional[str] = None

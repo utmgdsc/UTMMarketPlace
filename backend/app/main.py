@@ -37,7 +37,11 @@ from models import (
     UserGetResponse,
     UserPutRequest,
     UserPutResponse,
-    SearchGetResponse
+    SearchGetResponse,
+    SavedItemsPostRequest,
+    SavedItemsPostResponse,
+    SavedItemsGetResponse,
+    SavedItemsDeleteResponse,
 )
 
 app = FastAPI(
@@ -414,29 +418,32 @@ async def post_listings(
     except Exception as e:
         return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
     
-######################################## SAVED POSTS ENDPOINTS ###################################
+######################################## SAVED ITEMS ENDPOINTS ###################################
 
-@app.post("/saved_items", responses={
-    200: {"description": "Item saved successfully."},
+@app.post("/saved_items", 
+    response_model=SavedItemsPostResponse,
+    responses={
     400: {"model": ErrorResponse},
     404: {"model": ErrorResponse},
     409: {"model": ErrorResponse},
     500: {"model": ErrorResponse},
 })
 async def save_item(
-    id: str = Query(..., description="ID of the item to save"),
+
+    body: SavedItemsPostRequest,
     current_user: dict = Depends(get_current_user)
 ):
     """
     Save an item to the user's saved list.
     """
     try:
+        item_id = body.id
         # Validate the ID format
-        if not ObjectId.is_valid(id):
+        if not ObjectId.is_valid(item_id):
             raise HTTPException(status_code=400, detail="Invalid listing ID format.")
 
         # Check if the listing exists
-        listing = await listings_collection.find_one({"_id": ObjectId(id)})
+        listing = await listings_collection.find_one({"_id": ObjectId(item_id)})
         if not listing:
             raise HTTPException(status_code=404, detail="Listing not found.")
 
@@ -447,16 +454,16 @@ async def save_item(
 
         # Check if the item is already saved
         saved_posts = user.get("saved_posts", [])
-        if id in saved_posts:
+        if item_id in saved_posts:
             raise HTTPException(status_code=409, detail="Item already saved.")
 
         if len(saved_posts) >= 30:
             raise HTTPException(status_code=400, detail="You can only save up to 30 items.")
 
     
-        saved_posts.append(id)
+        saved_posts.append(item_id)
         await users_collection.update_one({"_id": ObjectId(current_user["id"])}, {"$set": {"saved_posts": saved_posts}})
-        return {"message": "Item saved successfully."}
+        return SavedItemsPostResponse(message="Item saved successfully.")
 
     except HTTPException as e:
         raise e
@@ -465,7 +472,7 @@ async def save_item(
 
 
 @app.get("/saved_items",
-    response_model=ListingsGetResponseAll,
+    response_model=SavedItemsGetResponse,
     responses={
         200: {"description": "List of saved listings"},
         400: {"model": ErrorResponse},
@@ -503,8 +510,8 @@ async def get_saved_items(current_user: dict = Depends(get_current_user)):
             )
             for listing in listings
         ]
-        return ListingsGetResponseAll(
-            listings=response_data,
+        return SavedItemsGetResponse(
+            saved_items=response_data,
             total=len(response_data),
             )
 
@@ -514,25 +521,26 @@ async def get_saved_items(current_user: dict = Depends(get_current_user)):
         raise HTTPException(detail="Internal Server Error. Please try again later.")
 
 
-@app.delete("/saved_items", responses={
-    200: {"description": "Item removed from saved list."},
+@app.delete("/saved_items", 
+    response_model=SavedItemsDeleteResponse,        
+    responses={
     400: {"model": ErrorResponse},
     404: {"model": ErrorResponse},
     500: {"model": ErrorResponse},
 })
-async def delete_saved_item(id: str = Query(..., description="ID of the item to remove"), current_user: dict = Depends(get_current_user)):
+async def delete_saved_item(saved_item_id: str = Query(..., description="ID of the item to remove"), current_user: dict = Depends(get_current_user)):
     try:
         user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
         if not user:
             raise HTTPException(status_code=400, detail="User not found")
 
         saved_posts = user.get("saved_posts", [])
-        if id not in saved_posts:
+        if saved_item_id not in saved_posts:
             raise HTTPException(status_code=404, detail="Item not found in saved list")
 
-        saved_posts.remove(id)
+        saved_posts.remove(saved_item_id)
         await users_collection.update_one({"_id": ObjectId(current_user["id"])}, {"$set": {"saved_posts": saved_posts}})
-        return {"message": "Item removed from saved list."}
+        return SavedItemsDeleteResponse(message= "Item removed from saved list.")
     except HTTPException as e:
         raise e
     except Exception as e:

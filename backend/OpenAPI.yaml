@@ -263,6 +263,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SearchGetResponse"
+  
   /user:
     get:
       summary: Get user details
@@ -342,6 +343,119 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
+  /saved_items:
+    post:
+      tags:
+        - saved_items
+      summary: Save a listing to a users saved posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavedItemsPostRequest"
+      responses:
+        "200":
+          description: Post saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedItemsPostResponse"
+        "422":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    
+    get:
+      tags:
+        - saved_items
+      summary: Retrieve saved items for a user. User id is determined based on JWT.
+      responses:
+        "200":
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedItemsGetResponse"  
+        "400":
+          description: Bad Request - Missing or invalid user_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized - User not logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Saved items not found for the specified user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"  
+    
+    delete:
+      tags:
+        - saved_items
+      summary: Delete a saved item
+      description: Remove a listing from a user's saved items collection.
+      parameters:
+        - name: saved_item_id
+          in: query
+          required: true
+          description: The unique identifier of the saved item to delete.
+          schema:
+            type: string
+          
+      responses:
+        "200":
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedItemsDeleteResponse"
+        "400":
+          description: Bad Request - Missing or invalid saved_item_id or user_id.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized - User not logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Saved item not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 
 
 components:
@@ -629,3 +743,54 @@ components:
         user_id: "101"
         profile_picture: "https://example.com/image1.jpg"
         location: "Toronto"
+    
+    SavedItemsPostRequest:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+      example:
+        id: "101"    
+
+    SavedItemsPostResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      example:
+        message: "Item saved successfully."
+    
+    SavedItemsGetResponse:
+      type: object
+      required:
+        - user_id
+      properties:
+        saved_items:
+          type: array
+          items:
+            type: ListingGetResponseItem
+        total:
+          type: integer      
+      example:
+        saved_items:
+          - id: "1"
+            title: "MacBook Pro for sale"
+            price: 1200.99
+            description: "Selling my MacBook Pro in great condition!"
+            seller_id: "101"
+            pictures: ["https://example.com/image1.jpg"]
+            category: "Electronics"
+            condition: "Used"
+            date_posted: "2025-02-22T10:00:00Z"
+            campus: "UTM"
+        total: 1
+    SavedItemsDeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      example:
+        message: "Saved item deleted successfully."
+        
