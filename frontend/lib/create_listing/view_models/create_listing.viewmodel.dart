@@ -11,6 +11,9 @@ class CreateListingViewModel extends LoadingViewModel {
   String _condition = '';
   String get condition => _condition;
 
+  String? _campus;
+  String? get campus => _campus;
+
   File? _image;
   File? get image => _image;
   bool get hasImage => _image != null;
@@ -25,6 +28,11 @@ class CreateListingViewModel extends LoadingViewModel {
 
   void setCondition(String condition) {
     _condition = condition;
+    notifyListeners();
+  }
+
+  void setCampus(String? campus) {
+    _campus = campus;
     notifyListeners();
   }
 
@@ -81,8 +89,9 @@ class CreateListingViewModel extends LoadingViewModel {
 
     final isFormValid = formKey.currentState?.validate() ?? false;
     final hasConditionSelected = condition.isNotEmpty;
+    final hasCampusSelected = campus != null;
 
-    return isFormValid && hasImage && hasConditionSelected;
+    return isFormValid && hasImage && hasConditionSelected && hasCampusSelected;
   }
 
   Future<bool> submitForm({
@@ -118,6 +127,7 @@ class CreateListingViewModel extends LoadingViewModel {
         price: price,
         description: description,
         condition: _condition,
+        campus: _campus,
       );
 
       if (!listing.isValid) {
