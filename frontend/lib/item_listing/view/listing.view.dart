@@ -54,6 +54,38 @@ class _ListingViewState extends State<ListingView> {
     );
   }
 
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search_off_rounded,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No items found',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try adjusting your filters or search criteria',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
@@ -116,41 +148,39 @@ class _ListingViewState extends State<ListingView> {
       ),
     );
 
-    final trendingLabel = Padding(
-      padding: EdgeInsets.only(left: hPad, bottom: 5.0, top: 5.0),
-      child: const Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          'Trending',
-          style: TextStyle(
-            fontSize: 28,
-            color: Colors.black,
-          ),
-        ),
-      ),
-    );
-
-    final emptyState = const Center(child: Text('No items available.'));
-
     return Scaffold(
       appBar: appBar,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            searchBar,
             Expanded(
               child: Consumer<ListingViewModel>(
                 builder: (_, listingViewModel, child) {
                   if (listingViewModel.isLoading) {
                     return const ListingLoadingComponent();
                   }
+
                   if (listingViewModel.items.isEmpty) {
-                    return emptyState;
+                    return _buildEmptyState();
                   }
+
                   return ListView(
                     children: [
-                      searchBar,
-                      trendingLabel,
+                      const Padding(
+                        padding: EdgeInsets.only(left: 16, bottom: 5.0, top: 5.0),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Trending',
+                            style: TextStyle(
+                              fontSize: 28,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
                       _buildItemGrid(listingViewModel),
                     ],
                   );

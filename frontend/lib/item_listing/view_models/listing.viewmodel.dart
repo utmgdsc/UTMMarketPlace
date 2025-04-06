@@ -32,37 +32,25 @@ class ListingViewModel extends LoadingViewModel {
   }
 
   void applyFilters(FilterOptions filters) {
-    _filteredItems = List.from(_allItems);
-
-    if (filters.condition != null) {
-      _filteredItems = _filteredItems
-          .where((item) => item.condition == filters.condition)
-          .toList();
-    }
-
-    if (filters.campus != null) {
-      _filteredItems = _filteredItems
-          .where((item) => item.campus == filters.campus)
-          .toList();
-    }
-
-    if (filters.minPrice != null) {
-      _filteredItems = _filteredItems
-          .where((item) => item.price >= filters.minPrice!)
-          .toList();
-    }
-
-    if (filters.maxPrice != null) {
-      _filteredItems = _filteredItems
-          .where((item) => item.price <= filters.maxPrice!)
-          .toList();
-    }
-
-    if (filters.dateFrom != null) {
-      _filteredItems = _filteredItems
-          .where((item) => item.datePosted?.isAfter(filters.dateFrom!) ?? false)
-          .toList();
-    }
+    _filteredItems = _allItems.where((item) {
+      if (filters.condition != null && item.condition != filters.condition) {
+        return false;
+      }
+      if (filters.campus != null && item.campus != filters.campus) {
+        return false;
+      }
+      if (filters.minPrice != null && item.price < filters.minPrice!) {
+        return false;
+      }
+      if (filters.maxPrice != null && item.price > filters.maxPrice!) {
+        return false;
+      }
+      if (filters.dateFrom != null && 
+          (item.datePosted == null || item.datePosted!.isBefore(filters.dateFrom!))) {
+        return false;
+      }
+      return true;
+    }).toList();
 
     if (filters.sortOrder != null) {
       switch (filters.sortOrder) {
