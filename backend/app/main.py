@@ -1,3 +1,4 @@
+from fastapi.staticfiles import StaticFiles
 import jwt
 from jwt import decode, exceptions
 import re
@@ -13,7 +14,7 @@ import base64
 import json
 load_dotenv()  # Load environment variables from .env
 JWT_SECRET = os.getenv("JWT_SECRET")
-STATIC_DIR = os.getenv("STATIC_DIR")
+STATIC_DIR = os.getenv("STATIC_DIR", "static")
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, HTTPException, Query, Header
 from fastapi.exceptions import RequestValidationError
@@ -50,6 +51,8 @@ app = FastAPI(
         {'url': 'http://localhost:5000', 'description': 'Local Development Server'},
     ],
 )
+
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 oauth2_scheme = HTTPBearer()
 
@@ -402,6 +405,9 @@ async def post_listings(
         os.makedirs(STATIC_DIR, exist_ok=True)
 
         for idx, image_b64 in enumerate(body.pictures):
+            if image_b64.startswith("data:image"):
+                image_b64 = image_b64.split(",")[1]
+
             try:
                 img_data = base64.b64decode(image_b64)
             except Exception:
@@ -414,6 +420,11 @@ async def post_listings(
                 f.write(img_data)
             
             image_urls.append(f"/static/{filename}")
+
+        await listings_collection.update_one(
+            {"_id": result.inserted_id},
+            {"$set": {"pictures": image_urls}}
+        )
 
         # Return the created listing
         return ListingsPostResponse(
@@ -428,6 +439,7 @@ async def post_listings(
             condition=body.condition,
             campus=body.campus,
         )
+    
     except exceptions.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired, login again")
     except ValidationError as e:
