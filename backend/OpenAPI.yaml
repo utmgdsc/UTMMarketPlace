@@ -13,6 +13,8 @@ servers:
 paths:
   /sign-up:
     post:
+      tags:
+        - authentication
       summary: Sign up a new user
       description: Registers a new user using an email and password.
       requestBody:
@@ -55,6 +57,8 @@ paths:
 
   /listings:
     get:
+      tags:
+        - listings
       summary: Retrieve all listings
       parameters:
         - name: limit
@@ -88,8 +92,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-    
+
     post:
+      tags:
+        - listings
       summary: Create a new listing
       requestBody:
         required: true
@@ -104,12 +110,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ListingsPostResponse"
-        "401":
-          description: Unauthorized - User not logged in
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
         "422":
           description: Validation error - Missing/incorrect required fields
           content:
@@ -125,6 +125,8 @@ paths:
 
   /listing:
     get:
+      tags:
+        - listings
       summary: Retrieve a single listing by ID
       parameters:
         - name: listing_id
@@ -162,10 +164,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"  
-  
+                $ref: "#/components/schemas/ErrorResponse"
+
   /login:
     post:
+      tags:
+        - authentication
       summary: Log in a user
       description: Log in a existing user using a email and password.
       requestBody:
@@ -196,6 +200,8 @@ paths:
 
   /search:
     get:
+      tags:
+        - listings
       summary: search listings
       description: send a search query to the backend and return matching listings.
       parameters:
@@ -250,12 +256,6 @@ paths:
           schema:
             type: string
           description: earlier date for date filtering
-        - name: campus
-          in: query
-          required: false
-          schema:
-            type: string
-          description: location of listing
       responses:
         "200":
           description: A list of marketplace listings
@@ -263,7 +263,209 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SearchGetResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   
+  /conversations:
+    get:
+      tags:
+        - messages
+      summary: Retrieve user conversations
+      description: Returns a list of conversations the user is involved in.
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: The ID of the user whose conversations are being retrieved.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of user conversations.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        conversation_id:
+                          type: string
+                        participant_ids:
+                          type: array
+                          items:
+                            type: string
+                        last_message:
+                          type: string
+                        last_timestamp:
+                          type: string
+                          format: date-time
+                example:
+                  conversations:
+                    - conversation_id: "abc123"
+                      participant_ids: ["101", "202"]
+                      last_message: "See you soon!"
+                      last_timestamp: "2025-04-04T18:00:00Z"
+        "400":
+          description: Missing or invalid user_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Bad Request - Missing or invalid input data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /messages:
+    post:
+      tags:
+        - messages
+      summary: Send a message
+      description: Create and send a new message from one user to another.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessagesPostRequest"
+      responses:
+        "201":
+          description: Message sent successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessagesPostResponse"
+        "422":
+          description: Bad Request - Missing or invalid input data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      tags:
+        - messages
+      summary: Retrieve messages between two users
+      description: Retrieve a list of messages exchanged between two users.
+      parameters:
+        - name: user1
+          in: query
+          required: true
+          description: The unique identifier of first participant of the conversation.
+          schema:
+            type: string
+        - name: user2
+          in: query
+          required: true
+          description: The unique identifier of the second participant of the conversation.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of messages exchanged between the specified users.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MessageGetResponseItem"
+                  total:
+                    type: integer
+                example:
+                  messages:
+                    - message_id: "501"
+                      sender_id: "101"
+                      recipient_id: "202"
+                      content: "Hello, how are you?"
+                      timestamp: "2025-03-25T14:00:00Z"
+                    - message_id: "502"
+                      sender_id: "202"
+                      recipient_id: "101"
+                      content: "I'm good, thanks for asking!"
+                      timestamp: "2025-03-25T14:05:00Z"
+                  total: 2
+        "400":
+          description: Bad Request - Missing or invalid query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No messages found for the specified query.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /settings:
+    put:
+      tags:
+        - settings
+      summary: Update user settings
+      description: Update the settings for a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsPutRequest"
+      responses:
+        "200":
+          description: Settings updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingsPutResponse"
+        "422":
+          description: Bad Request - Missing or invalid settings data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /user:
     get:
       tags:
@@ -289,6 +491,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: User not found
           content:
@@ -309,6 +512,8 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 
     put:
+      tags:
+        - user
       summary: Update User details
       requestBody:
         required: true
@@ -347,6 +552,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
 
   /saved_items:
     post:
@@ -460,8 +666,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-
-
 components:
   schemas:
     ErrorResponse:
@@ -471,7 +675,7 @@ components:
       properties:
         details:
           type: string
-    
+
     SignUpPostRequest:
       type: object
       required:
@@ -489,7 +693,7 @@ components:
       example:
         email: "student@utoronto.ca"
         password: "P@ssword123"
-    
+
     LogInPostRequest:
       type: object
       required:
@@ -507,7 +711,7 @@ components:
       example:
         email: "student@utoronto.ca"
         password: "P@ssword123"
-    
+
     LogInPostResponse:
       type: object
       required:
@@ -519,8 +723,8 @@ components:
           type: string
       example:
         user_id: 42
-        message: "User logged in successfully."  
-    
+        message: "User logged in successfully."
+
     SignUpPostResponse:
       type: object
       required:
@@ -532,8 +736,8 @@ components:
           type: string
       example:
         user_id: 42
-        message: "User registered successfully."  
-    
+        message: "User registered successfully."
+
     SearchGetResponse:
       type: object
       required:
@@ -591,7 +795,7 @@ components:
         condition: "Used"
         date_posted: "2025-02-22T10:00:00Z"
         campus: "UTM"
-    
+
     ListingsGetResponseAll:
       type: object
       properties:
@@ -601,10 +805,11 @@ components:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
-    
+
     ListingsPostRequest:
       type: object
       required:
+        - seller_id
         - title
         - price
         - pictures
@@ -634,11 +839,12 @@ components:
         price: 899.99
         description: "Lightly used gaming laptop, great condition!"
         seller_id: "101"
-        pictures: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
+        pictures:
+          ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
         category: "Electronics"
         condition: "Used"
         campus: "UTM"
-    
+
     ListingsPostResponse:
       type: object
       required:
@@ -674,12 +880,117 @@ components:
         price: 899.99
         description: "Lightly used gaming laptop, great condition!"
         seller_id: "101"
-        pictures: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
+        pictures:
+          ["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
         category: "Electronics"
         condition: "Used"
         date_posted: "2025-02-22T10:00:00Z"
         campus: "UTM"
-    UserGetResponse:    
+
+    MessagesPostRequest:
+      type: object
+      required:
+        - sender_id
+        - recipient_id
+        - content
+      properties:
+        sender_id:
+          type: string
+          description: The unique identifier of the user sending the message.
+        recipient_id:
+          type: string
+          description: The unique identifier of the user receiving the message.
+        content:
+          type: string
+          description: The content of the message.
+      example:
+        sender_id: "101"
+        recipient_id: "202"
+        content: "Hello, is this still available?"
+
+    MessagesPostResponse:
+      type: object
+      required:
+        - message_id
+        - message
+        - timestamp
+      properties:
+        message_id:
+          type: string
+          description: The unique identifier of the created message.
+        message:
+          type: string
+          description: Confirmation message.
+        timestamp:
+          type: string
+          format: date-time
+          description: The time when the message was sent.
+      example:
+        message_id: "501"
+        message: "Message sent successfully."
+        timestamp: 2012-04-23T18:25:43.511Z
+
+    MessageGetResponseItem:
+      type: object
+      required:
+        - message_id
+        - sender_id
+        - recipient_id
+        - content
+        - timestamp
+      properties:
+        message_id:
+          type: string
+          description: Unique identifier for the message.
+        sender_id:
+          type: string
+          description: Identifier for the user who sent the message.
+        recipient_id:
+          type: string
+          description: Identifier for the user who received the message.
+        content:
+          type: string
+          description: The content of the message.
+        timestamp:
+          type: string
+          format: date-time
+          description: The time when the message was sent.
+
+    SettingsPutRequest:
+      type: object
+      properties:
+        notifications:
+          type: boolean
+          description: Flag indicating whether notifications are enabled.
+        theme:
+          type: string
+          description: The UI theme preference (e.g., "light" or "dark").
+        text_size:
+          type: integer
+          description: The preferred text font size.
+      example:
+        notifications: true
+        theme: "dark"
+        text_size: 12
+
+    SettingsPutResponse:
+      type: object
+      properties:
+        notifications:
+          type: boolean
+          description: Current notification setting.
+        theme:
+          type: string
+          description: Current UI theme preference.
+        text_size:
+          type: integer
+          description: Current text size setting.
+      example:
+        notifications: true
+        theme: "dark"
+        text_size: 12
+        message: "User settings updated successfully."
+    UserGetResponse:
       type: object
       required:
         - display_name
@@ -688,6 +999,7 @@ components:
         - rating_count
       properties:
         display_name:
+          type: string
           type: string
         profile_picture:
           type: string
@@ -719,12 +1031,17 @@ components:
       properties:
         display_name:
           type: string
+          type: string
         profile_picture:
+          type: string
           type: string
         email:
           type: string
           format: email
+          type: string
+          format: email
         location:
+          type: string
           type: string
       example:
         display_name: "Drake"
