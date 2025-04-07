@@ -1,8 +1,4 @@
-enum SortOrder {
-  priceLowToHigh,
-  priceHighToLow,
-  dateRecent
-}
+enum SortOrder { priceLowToHigh, priceHighToLow, dateRecent }
 
 class FilterOptions {
   final String? priceType;

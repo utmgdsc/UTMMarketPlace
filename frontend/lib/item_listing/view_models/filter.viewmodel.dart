@@ -72,7 +72,8 @@ class FilterViewModel extends LoadingViewModel {
   }
 
   void applyFilters(BuildContext context) {
-    final listingViewModel = Provider.of<ListingViewModel>(context, listen: false);
+    final listingViewModel =
+        Provider.of<ListingViewModel>(context, listen: false);
     final filters = FilterOptions(
       priceType: FilterOptions.sortOrderToPriceType(_sortOrder),
       dateRange: _dateRange,

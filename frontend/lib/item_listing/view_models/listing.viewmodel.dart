@@ -45,8 +45,9 @@ class ListingViewModel extends LoadingViewModel {
       if (filters.upperPrice != null && item.price > filters.upperPrice!) {
         return false;
       }
-      if (filters.dateRange != null && 
-          (item.datePosted == null || item.datePosted!.isBefore(filters.dateRange!))) {
+      if (filters.dateRange != null &&
+          (item.datePosted == null ||
+              item.datePosted!.isBefore(filters.dateRange!))) {
         return false;
       }
       return true;
@@ -61,8 +62,8 @@ class ListingViewModel extends LoadingViewModel {
         _filteredItems.sort((a, b) => b.price.compareTo(a.price));
         break;
       case 'date-recent':
-        _filteredItems.sort((a, b) => 
-          (b.datePosted ?? DateTime.now()).compareTo(a.datePosted ?? DateTime.now()));
+        _filteredItems.sort((a, b) => (b.datePosted ?? DateTime.now())
+            .compareTo(a.datePosted ?? DateTime.now()));
         break;
     }
 

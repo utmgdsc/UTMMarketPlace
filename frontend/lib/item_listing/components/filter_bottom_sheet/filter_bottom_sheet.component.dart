@@ -163,7 +163,8 @@ class FilterBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildPriceRangeButton(BuildContext context, FilterViewModel viewModel) {
+  Widget _buildPriceRangeButton(
+      BuildContext context, FilterViewModel viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
