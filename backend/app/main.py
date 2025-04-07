@@ -57,6 +57,8 @@ app = FastAPI(
     ],
 )
 
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
 oauth2_scheme = HTTPBearer()
 
 ######################################## HELPER METHODS ########################################
@@ -393,6 +395,7 @@ async def get_listings(
         return ErrorResponse(details="Internal Server Error. Please try again later.")
 
 
+
 @app.post(
     '/listings',
     response_model=None,
@@ -411,6 +414,7 @@ async def post_listings(
     Create a new listing
     """
     try:
+
         # Prepare data for MongoDB
         listing_data = body.dict()
         listing_data["date_posted"] = datetime.now(
@@ -420,6 +424,32 @@ async def post_listings(
         # Insert into MongoDB
         result = await listings_collection.insert_one(listing_data)
 
+        image_urls = []
+
+        os.makedirs(STATIC_DIR, exist_ok=True)
+
+        for idx, image_b64 in enumerate(body.pictures):
+            if image_b64.startswith("data:image"):
+                image_b64 = image_b64.split(",")[1]
+
+            try:
+                img_data = base64.b64decode(image_b64)
+            except Exception:
+                raise HTTPException(status_code=422, detail="Invalid base64 image format")
+        
+            filename = f"{result.inserted_id}_{idx}.jpg"
+            filepath = os.path.join(STATIC_DIR, filename)
+
+            with open(filepath, "wb") as f:
+                f.write(img_data)
+            
+            image_urls.append(f"/static/{filename}")
+
+        await listings_collection.update_one(
+            {"_id": result.inserted_id},
+            {"$set": {"pictures": image_urls}}
+        )
+
         # Return the created listing
         return ListingsPostResponse(
             id=str(result.inserted_id),
@@ -427,12 +457,13 @@ async def post_listings(
             price=body.price,
             description=body.description,
             seller_id=current_user["id"],
-            pictures=body.pictures,
+            pictures=image_urls,
             category=body.category,
             date_posted=listing_data["date_posted"],
             condition=body.condition,
             campus=body.campus,
         )
+    
     except exceptions.ExpiredSignatureError:
         raise HTTPException(
             status_code=401, detail="Token expired, login again")
