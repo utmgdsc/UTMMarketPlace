@@ -146,12 +146,6 @@ async def test_signup_missing_fields_422(client, load_payload):
     data = response.json()
     assert "detail" in data
 
-@pytest.mark.asyncio
-async def test_signup_server_error_500(client, load_payload):
-    # This test would require mocking the database to simulate a server error
-    # For now, we'll just document that this case exists
-    pass
-
 # ================================== SEARCH TESTS ==================================
 @pytest.fixture
 async def setup_search_test_data():
