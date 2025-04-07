@@ -5,6 +5,9 @@ from app.MongoClient_async import listings_collection
 import json
 import requests
 import os
+from bson.objectid import ObjectId
+import asyncio
+
 
 # Helper function to load test payloads
 def load_test_payload(filename):
@@ -17,6 +20,12 @@ async def cleanup_test_user(email: str):
     await users_collection.delete_one({"email": email})
     await users_collection.delete_one({"email": "duplicate@mail.utoronto.ca"})
 
+@pytest.fixture(scope="session")
+def event_loop():
+    """Create an instance of the default event loop for each test case."""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 # ================================== PAGINATION TESTS ==================================
 @pytest.mark.asyncio
@@ -299,3 +308,180 @@ async def test_search_with_text_query(client, setup_search_test_data):
     for listing in data["listings"]:
         assert (query.lower() in listing["title"].lower() or 
                 (listing.get("description") and query.lower() in listing["description"].lower()))
+
+# ================================== USER PROFILE TESTS ==================================
+@pytest.mark.asyncio
+async def test_get_own_profile(client, load_payload):
+    # Get test user credentials
+    user_payloads = load_test_payload("user.json")
+    login_data = user_payloads["valid_login"]
+    test_email = login_data["email"]
+    
+    # First get the user_id by querying the database
+    user = await users_collection.find_one({"email": test_email})
+    user_id = str(user["_id"])
+    
+    # Set some profile data
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {
+            "display_name": "Test User",
+            "saved_posts": ["post1", "post2"],
+            "rating": 4.5,
+            "rating_count": 10
+        }}
+    )
+    
+    # Log in to get token
+    login_response = requests.post("http://127.0.0.1:8000/login", json=login_data)
+    assert login_response.status_code == 200
+    token = login_response.json()["access_token"]
+    
+    # Get own profile
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.get(f"http://127.0.0.1:8000/user/{user_id}", headers=headers)
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["email"] == test_email
+    assert data["display_name"] == "Test User"
+    assert "saved_posts" in data
+    assert len(data["saved_posts"]) == 2
+    assert data["rating"] == 4.5
+    assert data["rating_count"] == 10
+
+@pytest.mark.asyncio
+async def test_get_other_user_profile(client, load_payload):
+    # Get test user credentials
+    user_payloads = load_test_payload("user.json")
+    login_data = user_payloads["valid_login"]
+    test_email = login_data["email"]
+    
+    other_email = "other@mail.utoronto.ca"
+    
+    # Get first user's ID from database
+    user = await users_collection.find_one({"email": test_email})
+    if not user:
+        pytest.skip("Test user not found in database")
+    user_id = str(user["_id"])
+    
+    # Create second test user
+    other_signup_data = {
+        "email": other_email,
+        "password": "TestPass123!"
+    }
+    
+    try:
+        # Sign up second user
+        response = requests.post("http://127.0.0.1:8000/sign-up", json=other_signup_data)
+        assert response.status_code == 201
+        other_user_id = response.json()["user_id"]
+        
+        # Set profile data for second user
+        await users_collection.update_one(
+            {"_id": ObjectId(other_user_id)},
+            {"$set": {
+                "display_name": "Other User",
+                "email": other_email,
+                "user_id": other_user_id,
+                "rating": 4.0,
+                "rating_count": 5,
+                "saved_posts": ["secret1", "secret2"]
+            }}
+        )
+        
+        # Log in as first user (existing account)
+        login_response = requests.post("http://127.0.0.1:8000/login", json=login_data)
+        assert login_response.status_code == 200
+        token = login_response.json()["access_token"]
+        
+        # Get other user's profile
+        headers = {"Authorization": f"Bearer {token}"}
+        response = requests.get(f"http://127.0.0.1:8000/user/{other_user_id}", headers=headers)
+        
+        assert response.status_code == 200
+        data = response.json()
+        
+        # Test required fields
+        assert data["display_name"] == "Other User"
+        assert data["email"] == other_email
+        assert data["user_id"] == other_user_id
+        assert data["rating"] == 4.0
+        assert data["rating_count"] == 5
+        assert "saved_posts" not in data
+        
+        # Get own profile
+        response = requests.get(f"http://127.0.0.1:8000/user/{user_id}", headers=headers)
+        assert response.status_code == 200
+        own_data = response.json()
+        assert "saved_posts" in own_data
+    
+    finally:
+        # Clean up the second test user
+        await cleanup_test_user(other_email)
+
+@pytest.mark.asyncio
+async def test_update_user_profile(client, load_payload):
+    # Get test user credentials
+    user_payloads = load_test_payload("user.json")
+    login_data = user_payloads["valid_login"]
+    test_email = login_data["email"]
+    
+    try:
+        # Get user from database
+        user = await users_collection.find_one({"email": test_email})
+        if not user:
+            pytest.skip("Test user not found in database")
+        user_id = str(user["_id"])
+        
+        # Log in to get token
+        login_response = requests.post("http://127.0.0.1:8000/login", json=login_data)
+        assert login_response.status_code == 200
+        token = login_response.json()["access_token"]
+        
+        # Store original values to restore later
+        original_values = {
+            "display_name": user.get("display_name", "Original Name"),
+            "location": user.get("location"),
+            "email": user.get("email")
+        }
+        
+        print(user)
+        # First ensure user has required fields
+        if "display_name" not in user:
+            await users_collection.update_one(
+                {"_id": ObjectId(user_id)},
+                {"$set": {"display_name": "Original Name"}}
+            )
+        
+        # Update profile
+        headers = {"Authorization": f"Bearer {token}"}
+        update_data = {
+            "display_name": "Updated Name",
+            "location": "St. George"
+        }
+        
+        response = requests.put(f"http://127.0.0.1:8000/user/{user_id}", headers=headers, json=update_data)
+        assert response.status_code == 200
+        
+        # Verify response format
+        response_data = response.json()
+        print(response_data)
+        assert "display_name" in response_data
+        assert "email" in response_data
+        assert "user_id" in response_data
+        assert response_data["display_name"] == "Updated Name"
+        assert response_data["location"] == "St. George"
+        
+        # Verify update in database
+        updated_user = await users_collection.find_one({"_id": ObjectId(user_id)})
+        assert updated_user["display_name"] == "Updated Name"
+        assert updated_user["location"] == "St. George"
+        
+    finally:
+        # Restore original values
+        if 'user_id' in locals() and 'original_values' in locals():
+            await users_collection.update_one(
+                {"_id": ObjectId(user_id)},
+                {"$set": original_values}
+            )
