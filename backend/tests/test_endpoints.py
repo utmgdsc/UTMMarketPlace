@@ -26,6 +26,7 @@ async def test_listings_pagination(client, load_payload):
     data = response.json()
     
     assert len(data["listings"]) == 5
+    print(data)
     assert "next_page_token" in data
     
     next_token = data["next_page_token"]
