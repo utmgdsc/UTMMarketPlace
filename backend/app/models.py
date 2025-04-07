@@ -87,15 +87,6 @@ class ListingsPostResponse(BaseModel):
     campus: Optional[str] = None
 
 
-class SavedItemsPostRequest(BaseModel):
-    id: int = Field(..., description='Must be id linking to a listing')
-
-
-class SavedItemsPostResponse(BaseModel):
-    id: int
-    message: Optional[str] = None
-
-
 class MessagesPostRequest(BaseModel):
     sender_id: str = Field(
         ..., description='The unique identifier of the user sending the message.'
@@ -162,10 +153,16 @@ class UserPutRequest(BaseModel):
     location: Optional[str] = None
 
 
+
+class SavedItemsPostRequest(BaseModel):
+    id: str = Field(..., description='Must be id linking to a listing')
+
+class SavedItemsPostResponse(BaseModel):
+    message: Optional[str] = None
+
 class SavedItemsGetResponse(BaseModel):
     saved_items: Optional[List[ListingGetResponseItem]] = None
     total: Optional[int] = None
-
 
 class SavedItemsDeleteResponse(BaseModel):
     message: Optional[str] = None
