@@ -19,8 +19,10 @@ from app.models import (
     SettingsPutResponse,
     SignUpPostRequest,
     SignUpPostResponse,
-    UserGetResponse,
+    OwnUserGetResponse,
+    OtherUserGetResponse,
     UserPutRequest,
+    BaseUserResponse
 )
 from app.MongoClient_async import listings_collection, users_collection
 from dateutil.parser import parse as dateutil_parse
@@ -440,9 +442,9 @@ async def post_listings(
 
 
 @app.get('/user/{userid}',
-         response_model=UserGetResponse,
+         response_model=Union[OwnUserGetResponse, OtherUserGetResponse],
          responses={
-             '200': {'model': UserGetResponse},
+             '200': {'model': Union[OwnUserGetResponse, OtherUserGetResponse]},
              '400': {'model': ErrorResponse},
              '404': {'model': ErrorResponse},
              '422': {'model': ErrorResponse},
@@ -455,7 +457,7 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        response = {
+        base_response = {
             "display_name": user["display_name"],
             "profile_picture": user.get("profile_picture"),
             "email": user["email"],
@@ -466,9 +468,10 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
         }
 
         if current_user["id"] == userid:
-            response["saved_posts"] = user.get("saved_posts", [])
+            return OwnUserGetResponse(**base_response, saved_posts=user.get("saved_posts", []))
+        else:
+            return OtherUserGetResponse(**base_response)
 
-        return UserGetResponse(**response)
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error. Please try again later. Error: {str(e)}")
@@ -477,7 +480,7 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
 @app.put('/user/{userid}',
          response_model=None,
          responses={
-             '201': {'model': UserGetResponse},
+             '201': {'model': BaseUserResponse},
              '400': {'model': ErrorResponse},
              '403': {'model': ErrorResponse},
              '404': {'model': ErrorResponse},
@@ -485,7 +488,7 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
              '500': {'model': ErrorResponse},
          },
          )
-async def update_user(userid: str, body: UserPutRequest, current_user: dict = Depends(get_current_user)) -> Union[UserGetResponse, ErrorResponse]:
+async def update_user(userid: str, body: UserPutRequest, current_user: dict = Depends(get_current_user)) -> Union[BaseUserResponse, ErrorResponse]:
     """
     Update user details only if the user matches.
     """
@@ -511,17 +514,20 @@ async def update_user(userid: str, body: UserPutRequest, current_user: dict = De
 
         updated_user = await users_collection.find_one({"_id": ObjectId(userid)})
 
-        return UserGetResponse(
+        return BaseUserResponse(
             display_name=updated_user["display_name"],
             profile_picture=updated_user.get("profile_picture"),
             email=updated_user["email"],
             user_id=str(updated_user["_id"]),
             location=updated_user.get("location", ""),
+            rating=updated_user.get("rating", 0.0),
+            rating_count=updated_user.get("rating_count", 0),
+            saved_posts=updated_user.get("saved_posts", []),
         )
 
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Internal Server Error. Please try again later")
+            status_code=500, detail=f"Internal Server Error. Please try again later {e}")
 
 ######################################## LOGIN/SIGNUP ENDPOINTS ########################################
 

@@ -144,7 +144,7 @@ class SettingsPutResponse(BaseModel):
     text_size: Optional[int] = Field(None, description='Current text size setting.')
 
 
-class UserGetResponse(BaseModel):
+class BaseUserResponse(BaseModel):
     display_name: str
     profile_picture: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -152,7 +152,14 @@ class UserGetResponse(BaseModel):
     location: Optional[str] = None
     rating: float
     rating_count: int
+
+
+class OwnUserGetResponse(BaseUserResponse):
     saved_posts: Optional[List[str]] = None
+
+
+class OtherUserGetResponse(BaseUserResponse):
+    pass
 
 
 class UserPutRequest(BaseModel):
