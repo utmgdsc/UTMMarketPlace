@@ -1,0 +1,17 @@
+{
+  "valid_signup": {
+    "email": "newuser@mail.utoronto.ca",
+    "password": "TestPass123!"
+  },
+  "invalid_email": {
+    "email": "invalid@example.com",
+    "password": "TestPass123!"
+  },
+  "duplicate_email": {
+    "email": "duplicate@mail.utoronto.ca",
+    "password": "TestPass123!"
+  },
+  "missing_password": {
+    "email": "test@mail.utoronto.ca"
+  }
+} 

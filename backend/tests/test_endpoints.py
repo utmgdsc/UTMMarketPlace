@@ -8,6 +8,7 @@ import os
 from bson.objectid import ObjectId
 import asyncio
 
+
 # Helper function to load test payloads
 def load_test_payload(filename):
     payload_path = os.path.join(os.path.dirname(__file__), "data", "payloads", filename)
@@ -34,6 +35,7 @@ async def test_listings_pagination(client, load_payload):
     data = response.json()
     
     assert len(data["listings"]) == 5
+    print(data)
     assert "next_page_token" in data
     
     next_token = data["next_page_token"]
