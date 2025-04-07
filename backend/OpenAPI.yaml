@@ -491,7 +491,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: User not found
           content:
@@ -1000,7 +999,6 @@ components:
       properties:
         display_name:
           type: string
-          type: string
         profile_picture:
           type: string
         email:
@@ -1031,17 +1029,12 @@ components:
       properties:
         display_name:
           type: string
-          type: string
         profile_picture:
-          type: string
           type: string
         email:
           type: string
           format: email
-          type: string
-          format: email
         location:
-          type: string
           type: string
       example:
         display_name: "Drake"
