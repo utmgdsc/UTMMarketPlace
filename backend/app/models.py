@@ -35,14 +35,13 @@ class LogInPostRequest(BaseModel):
         description='Must be at least 8 characters, contain 1 uppercase letter, 1 number.',
     )
 
-
 class LogInPostResponse(BaseModel):
     access_token: str
     token_type: str
 
 
 class SignUpPostResponse(BaseModel):
-    user_id: int
+    user_id: str
     message: Optional[str] = None
 
 
