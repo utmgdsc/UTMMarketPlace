@@ -1,4 +1,3 @@
-
 from app.models import (
     ConversationsGetResponse,
     ErrorResponse,
@@ -23,8 +22,7 @@ from app.models import (
     OwnUserGetResponse,
     OtherUserGetResponse,
     UserPutRequest,
-    BaseUserResponse,
-    UserPutResponse
+    BaseUserResponse
 )
 
 from app.MongoClient_async import listings_collection, users_collection
@@ -34,6 +32,7 @@ from pymongo.errors import DuplicateKeyError
 from passlib.hash import pbkdf2_sha256
 from fastapi.exceptions import RequestValidationError
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.staticfiles import StaticFiles
 from datetime import datetime, timezone, timedelta
 import jwt
 from jwt import decode, exceptions
@@ -47,6 +46,7 @@ from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 load_dotenv()  # Load environment variables from .env
 JWT_SECRET = os.getenv("JWT_SECRET")
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
 
 app = FastAPI(
