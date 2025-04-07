@@ -22,7 +22,6 @@ from app.models import (
     SignUpPostResponse,
     UserGetResponse,
     UserPutRequest,
-    UserPutResponse,  
 )
 from app.MongoClient_async import listings_collection, users_collection
 from dateutil.parser import parse as dateutil_parse
