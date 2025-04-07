@@ -190,3 +190,4 @@ class MessagesGetResponse(BaseModel):
 class SearchGetResponse(BaseModel):
     listings: Optional[List[ListingGetResponseItem]] = None
     total: Optional[int] = None
+    next_page_token: Optional[str] = None

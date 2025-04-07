@@ -169,14 +169,12 @@ async def get_search(
 
         pipeline = [
             search_stage,
+            # Price filter with stable sort using _id as tiebreaker
+            {"$sort": {"price": price_order, "_id": 1}} if price_order in [-1, 1] else {"$sort": {"_id": 1}}, 
             # Lower and upper limits of price (0 -> +inf by default)
             {
                 "$match": {
                     "price": {"$gte": lower_price, "$lte": upper_price}}} if price_type is not None else None,
-            # Price filter
-            {
-                "$sort": {
-                    "price": price_order}} if price_order in [1, -1] else None,
             # Condition filter
             {
                 "$match": {
