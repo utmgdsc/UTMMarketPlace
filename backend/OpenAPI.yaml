@@ -266,13 +266,16 @@ paths:
   
   /user:
     get:
+      tags:
+        - user
       summary: Get user details
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserGetResponse"
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: The user id to retrieve
+          schema:
+            type: string
       responses:
         "200":
           description: User details retrieved successfully
@@ -285,6 +288,7 @@ paths:
           content:
             application/json:
               schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: User not found
           content:
@@ -356,7 +360,7 @@ paths:
             schema:
               $ref: "#/components/schemas/SavedItemsPostRequest"
       responses:
-        "200":
+        "201":
           description: Post saved successfully
           content:
             application/json:
@@ -684,19 +688,21 @@ components:
         - rating_count
       properties:
         display_name:
-          type: str
+          type: string
         profile_picture:
-          type: str
+          type: string
         email:
-          type: email
+          type: string
+          format: email
         user_id:
-          type: str
+          type: string
         location:
-          type: str
+          type: string
         rating: 
-          type: float
+          type: number
+          format: float
         rating_count:
-          type: int 
+          type: integer 
         saved_posts:
           type: array
           items:
@@ -712,37 +718,20 @@ components:
       type: object
       properties:
         display_name:
-          type: str
+          type: string
         profile_picture:
-          type: str
+          type: string
         email:
-          type: email
+          type: string
+          format: email
         location:
-          type: str
+          type: string
       example:
         display_name: "Drake"
         profile_picture: "https://example.com/image1.jpg"
         email: zesty123@utoronto.ca
         location: "Toronto"
-    UserPutResponse:  
-      type: object
-      required:
-      properties:
-        display_name:
-          type: str
-        profile_picture:
-          type: str
-        email:
-          type: email
-        user_id:
-          type: str
-        location:
-          type: str
-      example:
-        display_name: "John"
-        user_id: "101"
-        profile_picture: "https://example.com/image1.jpg"
-        location: "Toronto"
+    
     
     SavedItemsPostRequest:
       type: object
@@ -770,7 +759,7 @@ components:
         saved_items:
           type: array
           items:
-            type: ListingGetResponseItem
+            $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer      
       example:
