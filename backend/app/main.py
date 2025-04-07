@@ -120,7 +120,7 @@ async def get_search(
         5, description="Number of listings to retrieve", ge=1, le=30),
     next: Optional[str] = Query(
         None, description="Last seen pagination token"),
-    price_type: Optional[str] = Query(None, description="Type of search"),
+    price_type: Optional[str] = Query(None, description="Type of search (price-high-to-low, price-low-to-high, date-recent)"),
     lower_price: Optional[int] = Query(
         0, description="lower end of price filter"),
     upper_price: Optional[int] = Query(
@@ -161,11 +161,14 @@ async def get_search(
         if next:
             search_stage["$search"]["searchAfter"] = next
 
-        # Selecting which order to sort price by
+        # Selecting which order to sort by
+        sort_stage = {"$sort": {"date_posted": -1}}  # Default to most recent first
         if price_type == "price-high-to-low":
-            price_order = -1
+            sort_stage = {"$sort": {"price": -1}}
         elif price_type == "price-low-to-high":
-            price_order = 1
+            sort_stage = {"$sort": {"price": 1}}
+        elif price_type == "date-recent":
+            sort_stage = {"$sort": {"date_posted": -1}}
 
         pipeline = [
             search_stage,
@@ -173,10 +176,8 @@ async def get_search(
             {
                 "$match": {
                     "price": {"$gte": lower_price, "$lte": upper_price}}} if price_type is not None else None,
-            # Price filter
-            {
-                "$sort": {
-                    "price": price_order}} if price_order in [1, -1] else None,
+            # Sort by price or date (always included since we have a default)
+            sort_stage,
             # Condition filter
             {
                 "$match": {
