@@ -22,7 +22,6 @@ from app.models import (
     SignUpPostResponse,
     UserGetResponse,
     UserPutRequest,
-    UserPutResponse,  
 )
 from app.MongoClient_async import listings_collection, users_collection
 from dateutil.parser import parse as dateutil_parse
@@ -176,12 +175,12 @@ async def get_search(
 
         pipeline = [
             search_stage,
+            # Price filter with stable sort using _id as tiebreaker
+            {"$sort": {"price": price_order, "_id": 1}} if price_order in [-1, 1] else {"$sort": {"_id": 1}}, 
             # Lower and upper limits of price (0 -> +inf by default)
             {
                 "$match": {
                     "price": {"$gte": lower_price, "$lte": upper_price}}} if price_type is not None else None,
-            # Sort by price or date (always included since we have a default)
-            sort_stage,
             # Condition filter
             {
                 "$match": {

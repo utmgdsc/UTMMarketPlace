@@ -39,7 +39,6 @@ class LogInPostResponse(BaseModel):
     access_token: str
     token_type: str
 
-
 class SignUpPostResponse(BaseModel):
     user_id: str
     message: Optional[str] = None
@@ -61,6 +60,7 @@ class ListingGetResponseItem(BaseModel):
 class ListingsGetResponseAll(BaseModel):
     listings: Optional[List[ListingGetResponseItem]] = None
     total: Optional[int] = None
+    next_page_token: Optional[str] = None
 
 
 class ListingsPostRequest(BaseModel):
@@ -187,4 +187,4 @@ class MessagesGetResponse(BaseModel):
 class SearchGetResponse(BaseModel):
     listings: Optional[List[ListingGetResponseItem]] = None
     total: Optional[int] = None
-
+    next_page_token: Optional[str] = None
