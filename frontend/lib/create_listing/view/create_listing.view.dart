@@ -5,6 +5,7 @@ import 'package:utm_marketplace/create_listing/view_models/create_listing.viewmo
 import 'package:utm_marketplace/create_listing/components/image_selector.component.dart';
 import 'package:utm_marketplace/create_listing/components/form_input_field.component.dart';
 import 'package:utm_marketplace/create_listing/components/condition_selector.component.dart';
+import 'package:utm_marketplace/create_listing/components/campus_selector.component.dart';
 
 class CreateListingView extends StatefulWidget {
   const CreateListingView({super.key});
@@ -110,6 +111,12 @@ class _CreateListingViewState extends State<CreateListingView> {
           const SizedBox(height: 16),
           Consumer<CreateListingViewModel>(
             builder: (_, model, __) => ConditionSelector(
+              showValidationErrors: model.showValidationErrors,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Consumer<CreateListingViewModel>(
+            builder: (_, model, __) => CampusSelector(
               showValidationErrors: model.showValidationErrors,
             ),
           ),
