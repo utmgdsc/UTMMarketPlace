@@ -3,33 +3,33 @@ import 'package:flutter/material.dart';
 class ListingLoadingComponent extends StatelessWidget {
   const ListingLoadingComponent({super.key});
 
-  Widget _buildSearchBarSkeleton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8.0),
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(30),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildSearchBarSkeleton() {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+  //     child: Row(
+  //       children: [
+  //         Expanded(
+  //           child: Container(
+  //             height: 50,
+  //             decoration: BoxDecoration(
+  //               color: Colors.grey[200],
+  //               borderRadius: BorderRadius.circular(30),
+  //             ),
+  //           ),
+  //         ),
+  //         const SizedBox(width: 8.0),
+  //         Container(
+  //           width: 50,
+  //           height: 50,
+  //           decoration: BoxDecoration(
+  //             color: Colors.grey[200],
+  //             borderRadius: BorderRadius.circular(30),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildTrendingLabelSkeleton() {
     return Padding(
@@ -86,7 +86,7 @@ class ListingLoadingComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        _buildSearchBarSkeleton(),
+        // _buildSearchBarSkeleton(),
         _buildTrendingLabelSkeleton(),
         Padding(
           padding: const EdgeInsets.all(16.0),
