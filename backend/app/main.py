@@ -1,31 +1,3 @@
-from fastapi.staticfiles import StaticFiles
-import jwt
-from jwt import decode, exceptions
-import re
-import os
-from typing import List, Optional, Union
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi.security import HTTPBearer
-from pydantic import BaseModel, ValidationError
-from dotenv import load_dotenv
-from fastapi.responses import JSONResponse
-from fastapi.requests import Request
-import base64
-import json
-load_dotenv()  # Load environment variables from .env
-JWT_SECRET = os.getenv("JWT_SECRET")
-STATIC_DIR = os.getenv("STATIC_DIR", "static")
-from datetime import datetime, timezone, timedelta
-from fastapi import FastAPI, HTTPException, Query, Header
-from fastapi.exceptions import RequestValidationError
-from passlib.hash import pbkdf2_sha256
-from pymongo.errors import DuplicateKeyError, PyMongoError
-from bson import ObjectId
-from dateutil.parser import parse as dateutil_parse
-
-#importing async way of connecting to MongoDB
-from app.MongoClient_async import db, listings_collection, users_collection
-
 
 from app.models import (
     ConversationsGetResponse,
@@ -50,6 +22,7 @@ from app.models import (
     SignUpPostResponse,
     UserGetResponse,
     UserPutRequest,
+    UserPutResponse,  
 )
 from app.MongoClient_async import listings_collection, users_collection
 from dateutil.parser import parse as dateutil_parse
@@ -498,6 +471,135 @@ async def post_listings(
         return ErrorResponse(status_code=422, details="Validation error. Please check your input data.")
     except Exception as e:
         return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
+    
+######################################## SAVED ITEMS ENDPOINTS ###################################
+
+@app.post("/saved_items", 
+    response_model=SavedItemsPostResponse,
+    responses={
+    400: {"model": ErrorResponse},
+    404: {"model": ErrorResponse},
+    409: {"model": ErrorResponse},
+    500: {"model": ErrorResponse},
+})
+async def save_item(
+
+    body: SavedItemsPostRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Save an item to the user's saved list.
+    """
+    try:
+        item_id = body.id
+        # Validate the ID format
+        if not ObjectId.is_valid(item_id):
+            raise HTTPException(status_code=400, detail="Invalid listing ID format.")
+
+        # Check if the listing exists
+        listing = await listings_collection.find_one({"_id": ObjectId(item_id)})
+        if not listing:
+            raise HTTPException(status_code=404, detail="Listing not found.")
+
+        # Check if the user exists
+        user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
+        if not user:
+            raise HTTPException(status_code=400, detail="User not found. Please log in or sign up.")
+
+        # Check if the item is already saved
+        saved_posts = user.get("saved_posts", [])
+        if item_id in saved_posts:
+            raise HTTPException(status_code=409, detail="Item already saved.")
+
+        if len(saved_posts) >= 30:
+            raise HTTPException(status_code=400, detail="You can only save up to 30 items.")
+
+    
+        saved_posts.append(item_id)
+        await users_collection.update_one({"_id": ObjectId(current_user["id"])}, {"$set": {"saved_posts": saved_posts}})
+        return SavedItemsPostResponse(message="Item saved successfully.")
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error. Please try again later. {e}")
+
+
+@app.get("/saved_items",
+    response_model=SavedItemsGetResponse,
+    responses={
+        200: {"description": "List of saved listings"},
+        400: {"model": ErrorResponse},
+        500: {"model": ErrorResponse},
+    },
+)
+async def get_saved_items(current_user: dict = Depends(get_current_user)):
+    try:
+        user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
+        if not user:
+            raise HTTPException(status_code=400, detail="User not found")
+
+        saved_ids = user.get("saved_posts", [])
+        if not saved_ids:
+            return [], 0
+
+        # Convert only valid ObjectIds
+        object_ids = [ObjectId(item_id) for item_id in saved_ids if ObjectId.is_valid(item_id)]
+
+        listings_cursor = listings_collection.find({"_id": {"$in": object_ids}})
+        listings = await listings_cursor.to_list(length=30)
+
+        response_data = [
+            ListingGetResponseItem(
+                id=str(listing["_id"]),
+                title=listing.get("title"),
+                price=listing.get("price"),
+                description=listing.get("description"),
+                seller_id=listing.get("seller_id"),
+                pictures=listing.get("pictures", []),
+                condition=listing.get("condition"),
+                category=listing.get("category"),
+                date_posted=listing.get("date_posted"),
+                campus=listing.get("campus"),
+            )
+            for listing in listings
+        ]
+        return SavedItemsGetResponse(
+            saved_items=response_data,
+            total=len(response_data),
+            )
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(detail="Internal Server Error. Please try again later.")
+
+
+@app.delete("/saved_items", 
+    response_model=SavedItemsDeleteResponse,        
+    responses={
+    400: {"model": ErrorResponse},
+    404: {"model": ErrorResponse},
+    500: {"model": ErrorResponse},
+})
+async def delete_saved_item(saved_item_id: str = Query(..., description="ID of the item to remove"), current_user: dict = Depends(get_current_user)):
+    try:
+        user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
+        if not user:
+            raise HTTPException(status_code=400, detail="User not found")
+
+        saved_posts = user.get("saved_posts", [])
+        if saved_item_id not in saved_posts:
+            raise HTTPException(status_code=404, detail="Item not found in saved list")
+
+        saved_posts.remove(saved_item_id)
+        await users_collection.update_one({"_id": ObjectId(current_user["id"])}, {"$set": {"saved_posts": saved_posts}})
+        return SavedItemsDeleteResponse(message= "Item removed from saved list.")
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        return ErrorResponse(detail="Internal Server Error. Please try again later.")
+
 
 ######################################## USER ENDPOINTS ########################################
 
@@ -664,59 +766,6 @@ async def post_sign_up(
         raise HTTPException(
             status_code=500, detail=f"Internal server error: {str(e)}")
 
-######################################## SAVED ITEMS ########################################
-
-
-@app.post(
-    '/saved_items',
-    response_model=None,
-    responses={
-        '201': {'model': SavedItemsPostResponse},
-        '422': {'model': ErrorResponse},
-        '500': {'model': ErrorResponse},
-    },
-)
-def post_saved_items(
-    body: SavedItemsPostRequest,
-) -> Optional[Union[SavedItemsPostResponse, ErrorResponse]]:
-    """
-    Save a listing to a users saved posts. This endpoint requires authentication.
-    """
-    pass
-
-
-@app.get(
-    '/saved_items',
-    response_model=SavedItemsGetResponse,
-    responses={
-        '400': {'model': ErrorResponse},
-        '404': {'model': ErrorResponse},
-        '500': {'model': ErrorResponse},
-    },
-)
-def get_saved_items() -> Union[SavedItemsGetResponse, ErrorResponse]:
-    """
-    Retrieve saved items for a user. User id is determined based on JWT.
-    """
-    pass
-
-
-@app.delete(
-    '/saved_items',
-    response_model=SavedItemsDeleteResponse,
-    responses={
-        '400': {'model': ErrorResponse},
-        '404': {'model': ErrorResponse},
-        '500': {'model': ErrorResponse},
-    },
-)
-def delete_saved_items(
-    saved_item_id: str,
-) -> Union[SavedItemsDeleteResponse, ErrorResponse]:
-    """
-    Delete a saved item
-    """
-    pass
 
 
 ######################################## MESSAGES ########################################

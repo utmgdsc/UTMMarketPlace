@@ -270,7 +270,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  
   /conversations:
     get:
       tags:
@@ -553,7 +552,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-
   /saved_items:
     post:
       tags:
@@ -584,7 +582,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-    
+
     get:
       tags:
         - saved_items
@@ -595,7 +593,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SavedItemsGetResponse"  
+                $ref: "#/components/schemas/SavedItemsGetResponse"
         "400":
           description: Bad Request - Missing or invalid user_id
           content:
@@ -619,8 +617,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"  
-    
+                $ref: "#/components/schemas/ErrorResponse"
+
     delete:
       tags:
         - saved_items
@@ -633,7 +631,7 @@ paths:
           description: The unique identifier of the saved item to delete.
           schema:
             type: string
-          
+
       responses:
         "200":
           description: User details retrieved successfully
@@ -1048,8 +1046,7 @@ components:
         profile_picture: "https://example.com/image1.jpg"
         email: zesty123@utoronto.ca
         location: "Toronto"
-    
-    
+
     SavedItemsPostRequest:
       type: object
       required:
@@ -1058,7 +1055,7 @@ components:
         id:
           type: string
       example:
-        id: "101"    
+        id: "101"
 
     SavedItemsPostResponse:
       type: object
@@ -1067,7 +1064,7 @@ components:
           type: string
       example:
         message: "Item saved successfully."
-    
+
     SavedItemsGetResponse:
       type: object
       required:
@@ -1078,7 +1075,7 @@ components:
           items:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
-          type: integer      
+          type: integer
       example:
         saved_items:
           - id: "1"
@@ -1099,4 +1096,3 @@ components:
           type: string
       example:
         message: "Saved item deleted successfully."
-        
