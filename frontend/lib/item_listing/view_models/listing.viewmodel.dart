@@ -47,7 +47,7 @@ class ListingViewModel extends LoadingViewModel {
       final response = await repo.fetchData(limit: limit, nextPageToken: _listingModel.nextPageToken, query: query);
       final newListingModel = ListingModel.fromJson(response);
       _listingModel = newListingModel;
-      items = [...items, ...newListingModel.items];
+      items.addAll(newListingModel.items);
     } catch (exc) {
       debugPrint('Error in fetchMoreData : ${exc.toString()}');
     } finally {

@@ -64,19 +64,19 @@ class Item {
   String? paginationToken;
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
-        id: json["id"],
-        title: json["title"],
-        price: (json["price"] ?? 0).toDouble(),
-        description: json["description"],
-        sellerId: json["seller_id"],
+        id: json["id"] as String?,
+        title: json["title"] as String? ?? '',
+        price: (json["price"] as num?)?.toDouble() ?? 0.0,
+        description: json["description"] as String?,
+        sellerId: json["seller_id"] as String? ?? '',
         pictures: json["pictures"] == null
             ? []
-            : List<String>.from(json["pictures"].map((x) => x)),
-        condition: json["condition"],
-        category: json["category"],
-        datePosted: json["date_posted"],
-        campus: json["campus"],
-        paginationToken: json["paginationToken"],
+            : List<String>.from((json["pictures"] as List).map((x) => x as String)),
+        condition: json["condition"] as String? ?? '',
+        category: json["category"] as String?,
+        datePosted: json["date_posted"] as String?,
+        campus: json["campus"] as String?,
+        paginationToken: json["paginationToken"] as String?,
       );
 
   Map<String, dynamic> toJson() => {
