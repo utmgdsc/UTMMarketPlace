@@ -99,7 +99,10 @@ class CreateListingViewModel extends LoadingViewModel {
     final hasConditionSelected = condition.isNotEmpty;
     final hasCampusSelected = campus != null;
 
-    return isFormValid && hasImages && hasConditionSelected && hasCampusSelected;
+    return isFormValid &&
+        hasImages &&
+        hasConditionSelected &&
+        hasCampusSelected;
   }
 
   Future<bool> submitForm({
@@ -130,7 +133,8 @@ class CreateListingViewModel extends LoadingViewModel {
   }) async {
     try {
       isLoading = true;
-      debugPrint('Creating listing with title: $title, price: $price, description: $description, condition: $_condition');
+      debugPrint(
+          'Creating listing with title: $title, price: $price, description: $description, condition: $_condition');
       final listing = CreateListingModel(
         title: title,
         price: price,

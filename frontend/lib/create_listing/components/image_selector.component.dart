@@ -22,31 +22,32 @@ class ImageSelector extends StatelessWidget {
 
         final imageContent = model.images.isNotEmpty
             ? ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: FutureBuilder<List<File>>(
-                future: Future.value(model.images.map((xfile) => File(xfile.path)).toList()),
-                builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                  snapshot.hasData) {
-                  return GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 4,
-                    mainAxisSpacing: 4,
-                  ),
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    return Image.file(
-                    snapshot.data![index],
-                    fit: BoxFit.cover,
-                    );
+                borderRadius: BorderRadius.circular(12),
+                child: FutureBuilder<List<File>>(
+                  future: Future.value(
+                      model.images.map((xfile) => File(xfile.path)).toList()),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.hasData) {
+                      return GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                        ),
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          return Image.file(
+                            snapshot.data![index],
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      );
+                    } else {
+                      return Center(child: CircularProgressIndicator());
+                    }
                   },
-                  );
-                } else {
-                  return Center(child: CircularProgressIndicator());
-                }
-                },
-              ),
+                ),
               )
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -94,8 +95,7 @@ class ImageSelector extends StatelessWidget {
         );
         return GestureDetector(
           onTap: () async {
-            final List<XFile> images =
-                await picker.pickMultiImage();
+            final List<XFile> images = await picker.pickMultiImage();
             if (images.isNotEmpty) {
               for (var image in images) {
                 model.addMedia(image);
