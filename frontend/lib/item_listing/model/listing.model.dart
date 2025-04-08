@@ -11,13 +11,14 @@ ListingModel listingModelFromJson(String str) {
 String listingModelToJson(ListingModel data) => json.encode(data.toJson());
 
 class ListingModel {
+  final List<Item> items;
+
   ListingModel({
     this.items = const [],
     this.total,
     this.nextPageToken,
   });
 
-  List<Item> items;
   int? total;
   String? nextPageToken;
 
@@ -37,59 +38,69 @@ class ListingModel {
 }
 
 class Item {
+  final String id;
+  final String name;
+  final String description;
+  final double price;
+  final String imageUrl;
+  final String category;
+  final String condition;
+  final DateTime? datePosted;
+  final String? campus;
+  String title;
+  String sellerId;
+  List<String> pictures;
+  String? paginationToken;
+
   Item({
-    this.id,
-    required this.title,
+    required this.id,
+    required this.name,
+    required this.description,
     required this.price,
-    this.description,
-    required this.sellerId,
-    this.pictures = const [],
+    this.imageUrl = '',
+    required this.category,
     required this.condition,
-    this.category,
     this.datePosted,
     this.campus,
+    required this.title,
+    required this.sellerId,
+    this.pictures = const [],
     this.paginationToken,
   });
 
-  String? id;
-  String title;
-  double price;
-  String? description;
-  String sellerId;
-  List<String> pictures;
-  String condition;
-  String? category;
-  String? datePosted;
-  String? campus;
-  String? paginationToken;
-
   factory Item.fromJson(Map<String, dynamic> json) => Item(
-        id: json["id"] as String?,
-        title: json["title"] as String? ?? '',
+        id: json["id"] as String? ?? '',
+        name: json["name"] as String? ?? '',
+        description: json["description"] as String? ?? '',
         price: (json["price"] as num?)?.toDouble() ?? 0.0,
-        description: json["description"] as String?,
+        imageUrl: json["imageUrl"] as String? ?? '',
+        category: json["category"] as String? ?? '',
+        condition: json["condition"] as String? ?? '',
+        datePosted: json["date_posted"] != null
+            ? DateTime.tryParse(json["date_posted"])
+            : null,
+        campus: json["campus"] as String?,
+        title: json["title"] as String? ?? '',
         sellerId: json["seller_id"] as String? ?? '',
         pictures: json["pictures"] == null
             ? []
             : List<String>.from((json["pictures"] as List).map((x) => x as String)),
-        condition: json["condition"] as String? ?? '',
-        category: json["category"] as String?,
-        datePosted: json["date_posted"] as String?,
-        campus: json["campus"] as String?,
         paginationToken: json["paginationToken"] as String?,
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        "title": title,
-        "price": price,
+        "name": name,
         "description": description,
+        "price": price,
+        "imageUrl": imageUrl,
+        "category": category,
+        "condition": condition,
+        "date_posted": datePosted?.toIso8601String(),
+        "campus": campus,
+        "title": title,
         "seller_id": sellerId,
         "pictures": List<dynamic>.from(pictures.map((x) => x)),
-        "condition": condition,
-        "category": category,
-        "date_posted": datePosted,
-        "campus": campus,
         "paginationToken": paginationToken,
       };
 }

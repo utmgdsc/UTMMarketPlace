@@ -1,9 +1,14 @@
 import pytest
 from fastapi.testclient import TestClient
+import sys
+import os
 import json
 from pathlib import Path
 
-from app.main import app  # This will now work directly once app/ has __init__.py
+# Add the parent directory to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from app.main import app
 
 @pytest.fixture
 def client():
