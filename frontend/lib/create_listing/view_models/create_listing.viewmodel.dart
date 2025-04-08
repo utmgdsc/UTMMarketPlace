@@ -11,6 +11,9 @@ class CreateListingViewModel extends LoadingViewModel {
 
   String _condition = '';
   String get condition => _condition;
+
+  String? _campus;
+  String? get campus => _campus;
   final List<XFile> _images = [];
   List<XFile> get images => _images;
   bool get hasImages => _images.isNotEmpty;
@@ -30,6 +33,11 @@ class CreateListingViewModel extends LoadingViewModel {
 
   void clearCondition() {
     _condition = '';
+  }
+
+  void setCampus(String? campus) {
+    _campus = campus;
+    notifyListeners();
   }
 
   void setShowValidationErrors(bool value) {
@@ -89,8 +97,9 @@ class CreateListingViewModel extends LoadingViewModel {
 
     final isFormValid = formKey.currentState?.validate() ?? false;
     final hasConditionSelected = condition.isNotEmpty;
+    final hasCampusSelected = campus != null;
 
-    return isFormValid && hasImages && hasConditionSelected;
+    return isFormValid && hasImages && hasConditionSelected && hasCampusSelected;
   }
 
   Future<bool> submitForm({
@@ -127,6 +136,7 @@ class CreateListingViewModel extends LoadingViewModel {
         price: price,
         description: description,
         condition: _condition,
+        campus: _campus,
         // TODO: Change encryption method for images when backend is ready
         images: await Future.wait(_images.map((image) async {
           final bytes = await image.readAsBytes();

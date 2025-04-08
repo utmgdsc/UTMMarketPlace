@@ -8,6 +8,7 @@ class CreateListingModel {
   final String? description;
   final String condition;
   final List<String> images;
+  final String? campus;
 
   CreateListingModel({
     this.title,
@@ -15,6 +16,7 @@ class CreateListingModel {
     this.description,
     this.condition = 'New',
     this.images = const [],
+    this.campus,
   });
 
   bool get isValid {
@@ -25,6 +27,7 @@ class CreateListingModel {
         price! > 0 &&
         price! <= maxPrice &&
         images.isNotEmpty &&
+        campus != null &&
         (description == null || description!.length <= maxDescriptionLength);
   }
 
@@ -35,6 +38,7 @@ class CreateListingModel {
       'description': description,
       'condition': condition,
       'pictures': images,
+      'campus': campus,
     };
   }
 }
