@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/create_listing/view_models/create_listing.viewmodel.dart';
 
@@ -14,15 +17,36 @@ class ImageSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CreateListingViewModel>(
       builder: (_, model, __) {
-        final bool showError = !model.hasImage && showValidationErrors;
-        final imageContent = model.image != null
+        final bool showError = !model.hasImages && showValidationErrors;
+        final ImagePicker picker = ImagePicker();
+
+        final imageContent = model.images.isNotEmpty
             ? ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  model.image!,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                ),
+              borderRadius: BorderRadius.circular(12),
+              child: FutureBuilder<List<File>>(
+                future: Future.value(model.images.map((xfile) => File(xfile.path)).toList()),
+                builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasData) {
+                  return GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 4,
+                    mainAxisSpacing: 4,
+                  ),
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    return Image.file(
+                    snapshot.data![index],
+                    fit: BoxFit.cover,
+                    );
+                  },
+                  );
+                } else {
+                  return Center(child: CircularProgressIndicator());
+                }
+                },
+              ),
               )
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -70,7 +94,13 @@ class ImageSelector extends StatelessWidget {
         );
         return GestureDetector(
           onTap: () async {
-            // Your existing image selection logic
+            final List<XFile> images =
+                await picker.pickMultiImage();
+            if (images.isNotEmpty) {
+              for (var image in images) {
+                model.addMedia(image);
+              }
+            }
           },
           child: imageContainer,
         );
