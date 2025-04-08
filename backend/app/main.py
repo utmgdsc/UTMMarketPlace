@@ -1,4 +1,5 @@
 
+import base64
 from app.models import (
     ConversationsGetResponse,
     ErrorResponse,
@@ -109,9 +110,9 @@ async def authenticate_user(email: str, password):
     return user
 
 
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
-    raise HTTPException(status_code=422, detail="Invalid request.")
+# @app.exception_handler(RequestValidationError)
+# async def validation_exception_handler(request, exc):
+#     raise HTTPException(status_code=422, detail="Invalid request.")
 
 ######################################## LISTINGS ENDPOINTS ########################################
 
@@ -286,15 +287,16 @@ async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorRes
         # Convert MongoDB document to Pydantic model
 
         return ListingGetResponseItem(
-            id=str(listing.get("_id")),
+            id=str(listing["_id"]),
             title=listing.get("title"),
             price=listing.get("price"),
             description=listing.get("description"),
             seller_id=listing.get("seller_id"),
             pictures=listing.get("pictures", []),
             category=listing.get("category"),
-            date_posted=listing.get("date_posted"),
+            condition=listing.get("condition"),
             campus=listing.get("campus"),
+            date_posted=listing.get("date_posted"),
         )
     except Exception as e:
         return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
