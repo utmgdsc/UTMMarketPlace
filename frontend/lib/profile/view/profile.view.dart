@@ -44,17 +44,47 @@ class _ProfileState extends State<Profile> {
 
         final profile = profileViewModel.profile;
         if (profile == null) {
-          return const Center(child: Text('Error loading profile'));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Error loading profile',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                if (profileViewModel.errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      profileViewModel.errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    profileViewModel.fetchData(widget.userId);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF11384A),
+                  ),
+                  child: const Text('Try Again'),
+                ),
+              ],
+            ),
+          );
         }
 
         return SingleChildScrollView(
           child: Column(
             children: [
               ProfileHeader(
-                name: profile.name,
+                displayName: profile.displayName,
                 email: profile.email,
-                imageUrl: profile.imageUrl,
+                profilePicture: profile.profilePicture,
                 rating: profile.rating,
+                ratingCount: profile.ratingCount,
                 isOwnProfile: widget.isOwnProfile,
               ),
               const SizedBox(height: 16),

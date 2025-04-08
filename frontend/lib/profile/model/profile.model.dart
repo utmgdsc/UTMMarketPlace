@@ -1,43 +1,40 @@
 class ProfileModel {
   final String id;
-  final String name;
+  final String displayName;
   final String email;
-  final String imageUrl;
+  final String? profilePicture;
   final double rating;
+  final int ratingCount;
+  final String? location;
+  final List<String>? savedPosts;
   final List<Review> reviews;
   final List<ListingItem> listings;
-  final List<ListingItem> savedItems;
 
   ProfileModel({
     required this.id,
-    required this.name,
+    required this.displayName,
     required this.email,
-    required this.imageUrl,
+    this.profilePicture,
     this.rating = 0.0,
+    this.ratingCount = 0,
+    this.location,
+    this.savedPosts,
     this.reviews = const [],
     this.listings = const [],
-    this.savedItems = const [],
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
     return ProfileModel(
-      id: json['id'],
-      name: json['name'],
+      id: json['user_id'],
+      displayName: json['display_name'],
       email: json['email'],
-      imageUrl: json['image_url'],
+      profilePicture: json['profile_picture'],
       rating: json['rating']?.toDouble() ?? 0.0,
-      reviews: (json['reviews'] as List?)
-              ?.map((review) => Review.fromJson(review))
-              .toList() ??
-          [],
-      listings: (json['listings'] as List?)
-              ?.map((listing) => ListingItem.fromJson(listing))
-              .toList() ??
-          [],
-      savedItems: (json['saved_items'] as List?)
-              ?.map((item) => ListingItem.fromJson(item))
-              .toList() ??
-          [],
+      ratingCount: json['rating_count'] ?? 0,
+      location: json['location'],
+      savedPosts: (json['saved_posts'] as List?)?.cast<String>(),
+      reviews: [], // Reviews are not part of the current API response
+      listings: [], // Listings are not part of the current API response
     );
   }
 }

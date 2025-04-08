@@ -7,7 +7,8 @@ class NavProfileImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 13,
-      backgroundImage: const AssetImage('assets/images/aubreydrakepfp.jpg'),
+      backgroundColor: const Color(0xFF11384A),
+      child: const Icon(Icons.person, size: 13, color: Colors.white),
     );
   }
 }

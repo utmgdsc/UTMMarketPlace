@@ -37,9 +37,9 @@ final router = GoRouter(
           currentIndex = 0;
         } else if (location.startsWith('/messages')) {
           currentIndex = 1;
-        } else if (location.startsWith('/marketplace')) {
+        } else if (location.startsWith('/create-listing')) {
           currentIndex = 2;
-        } else if (location.startsWith('/notifications')) {
+        } else if (location.startsWith('/marketplace')) {
           currentIndex = 3;
         } else {
           currentIndex = 4;
@@ -78,10 +78,6 @@ final router = GoRouter(
               conversationId: conversationId,
             );
           },
-        ),
-        GoRoute(
-          path: '/notifications',
-          builder: (context, state) => const NotificationsView(),
         ),
         GoRoute(
           path: '/menu',

@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:utm_marketplace/profile/components/edit_profile_dialog.component.dart';
 
 class ProfileHeader extends StatelessWidget {
-  final String name;
+  final String displayName;
   final String email;
-  final String imageUrl;
+  final String? profilePicture;
   final double rating;
+  final int ratingCount;
   final bool isOwnProfile;
 
   const ProfileHeader({
     super.key,
-    required this.name,
+    required this.displayName,
     required this.email,
-    required this.imageUrl,
+    this.profilePicture,
     required this.rating,
+    required this.ratingCount,
     required this.isOwnProfile,
   });
 
@@ -39,8 +41,8 @@ class ProfileHeader extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (context) => EditProfileDialog(
-                    currentName: name,
-                    currentImageUrl: imageUrl,
+                    currentName: displayName,
+                    currentImageUrl: profilePicture,
                   ),
                 );
               },
@@ -66,12 +68,18 @@ class ProfileHeader extends StatelessWidget {
       ),
       child: CircleAvatar(
         radius: 65,
-        backgroundImage: AssetImage(imageUrl),
+        backgroundImage: profilePicture != null && profilePicture!.isNotEmpty
+            ? NetworkImage(profilePicture!) as ImageProvider
+            : null,
+        backgroundColor: const Color(0xFF11384A),
+        child: profilePicture == null || profilePicture!.isEmpty
+            ? const Icon(Icons.person, size: 65, color: Colors.white)
+            : null,
       ),
     );
 
     final userName = Text(
-      name,
+      displayName,
       style: const TextStyle(
         fontSize: 32,
         fontWeight: FontWeight.bold,
@@ -96,7 +104,7 @@ class ProfileHeader extends StatelessWidget {
             size: 20,
           );
         }),
-        Text(' ($rating/5)'),
+        Text(' ($rating/5, $ratingCount reviews)'),
       ],
     );
 
