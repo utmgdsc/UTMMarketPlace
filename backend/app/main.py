@@ -45,6 +45,7 @@ from fastapi.security import HTTPBearer
 from pydantic import ValidationError
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
+import base64
 load_dotenv()  # Load environment variables from .env
 JWT_SECRET = os.getenv("JWT_SECRET")
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
@@ -128,7 +129,8 @@ async def get_search(
         5, description="Number of listings to retrieve", ge=1, le=30),
     next: Optional[str] = Query(
         None, description="Last seen pagination token"),
-    price_type: Optional[str] = Query(None, description="Type of search (price-high-to-low, price-low-to-high, date-recent)"),
+    price_type: Optional[str] = Query(
+        None, description="Type of search (price-high-to-low, price-low-to-high, date-recent)"),
     lower_price: Optional[int] = Query(
         0, description="lower end of price filter"),
     upper_price: Optional[int] = Query(
@@ -170,7 +172,8 @@ async def get_search(
             search_stage["$search"]["searchAfter"] = next
 
         # Selecting which order to sort by
-        sort_stage = {"$sort": {"date_posted": -1}}  # Default to most recent first
+        # Default to most recent first
+        sort_stage = {"$sort": {"date_posted": -1}}
         if price_type == "price-high-to-low":
             sort_stage = {"$sort": {"price": -1}}
         elif price_type == "price-low-to-high":
@@ -181,7 +184,8 @@ async def get_search(
         pipeline = [
             search_stage,
             # Price filter with stable sort using _id as tiebreaker
-            {"$sort": {"price": price_order, "_id": 1}} if price_order in [-1, 1] else {"$sort": {"_id": 1}}, 
+            {"$sort": {"price": price_order, "_id": 1}
+             } if price_order in [-1, 1] else {"$sort": {"_id": 1}},
             # Lower and upper limits of price (0 -> +inf by default)
             {
                 "$match": {
@@ -399,7 +403,6 @@ async def get_listings(
         return ErrorResponse(details="Internal Server Error. Please try again later.")
 
 
-
 @app.post(
     '/listings',
     response_model=None,
@@ -439,14 +442,15 @@ async def post_listings(
             try:
                 img_data = base64.b64decode(image_b64)
             except Exception:
-                raise HTTPException(status_code=422, detail="Invalid base64 image format")
-        
+                raise HTTPException(
+                    status_code=422, detail="Invalid base64 image format")
+
             filename = f"{result.inserted_id}_{idx}.jpg"
             filepath = os.path.join(STATIC_DIR, filename)
 
             with open(filepath, "wb") as f:
                 f.write(img_data)
-            
+
             image_urls.append(f"/static/{filename}")
 
         await listings_collection.update_one(
@@ -467,7 +471,7 @@ async def post_listings(
             condition=body.condition,
             campus=body.campus,
         )
-    
+
     except exceptions.ExpiredSignatureError:
         raise HTTPException(
             status_code=401, detail="Token expired, login again")
@@ -475,17 +479,18 @@ async def post_listings(
         return ErrorResponse(status_code=422, details="Validation error. Please check your input data.")
     except Exception as e:
         return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
-    
+
 ######################################## SAVED ITEMS ENDPOINTS ###################################
 
-@app.post("/saved_items", 
-    response_model=SavedItemsPostResponse,
-    responses={
-    400: {"model": ErrorResponse},
-    404: {"model": ErrorResponse},
-    409: {"model": ErrorResponse},
-    500: {"model": ErrorResponse},
-})
+
+@app.post("/saved_items",
+          response_model=SavedItemsPostResponse,
+          responses={
+              400: {"model": ErrorResponse},
+              404: {"model": ErrorResponse},
+              409: {"model": ErrorResponse},
+              500: {"model": ErrorResponse},
+          })
 async def save_item(
 
     body: SavedItemsPostRequest,
@@ -498,7 +503,8 @@ async def save_item(
         item_id = body.id
         # Validate the ID format
         if not ObjectId.is_valid(item_id):
-            raise HTTPException(status_code=400, detail="Invalid listing ID format.")
+            raise HTTPException(
+                status_code=400, detail="Invalid listing ID format.")
 
         # Check if the listing exists
         listing = await listings_collection.find_one({"_id": ObjectId(item_id)})
@@ -508,7 +514,8 @@ async def save_item(
         # Check if the user exists
         user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
         if not user:
-            raise HTTPException(status_code=400, detail="User not found. Please log in or sign up.")
+            raise HTTPException(
+                status_code=400, detail="User not found. Please log in or sign up.")
 
         # Check if the item is already saved
         saved_posts = user.get("saved_posts", [])
@@ -516,9 +523,9 @@ async def save_item(
             raise HTTPException(status_code=409, detail="Item already saved.")
 
         if len(saved_posts) >= 30:
-            raise HTTPException(status_code=400, detail="You can only save up to 30 items.")
+            raise HTTPException(
+                status_code=400, detail="You can only save up to 30 items.")
 
-    
         saved_posts.append(item_id)
         await users_collection.update_one({"_id": ObjectId(current_user["id"])}, {"$set": {"saved_posts": saved_posts}})
         return SavedItemsPostResponse(message="Item saved successfully.")
@@ -526,17 +533,18 @@ async def save_item(
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal Server Error. Please try again later. {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Internal Server Error. Please try again later. {e}")
 
 
 @app.get("/saved_items",
-    response_model=SavedItemsGetResponse,
-    responses={
-        200: {"description": "List of saved listings"},
-        400: {"model": ErrorResponse},
-        500: {"model": ErrorResponse},
-    },
-)
+         response_model=SavedItemsGetResponse,
+         responses={
+             200: {"description": "List of saved listings"},
+             400: {"model": ErrorResponse},
+             500: {"model": ErrorResponse},
+         },
+         )
 async def get_saved_items(current_user: dict = Depends(get_current_user)):
     try:
         user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
@@ -548,9 +556,11 @@ async def get_saved_items(current_user: dict = Depends(get_current_user)):
             return [], 0
 
         # Convert only valid ObjectIds
-        object_ids = [ObjectId(item_id) for item_id in saved_ids if ObjectId.is_valid(item_id)]
+        object_ids = [ObjectId(item_id)
+                      for item_id in saved_ids if ObjectId.is_valid(item_id)]
 
-        listings_cursor = listings_collection.find({"_id": {"$in": object_ids}})
+        listings_cursor = listings_collection.find(
+            {"_id": {"$in": object_ids}})
         listings = await listings_cursor.to_list(length=30)
 
         response_data = [
@@ -571,21 +581,22 @@ async def get_saved_items(current_user: dict = Depends(get_current_user)):
         return SavedItemsGetResponse(
             saved_items=response_data,
             total=len(response_data),
-            )
+        )
 
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(detail="Internal Server Error. Please try again later.")
+        raise HTTPException(
+            detail="Internal Server Error. Please try again later.")
 
 
-@app.delete("/saved_items", 
-    response_model=SavedItemsDeleteResponse,        
-    responses={
-    400: {"model": ErrorResponse},
-    404: {"model": ErrorResponse},
-    500: {"model": ErrorResponse},
-})
+@app.delete("/saved_items",
+            response_model=SavedItemsDeleteResponse,
+            responses={
+                400: {"model": ErrorResponse},
+                404: {"model": ErrorResponse},
+                500: {"model": ErrorResponse},
+            })
 async def delete_saved_item(saved_item_id: str = Query(..., description="ID of the item to remove"), current_user: dict = Depends(get_current_user)):
     try:
         user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
@@ -594,11 +605,12 @@ async def delete_saved_item(saved_item_id: str = Query(..., description="ID of t
 
         saved_posts = user.get("saved_posts", [])
         if saved_item_id not in saved_posts:
-            raise HTTPException(status_code=404, detail="Item not found in saved list")
+            raise HTTPException(
+                status_code=404, detail="Item not found in saved list")
 
         saved_posts.remove(saved_item_id)
         await users_collection.update_one({"_id": ObjectId(current_user["id"])}, {"$set": {"saved_posts": saved_posts}})
-        return SavedItemsDeleteResponse(message= "Item removed from saved list.")
+        return SavedItemsDeleteResponse(message="Item removed from saved list.")
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -762,8 +774,14 @@ async def post_sign_up(
     hashed_password = pbkdf2_sha256.hash(password)
 
     # Store User in Database
+    user_default_data = {"email": email,
+                 "password": hashed_password,
+                 "display_name": email,
+                 "rating": 0,
+                 "location": "",
+                 "rating_count": 0}
     try:
-        result = await users_collection.insert_one({"email": email, "password": hashed_password})
+        result = await users_collection.insert_one(user_default_data)
         return JSONResponse(
             status_code=201,
             content={"user_id": str(result.inserted_id), "message": "User registered successfully."})
@@ -773,7 +791,6 @@ async def post_sign_up(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Internal server error: {str(e)}")
-
 
 
 ######################################## MESSAGES ########################################
