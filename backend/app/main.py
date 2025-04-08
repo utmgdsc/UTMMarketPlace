@@ -1,4 +1,5 @@
 
+import base64
 from app.models import (
     ConversationsGetResponse,
     ErrorResponse,
@@ -23,8 +24,11 @@ from app.models import (
     OwnUserGetResponse,
     OtherUserGetResponse,
     UserPutRequest,
-    BaseUserResponse
-)
+    BaseUserResponse,
+    ReviewGetResponse,
+    ReviewPostRequest,
+    ReviewPostResponse
+    )
 
 from app.MongoClient_async import listings_collection, users_collection
 from dateutil.parser import parse as dateutil_parse
@@ -48,6 +52,7 @@ from fastapi.responses import JSONResponse
 load_dotenv()  # Load environment variables from .env
 JWT_SECRET = os.getenv("JWT_SECRET")
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+
 
 
 app = FastAPI(
@@ -643,6 +648,106 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error. Please try again later. Error: {str(e)}")
 
+@app.get(
+    '/reviews',
+    response_model=ReviewGetResponse,
+    responses={
+        '400': {'model': ErrorResponse},
+        '404': {'model': ErrorResponse},
+        '500': {'model': ErrorResponse},
+    },
+    tags=['reviews'],
+)
+
+async def get_reviews(seller_id: str) -> Union[ReviewGetResponse, ErrorResponse]:
+    """
+    Get reviews for a seller
+    """
+    try:
+        seller = await users_collection.find_one({"_id": ObjectId(seller_id)})
+        if not seller:
+            raise HTTPException(status_code=404, detail="Seller not found")
+    
+        reviews = seller.get("reviews", [])
+        total_reviews = len(reviews)
+        average_rating = round(sum(r['rating'] for r in reviews)/total_reviews, 2) if total_reviews > 0 else 0.0
+
+        return ReviewGetResponse(
+            seller=seller_id,
+            total_reviews=total_reviews,
+            average_rating=average_rating,
+            reviews=reviews
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server Error. {str(e)}")
+
+
+@app.post(
+    '/reviews',
+    response_model=None,
+    responses={
+        '201': {'model': ReviewPostResponse},
+        '400': {'model': ErrorResponse},
+        '404': {'model': ErrorResponse},
+        '500': {'model': ErrorResponse},
+    },
+    tags=['reviews'],
+)
+async def post_reviews(
+    body: ReviewPostRequest,
+) -> Optional[Union[ReviewPostResponse, ErrorResponse]]:
+    """
+    Create a review for a seller
+    """
+    try:
+        seller_id = body.seller_id
+
+        seller = await users_collection.find_one({"_id": ObjectId(body.seller_id)})
+        if not seller:
+            raise HTTPException(status_code=400, detail="Seller not found")
+        
+        #check if the reviewer has already left a review
+        reviews = seller.get("reviews")
+        if reviews:
+            for review in reviews:
+                if body.reviewer_id == review.get("reviewer_id"):
+                    raise HTTPException(status_code=404, detail="You have already left the user a review")
+
+
+        review = {
+            "reviewer_id": body.reviewer_id,
+            "rating": body.rating,
+            "comment": body.comment,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+        
+        await users_collection.update_one(
+            {"_id": ObjectId(seller_id)},
+            {"$push": {"reviews": review},
+             "$inc": {
+                 "rating_count": 1,
+                 "rating": body.rating
+             }}
+        )
+
+        #recalculate average
+        updated_seller = await users_collection.find_one({"_id": ObjectId(body.seller_id)})
+        count = updated_seller.get("rating_count", 1)
+        total_rating = sum([r["rating"] for r in updated_seller.get("reviews", [])])
+        avg = round(total_rating / count, 2)
+
+        await users_collection.update_one(
+            {"_id": ObjectId(body.seller_id)},
+            {"$set": {"rating": avg}}
+        )
+
+        return ReviewPostResponse(message="Review created")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @app.put('/user/{userid}',
          response_model=None,

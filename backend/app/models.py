@@ -7,8 +7,24 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, Field, SecretStr
+from pydantic import BaseModel, EmailStr, Field, SecretStr, confloat
 
+
+class ReviewItem(BaseModel):
+    reviewer_id: Optional[str] = None
+    rating: Optional[float] = None
+    comment: Optional[str] = None
+    timestamp: Optional[datetime] = None
+
+class BaseUserResponse(BaseModel):
+    display_name: str
+    profile_picture: Optional[str] = None
+    email: Optional[EmailStr] = None
+    user_id: str
+    location: Optional[str] = None
+    rating: float
+    rating_count: int
+    reviews: Optional[List[ReviewItem]] = None
 
 class ErrorResponse(BaseModel):
     details: str
@@ -135,16 +151,6 @@ class SettingsPutResponse(BaseModel):
     text_size: Optional[int] = Field(None, description='Current text size setting.')
 
 
-class BaseUserResponse(BaseModel):
-    display_name: str
-    profile_picture: Optional[str] = None
-    email: Optional[EmailStr] = None
-    user_id: str
-    location: Optional[str] = None
-    rating: float
-    rating_count: int
-
-
 class OwnUserGetResponse(BaseUserResponse):
     saved_posts: Optional[List[str]] = None
 
@@ -195,3 +201,24 @@ class SearchGetResponse(BaseModel):
     listings: Optional[List[ListingGetResponseItem]] = None
     total: Optional[int] = None
     next_page_token: Optional[str] = None
+
+class ReviewGetResponse(BaseModel):
+    seller_id: Optional[str] = None
+    total_reviews: Optional[int] = None
+    average_rating: Optional[float] = None
+    reviews: Optional[List[ReviewItem]] = None
+
+
+class ReviewPostResponse(BaseModel):
+    message: str
+
+class ReviewPostRequest(BaseModel):
+    seller_id: str = Field(..., description='The user ID of the seller being reviewed.')
+    reviewer_id: str = Field(..., description='The user ID of the reviewer.')
+    rating: confloat(ge=1.0, le=5.0) = Field(
+        ..., description='Rating between 1.0 and 5.0.'
+    )
+    comment: Optional[str] = Field(
+        None, description='Optional comment about the seller.'
+    )
+

@@ -727,7 +727,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Seller not found or no reviews available
+          description: Reviewer has already left the seller a review
           content:
             application/json:
               schema:
