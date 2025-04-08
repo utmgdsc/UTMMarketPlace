@@ -1,13 +1,8 @@
 import 'package:utm_marketplace/shared/dio/dio.dart';
 
-abstract class ListingRepo {
-  Future<dynamic> fetchData({int limit, String? nextPageToken, String? query});
-}
-
-class ListingRepoImpl extends ListingRepo {
+class ListingRepo {
   final Map<String, dynamic> _cache = {};
 
-  @override
   Future<dynamic> fetchData({int limit = 6, String? nextPageToken, String? query}) async {
     final cacheKey = '$limit-$nextPageToken-$query';
     if (_cache.containsKey(cacheKey)) {

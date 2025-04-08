@@ -57,7 +57,7 @@ class _ListingViewState extends State<ListingView> {
             },
             child: ItemCard(
               id: item.id,
-              name: item.name,
+              name: item.title,
               price: item.price,
               category: item.condition,
               imageUrls: item.pictures,

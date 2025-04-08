@@ -39,61 +39,54 @@ class ListingModel {
 
 class Item {
   final String id;
-  final String name;
-  final String description;
+  final String title;
   final double price;
-  final String imageUrl;
+  final String description;
+  final String sellerId;
+  final List<String> pictures;
   final String category;
   final String condition;
+  final String campus;
   final DateTime? datePosted;
-  final String? campus;
-  String title;
-  String sellerId;
-  List<String> pictures;
-  String? paginationToken;
+  final String? paginationToken;
 
   Item({
     required this.id,
-    required this.name,
-    required this.description,
-    required this.price,
-    this.imageUrl = '',
-    required this.category,
-    required this.condition,
-    this.datePosted,
-    this.campus,
     required this.title,
+    required this.price,
+    required this.description,
     required this.sellerId,
     this.pictures = const [],
+    required this.category,
+    required this.condition,
+    required this.campus,
+    this.datePosted,
     this.paginationToken,
   });
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
         id: json["id"] as String? ?? '',
-        name: json["name"] as String? ?? '',
         description: json["description"] as String? ?? '',
         price: (json["price"] as num?)?.toDouble() ?? 0.0,
-        imageUrl: json["imageUrl"] as String? ?? '',
         category: json["category"] as String? ?? '',
         condition: json["condition"] as String? ?? '',
         datePosted: json["date_posted"] != null
             ? DateTime.tryParse(json["date_posted"])
             : null,
-        campus: json["campus"] as String?,
+        campus: json["campus"] as String? ?? '',
         title: json["title"] as String? ?? '',
         sellerId: json["seller_id"] as String? ?? '',
         pictures: json["pictures"] == null
             ? []
-            : List<String>.from((json["pictures"] as List).map((x) => x as String)),
+            : List<String>.from(
+                (json["pictures"] as List).map((x) => x as String)),
         paginationToken: json["paginationToken"] as String?,
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        "name": name,
         "description": description,
         "price": price,
-        "imageUrl": imageUrl,
         "category": category,
         "condition": condition,
         "date_posted": datePosted?.toIso8601String(),

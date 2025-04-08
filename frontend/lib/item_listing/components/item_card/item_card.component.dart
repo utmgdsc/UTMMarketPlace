@@ -1,5 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
+import 'package:dio/dio.dart';
 
 class ItemCard extends StatelessWidget {
   final String? id;
@@ -17,38 +18,96 @@ class ItemCard extends StatelessWidget {
     this.category,
   });
 
+  Future<ImageProvider?> _fetchImage(String url) async {
+    final response = await dio.get(
+      url,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return MemoryImage(response.data);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final imageWidgets = imageUrls != null && imageUrls!.isNotEmpty
-      ? Container(
+    Widget buildLoadingImage() {
+      return Container(
         height: 250.0,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
+          color: Colors.grey[200],
         ),
-        child: Builder(
-          builder: (context) {
-            // TODO: Change this once image storage is officially implemented
-            try {
-              return Image.memory(
-                base64Decode(imageUrls!.first),
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Image.network(
-                    'https://placehold.co/400/png',
-                    fit: BoxFit.cover,
-                  );
-                },
-              );
-            } catch (e) {
-              return Image.network(
-                'https://placehold.co/400/png',
-                fit: BoxFit.cover,
-              );
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    Widget buildErrorImage() {
+      return Container(
+        height: 250.0,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+          color: Colors.grey[200],
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.broken_image,
+            size: 50,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
+
+    Widget buildPlaceholderImage() {
+      return Container(
+        height: 250.0,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+          color: Colors.grey[200],
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.image_not_supported,
+            size: 50,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
+
+    Widget buildLoadedImage(ImageProvider image) {
+      return Container(
+        height: 250.0,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+          image: DecorationImage(
+            image: image,
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
+
+    Widget buildImageWidget() {
+      if (imageUrls != null && imageUrls!.isNotEmpty) {
+        return FutureBuilder<ImageProvider?>(
+          future: _fetchImage(imageUrls!.first),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return buildLoadingImage();
+            } else if (snapshot.hasError || !snapshot.hasData) {
+              return buildErrorImage();
+            } else {
+              return buildLoadedImage(snapshot.data!);
             }
           },
-        ),
-      )
-      : SizedBox.shrink();
+        );
+      } else {
+        return buildPlaceholderImage();
+      }
+    }
+
+    final imageWidgets = buildImageWidget();
 
     final nameWidget = Text(
       name,

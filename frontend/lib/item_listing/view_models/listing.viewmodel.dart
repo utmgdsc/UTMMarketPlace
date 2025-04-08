@@ -6,11 +6,12 @@ import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
 import 'package:utm_marketplace/item_listing/components/filter_bottom_sheet/filter_bottom_sheet.component.dart';
 
 class ListingViewModel extends LoadingViewModel {
+  final ListingRepo repo;
+
   ListingViewModel({
     required this.repo,
   });
 
-  final ListingRepo repo;
   List<Item> _allItems = [];
   List<Item> _filteredItems = [];
   ListingModel? _listingModel;
@@ -27,6 +28,8 @@ class ListingViewModel extends LoadingViewModel {
       _listingModel = ListingModel.fromJson(response);
       _allItems = _listingModel!.items;
       _filteredItems = _allItems;
+      debugPrint('Fetched ${_filteredItems.length} items');
+      debugPrint('Items: ${_filteredItems.map((item) => item.title).toList()}');
       notifyListeners();
     } catch (exc) {
       debugPrint('Error in fetchData : ${exc.toString()}');
