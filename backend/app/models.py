@@ -35,14 +35,13 @@ class LogInPostRequest(BaseModel):
         description='Must be at least 8 characters, contain 1 uppercase letter, 1 number.',
     )
 
-
 class LogInPostResponse(BaseModel):
     access_token: str
     token_type: str
 
 
 class SignUpPostResponse(BaseModel):
-    user_id: int
+    user_id: str
     message: Optional[str] = None
 
 
@@ -62,6 +61,7 @@ class ListingGetResponseItem(BaseModel):
 class ListingsGetResponseAll(BaseModel):
     listings: Optional[List[ListingGetResponseItem]] = None
     total: Optional[int] = None
+    next_page_token: Optional[str] = None
 
 
 class ListingsPostRequest(BaseModel):
@@ -86,15 +86,6 @@ class ListingsPostResponse(BaseModel):
     condition: Optional[str] = None
     date_posted: Optional[datetime] = None
     campus: Optional[str] = None
-
-
-class SavedItemsPostRequest(BaseModel):
-    id: int = Field(..., description='Must be id linking to a listing')
-
-
-class SavedItemsPostResponse(BaseModel):
-    id: int
-    message: Optional[str] = None
 
 
 class MessagesPostRequest(BaseModel):
@@ -145,7 +136,7 @@ class SettingsPutResponse(BaseModel):
     text_size: Optional[int] = Field(None, description='Current text size setting.')
 
 
-class UserGetResponse(BaseModel):
+class BaseUserResponse(BaseModel):
     display_name: str
     profile_picture: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -153,7 +144,14 @@ class UserGetResponse(BaseModel):
     location: Optional[str] = None
     rating: float
     rating_count: int
+
+
+class OwnUserGetResponse(BaseUserResponse):
     saved_posts: Optional[List[str]] = None
+
+
+class OtherUserGetResponse(BaseUserResponse):
+    pass
 
 
 class UserPutRequest(BaseModel):
@@ -163,10 +161,16 @@ class UserPutRequest(BaseModel):
     location: Optional[str] = None
 
 
+
+class SavedItemsPostRequest(BaseModel):
+    id: str = Field(..., description='Must be id linking to a listing')
+
+class SavedItemsPostResponse(BaseModel):
+    message: Optional[str] = None
+
 class SavedItemsGetResponse(BaseModel):
     saved_items: Optional[List[ListingGetResponseItem]] = None
     total: Optional[int] = None
-
 
 class SavedItemsDeleteResponse(BaseModel):
     message: Optional[str] = None
@@ -191,3 +195,4 @@ class MessagesGetResponse(BaseModel):
 class SearchGetResponse(BaseModel):
     listings: Optional[List[ListingGetResponseItem]] = None
     total: Optional[int] = None
+    next_page_token: Optional[str] = None

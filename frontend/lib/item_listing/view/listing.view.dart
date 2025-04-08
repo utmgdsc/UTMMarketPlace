@@ -169,7 +169,8 @@ class _ListingViewState extends State<ListingView> {
                   return ListView(
                     children: [
                       const Padding(
-                        padding: EdgeInsets.only(left: 16, bottom: 5.0, top: 5.0),
+                        padding:
+                            EdgeInsets.only(left: 16, bottom: 5.0, top: 5.0),
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
