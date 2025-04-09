@@ -869,6 +869,9 @@ components:
           format: date-time
         campus:
           type: string
+        seller_name:  
+          type: string
+          description:  The display_name of the user matching seller_id. This field will only be present when querying for a single listing.
       example:
         id: "1"
         title: "MacBook Pro for sale"
