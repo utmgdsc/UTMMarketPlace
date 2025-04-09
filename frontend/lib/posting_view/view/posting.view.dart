@@ -35,6 +35,82 @@ class _PostingViewState extends State<PostingView> {
     return MemoryImage(response.data);
   }
 
+  Widget buildImageWidget(String url) {
+    return FutureBuilder<ImageProvider?>(
+      future: _fetchImage(url),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError || !snapshot.hasData) {
+          return const Center(
+            child: Icon(
+              Icons.broken_image,
+              size: 50,
+              color: Colors.grey,
+            ),
+          );
+        } else {
+          return Container(
+            height: 250.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4.0),
+              image: DecorationImage(
+                image: snapshot.data!,
+                fit: BoxFit.cover,
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget buildImageCarousel(dynamic item) {
+    if (item.pictures != null && item.pictures!.isNotEmpty) {
+      return SizedBox(
+        height: 250.0,
+        child: PageView.builder(
+          itemCount: item.pictures!.length,
+          itemBuilder: (context, index) {
+            final pictureUrl = item.pictures![index];
+            if (pictureUrl.isEmpty) {
+              return Container(
+                height: 250.0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4.0),
+                  color: Colors.grey[200],
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.image_not_supported,
+                    size: 50,
+                    color: Colors.grey,
+                  ),
+                ),
+              );
+            }
+            return buildImageWidget(pictureUrl);
+          },
+        ),
+      );
+    } else {
+      return Container(
+        height: 250.0,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4.0),
+          color: Colors.grey[200],
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.image_not_supported,
+            size: 50,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final loadingIndicator = const Center(child: LoadingComponent());
@@ -57,66 +133,7 @@ class _PostingViewState extends State<PostingView> {
               return itemUnavailable;
             }
 
-            Widget buildImageWidget(String url) {
-              return FutureBuilder<ImageProvider?>(
-                future: _fetchImage(url),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError || !snapshot.hasData) {
-                    return const Center(
-                      child: Icon(
-                        Icons.broken_image,
-                        size: 50,
-                        color: Colors.grey,
-                      ),
-                    );
-                  } else {
-                    return Container(
-                      height: 250.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4.0),
-                        image: DecorationImage(
-                          image: snapshot.data!,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    );
-                  }
-                },
-              );
-            }
-
-            Widget buildImageCarousel() {
-              if (item.pictures != null && item.pictures!.isNotEmpty) {
-                return SizedBox(
-                  height: 250.0,
-                  child: PageView.builder(
-                    itemCount: item.pictures!.length,
-                    itemBuilder: (context, index) {
-                      return buildImageWidget(item.pictures![index]);
-                    },
-                  ),
-                );
-              } else {
-                return Container(
-                  height: 250.0,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4.0),
-                    color: Colors.grey[200],
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 50,
-                      color: Colors.grey,
-                    ),
-                  ),
-                );
-              }
-            }
-
-            final itemImage = buildImageCarousel();
+            final itemImage = buildImageCarousel(item);
 
             final itemTitle = Text(
               item.name,

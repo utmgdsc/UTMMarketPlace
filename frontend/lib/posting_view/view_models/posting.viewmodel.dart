@@ -38,6 +38,7 @@ class PostingViewModel extends LoadingViewModel {
       isLoading = true;
 
       _postingModel = await repo.fetchData(itemid);
+      // TODO: Store seller_id and call backend for seller information
       item = _postingModel.item;
     } catch (exc) {
       debugPrint('Error in fetchData : ${exc.toString()}');
