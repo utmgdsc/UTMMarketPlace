@@ -12,6 +12,7 @@ from app.models import (
     MessagesGetResponse,
     MessagesPostRequest,
     MessagesPostResponse,
+    ReviewItem,
     SavedItemsDeleteResponse,
     SavedItemsGetResponse,
     SavedItemsPostRequest,
@@ -30,7 +31,7 @@ from app.models import (
     ReviewPostResponse
     )
 
-from app.MongoClient_async import listings_collection, users_collection
+from app.MongoClient_async import listings_collection, users_collection, reviews_collection
 from dateutil.parser import parse as dateutil_parse
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
@@ -663,12 +664,19 @@ async def get_reviews(seller_id: str) -> Union[ReviewGetResponse, ErrorResponse]
     """
     Get reviews for a seller
     """
+    print("SELLER ID: ", seller_id)
     try:
-        seller = await users_collection.find_one({"_id": ObjectId(seller_id)})
-        if not seller:
-            raise HTTPException(status_code=404, detail="Seller not found")
+        reviews_cursor = reviews_collection.find({"seller_id": ObjectId(seller_id)})
+        reviews = await reviews_cursor.to_list()
+
+        if not reviews:
+            return ReviewGetResponse(
+                seller_id=seller_id,
+                total_reviews=0,
+                average_rating=0.0,
+                reviews=[]
+            )
     
-        reviews = seller.get("reviews", [])
         total_reviews = len(reviews)
         average_rating = round(sum(r['rating'] for r in reviews)/total_reviews, 2) if total_reviews > 0 else 0.0
 
@@ -676,18 +684,24 @@ async def get_reviews(seller_id: str) -> Union[ReviewGetResponse, ErrorResponse]
             seller=seller_id,
             total_reviews=total_reviews,
             average_rating=average_rating,
-            reviews=reviews
+            reviews=[
+                ReviewItem(
+                    reviewer_id = str(r["reviewer_id"]),
+                    rating = r["rating"],
+                    comment = r.get("comment"),
+                    timestamp = r["timestamp"],
+                )
+                for r in reviews
+            ]
         )
 
-    except HTTPException:
-        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server Error. {str(e)}")
 
 
 @app.post(
     '/reviews',
-    response_model=None,
+    response_model=ReviewPostResponse,
     responses={
         '201': {'model': ReviewPostResponse},
         '400': {'model': ErrorResponse},
@@ -698,16 +712,16 @@ async def get_reviews(seller_id: str) -> Union[ReviewGetResponse, ErrorResponse]
 )
 async def post_reviews(
     body: ReviewPostRequest,
+    current_user: dict = Depends(get_current_user)
 ) -> Optional[Union[ReviewPostResponse, ErrorResponse]]:
     """
     Create a review for a seller
     """
     try:
-        seller_id = body.seller_id
-
+        #check if the seller exists
         seller = await users_collection.find_one({"_id": ObjectId(body.seller_id)})
         if not seller:
-            raise HTTPException(status_code=400, detail="Seller not found")
+            raise HTTPException(status_code=404, detail="Seller not found")
         
         #check if the reviewer has already left a review
         reviews = seller.get("reviews")
@@ -718,33 +732,27 @@ async def post_reviews(
 
 
         review = {
-            "reviewer_id": body.reviewer_id,
+            "seller_id": ObjectId(body.seller_id),
+            "reviewer_id": ObjectId(body.reviewer_id),
             "rating": body.rating,
             "comment": body.comment,
             "timestamp": datetime.utcnow().isoformat(),
         }
         
-        await users_collection.update_one(
-            {"_id": ObjectId(seller_id)},
-            {"$push": {"reviews": review},
-             "$inc": {
-                 "rating_count": 1,
-                 "rating": body.rating
-             }}
-        )
+        await reviews_collection.insert_one(review)
 
         #recalculate average
-        updated_seller = await users_collection.find_one({"_id": ObjectId(body.seller_id)})
-        count = updated_seller.get("rating_count", 1)
-        total_rating = sum([r["rating"] for r in updated_seller.get("reviews", [])])
-        avg = round(total_rating / count, 2)
+        current_rating = seller.get("rating", 0.0)
+        rating_count = seller.get('rating_count', 0)
+        new_avg = round((current_rating * rating_count + body.rating) / (rating_count + 1), 2) 
 
         await users_collection.update_one(
             {"_id": ObjectId(body.seller_id)},
-            {"$set": {"rating": avg}}
+            {"$set": {"rating": new_avg},
+             "$inc": {"rating_count": 1}}
         )
 
-        return ReviewPostResponse(message="Review created")
+        return ReviewPostResponse(message="Review submitted successfully")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
