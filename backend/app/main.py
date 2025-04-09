@@ -727,13 +727,13 @@ async def post_reviews(
         reviews = seller.get("reviews")
         if reviews:
             for review in reviews:
-                if body.reviewer_id == review.get("reviewer_id"):
+                if current_user["id"] == review.get("reviewer_id"):
                     raise HTTPException(status_code=404, detail="You have already left the user a review")
 
 
         review = {
             "seller_id": ObjectId(body.seller_id),
-            "reviewer_id": ObjectId(body.reviewer_id),
+            "reviewer_id": ObjectId(current_user["id"]),
             "rating": body.rating,
             "comment": body.comment,
             "timestamp": datetime.utcnow().isoformat(),

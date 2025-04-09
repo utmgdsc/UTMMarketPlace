@@ -811,7 +811,7 @@ components:
         - user_id
       properties:
         user_id:
-          type: integer
+          type: string
         message:
           type: string
       example:
@@ -821,7 +821,9 @@ components:
     SearchGetResponse:
       type: object
       required:
-        - query
+        - listings
+        - total
+        - next_page_token
       properties:
         listings:
           type: array
@@ -829,6 +831,9 @@ components:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
+        next_page_token:
+          type: string
+
 
     ListingGetResponseItem:
       type: object
@@ -878,6 +883,10 @@ components:
 
     ListingsGetResponseAll:
       type: object
+      required:
+        - listings
+        - total
+        - next_page_token
       properties:
         listings:
           type: array
@@ -885,6 +894,8 @@ components:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
+        next_page_token:
+          type: string
 
     ListingsPostRequest:
       type: object
@@ -1177,15 +1188,11 @@ components:
       type: object
       required:
         - seller_id
-        - reviewer_id
         - rating
       properties:
         seller_id:
           type: string
           description: The user ID of the seller being reviewed.
-        reviewer_id:
-          type: string
-          description: The user ID of the reviewer.
         rating:
           type: number
           format: float
@@ -1197,7 +1204,6 @@ components:
           description: Optional comment about the seller.
       example:
         seller_id: "101"
-        reviewer_id: "202"
         rating: 4.5
         comment: "Very responsive and item was as described."
 
