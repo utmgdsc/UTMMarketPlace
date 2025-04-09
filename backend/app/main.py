@@ -290,7 +290,7 @@ async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorRes
         pipeline = [
             {
                 "$addFields": {
-                    "seller_id_as_objid": {"$toObjectId": "$seller_id"}
+                    "seller_id_as_objid": {"$convert": {"input": "$seller_id", "to": "objectId"}}
                 }
             },
             {

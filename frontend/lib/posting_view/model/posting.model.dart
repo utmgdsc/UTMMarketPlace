@@ -35,6 +35,7 @@ class Item {
     this.datePosted,
     this.campus,
     this.sellerId,
+    this.sellerName,
     this.pictures,
   });
 
@@ -48,6 +49,7 @@ class Item {
   String? datePosted;
   String? campus;
   String? sellerId;
+  String? sellerName;
   List<String>? pictures;
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
@@ -63,6 +65,7 @@ class Item {
         datePosted: json["date_posted"]?.substring(0, json["date_posted"].length - 17),
         campus: json["campus"],
         sellerId: json["seller_id"],
+        sellerName: json["seller_name"],
         pictures: json["pictures"] != null
             ? List<String>.from(json["pictures"])
             : null,
@@ -79,5 +82,6 @@ class Item {
         "date_posted": datePosted,
         "campus": campus,
         "seller_id": sellerId,
+        "seller_name": sellerName,
       };
 }

@@ -148,9 +148,9 @@ class _PostingViewState extends State<PostingView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 8.0),
-                const Text(
-                  'Seller: Aubery Drake',
-                  style: TextStyle(
+                Text(
+                  'Seller: ${item.sellerName}',
+                  style: const TextStyle(
                     fontSize: 16,
                     color: Colors.grey,
                     fontWeight: FontWeight.bold,

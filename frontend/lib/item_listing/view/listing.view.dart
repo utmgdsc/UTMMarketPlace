@@ -29,7 +29,7 @@ class _ListingViewState extends State<ListingView> {
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
-          0.8 * _scrollController.position.maxScrollExtent) {
+          _scrollController.position.maxScrollExtent) {
         viewModel.fetchMoreData(limit: 6);
       }
     });
