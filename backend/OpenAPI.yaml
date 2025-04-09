@@ -663,6 +663,88 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /reviews:
+    post:
+      tags:
+        - reviews
+      summary: Create a review for a seller
+      description: Allows a user to submit a rating for a seller
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewPostRequest"
+      responses:
+        "201":
+          description: Review submitted successfully
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewPostResponse"
+        "400":
+          description: Invalid input (e.g. bad rating format or missing fields)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Seller not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    
+    get:
+      tags:
+        - reviews
+      summary: Get reviews for a seller
+      description: Retrieves a list of reviews for the specified seller.
+      parameters:
+        - name: seller_id
+          in: query
+          required: true
+          description: The ID of the seller whose reviews are being requested.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of reviews for the specified seller
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewGetResponse"
+        "400":
+          description: Missing or invalid seller_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Reviewer has already left the seller a review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     ErrorResponse:
@@ -729,7 +811,7 @@ components:
         - user_id
       properties:
         user_id:
-          type: integer
+          type: string
         message:
           type: string
       example:
@@ -739,7 +821,9 @@ components:
     SearchGetResponse:
       type: object
       required:
-        - query
+        - listings
+        - total
+        - next_page_token
       properties:
         listings:
           type: array
@@ -747,6 +831,9 @@ components:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
+        next_page_token:
+          type: string
+
 
     ListingGetResponseItem:
       type: object
@@ -796,6 +883,10 @@ components:
 
     ListingsGetResponseAll:
       type: object
+      required:
+        - listings
+        - total
+        - next_page_token
       properties:
         listings:
           type: array
@@ -803,6 +894,8 @@ components:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
+        next_page_token:
+          type: string
 
     ListingsPostRequest:
       type: object
@@ -1090,3 +1183,78 @@ components:
           type: string
       example:
         message: "Saved item deleted successfully."
+
+    ReviewPostRequest:
+      type: object
+      required:
+        - seller_id
+        - rating
+      properties:
+        seller_id:
+          type: string
+          description: The user ID of the seller being reviewed.
+        rating:
+          type: number
+          format: float
+          minimum: 1
+          maximum: 5
+          description: Rating between 1.0 and 5.0.
+        comment:
+          type: string
+          description: Optional comment about the seller.
+      example:
+        seller_id: "101"
+        rating: 4.5
+        comment: "Very responsive and item was as described."
+
+    ReviewPostResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+      example:
+        message: "Review submitted successfully."
+  
+    ReviewGetResponse:
+      type: object
+      properties:
+        seller_id:
+          type: string
+        total_reviews:
+          type: integer
+        average_rating:
+          type: number
+          format: float
+        reviews:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewItem"
+      example:
+        seller_id: "101"
+        total_reviews: 3
+        average_rating: 4.7
+        reviews:
+          - reviewer_id: "202"
+            rating: 5
+            comment: "Great experience!"
+            timestamp: "2025-04-01T12:00:00Z"
+          - reviewer_id: "303"
+            rating: 4.5
+            comment: "Smooth transaction."
+            timestamp: "2025-03-28T09:30:00Z"
+
+    ReviewItem:
+      type: object
+      properties:
+        reviewer_id:
+          type: string
+        rating:
+          type: number
+          format: float
+        comment:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
