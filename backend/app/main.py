@@ -12,6 +12,7 @@ from app.models import (
     MessagesGetResponse,
     MessagesPostRequest,
     MessagesPostResponse,
+    ReviewItem,
     SavedItemsDeleteResponse,
     SavedItemsGetResponse,
     SavedItemsPostRequest,
@@ -24,10 +25,13 @@ from app.models import (
     OwnUserGetResponse,
     OtherUserGetResponse,
     UserPutRequest,
-    BaseUserResponse
-)
+    BaseUserResponse,
+    ReviewGetResponse,
+    ReviewPostRequest,
+    ReviewPostResponse
+    )
 
-from app.MongoClient_async import listings_collection, users_collection
+from app.MongoClient_async import listings_collection, users_collection, reviews_collection
 from dateutil.parser import parse as dateutil_parse
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
@@ -49,6 +53,7 @@ from fastapi.responses import JSONResponse
 load_dotenv()  # Load environment variables from .env
 JWT_SECRET = os.getenv("JWT_SECRET")
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+
 
 
 app = FastAPI(
@@ -645,6 +650,113 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error. Please try again later. Error: {str(e)}")
 
+@app.get(
+    '/reviews',
+    response_model=ReviewGetResponse,
+    responses={
+        '400': {'model': ErrorResponse},
+        '404': {'model': ErrorResponse},
+        '500': {'model': ErrorResponse},
+    },
+    tags=['reviews'],
+)
+
+async def get_reviews(seller_id: str) -> Union[ReviewGetResponse, ErrorResponse]:
+    """
+    Get reviews for a seller
+    """
+    print("SELLER ID: ", seller_id)
+    try:
+        reviews_cursor = reviews_collection.find({"seller_id": ObjectId(seller_id)})
+        reviews = await reviews_cursor.to_list()
+
+        if not reviews:
+            return ReviewGetResponse(
+                seller_id=seller_id,
+                total_reviews=0,
+                average_rating=0.0,
+                reviews=[]
+            )
+    
+        total_reviews = len(reviews)
+        average_rating = round(sum(r['rating'] for r in reviews)/total_reviews, 2) if total_reviews > 0 else 0.0
+
+        return ReviewGetResponse(
+            seller=seller_id,
+            total_reviews=total_reviews,
+            average_rating=average_rating,
+            reviews=[
+                ReviewItem(
+                    reviewer_id = str(r["reviewer_id"]),
+                    rating = r["rating"],
+                    comment = r.get("comment"),
+                    timestamp = r["timestamp"],
+                )
+                for r in reviews
+            ]
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server Error. {str(e)}")
+
+
+@app.post(
+    '/reviews',
+    response_model=ReviewPostResponse,
+    responses={
+        '201': {'model': ReviewPostResponse},
+        '400': {'model': ErrorResponse},
+        '404': {'model': ErrorResponse},
+        '500': {'model': ErrorResponse},
+    },
+    tags=['reviews'],
+)
+async def post_reviews(
+    body: ReviewPostRequest,
+    current_user: dict = Depends(get_current_user)
+) -> Optional[Union[ReviewPostResponse, ErrorResponse]]:
+    """
+    Create a review for a seller
+    """
+    try:
+        #check if the seller exists
+        seller = await users_collection.find_one({"_id": ObjectId(body.seller_id)})
+        if not seller:
+            raise HTTPException(status_code=404, detail="Seller not found")
+        
+        #check if the reviewer has already left a review
+        reviews = seller.get("reviews")
+        if reviews:
+            for review in reviews:
+                if current_user["id"] == review.get("reviewer_id"):
+                    raise HTTPException(status_code=404, detail="You have already left the user a review")
+
+
+        review = {
+            "seller_id": ObjectId(body.seller_id),
+            "reviewer_id": ObjectId(current_user["id"]),
+            "rating": body.rating,
+            "comment": body.comment,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+        
+        await reviews_collection.insert_one(review)
+
+        #recalculate average
+        current_rating = seller.get("rating", 0.0)
+        rating_count = seller.get('rating_count', 0)
+        new_avg = round((current_rating * rating_count + body.rating) / (rating_count + 1), 2) 
+
+        await users_collection.update_one(
+            {"_id": ObjectId(body.seller_id)},
+            {"$set": {"rating": new_avg},
+             "$inc": {"rating_count": 1}}
+        )
+
+        return ReviewPostResponse(message="Review submitted successfully")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @app.put('/user/{userid}',
          response_model=None,
