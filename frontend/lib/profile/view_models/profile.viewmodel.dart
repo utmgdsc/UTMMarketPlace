@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:utm_marketplace/profile/model/profile.model.dart';
 import 'package:utm_marketplace/profile/repository/profile.repository.dart';
 import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
+import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:io';
 
 class ProfileViewModel extends LoadingViewModel {
   final ProfileRepository repo;
@@ -28,7 +31,8 @@ class ProfileViewModel extends LoadingViewModel {
       isLoading = true;
       notifyListeners();
       
-      _profileModel = await repo.fetchData(userId);
+      final result = await repo.fetchData(userId);
+      _profileModel = result;
       notifyListeners();
     } catch (e) {
       debugPrint('Error in fetchData: ${e.toString()}');
@@ -43,7 +47,7 @@ class ProfileViewModel extends LoadingViewModel {
   Future<bool> updateProfile({
     required String userId,
     String? displayName,
-    String? profilePicture,
+    File? profilePicture,
     String? location,
   }) async {
     if (_profileModel == null) return false;
@@ -53,12 +57,23 @@ class ProfileViewModel extends LoadingViewModel {
       _isUpdating = true;
       notifyListeners();
 
+      String? profilePictureBase64;
+      if (profilePicture != null) {
+        try {
+          final bytes = await profilePicture.readAsBytes();
+          profilePictureBase64 = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+        } catch (e) {
+          debugPrint('Error converting profile picture to base64: ${e.toString()}');
+          return false;
+        }
+      }
+
       // Create optimistic update
       final updatedProfile = ProfileModel(
         id: _profileModel!.id,
         displayName: displayName ?? _profileModel!.displayName,
         email: _profileModel!.email,
-        profilePicture: profilePicture ?? _profileModel!.profilePicture,
+        profilePicture: profilePictureBase64 ?? _profileModel!.profilePicture,
         rating: _profileModel!.rating,
         ratingCount: _profileModel!.ratingCount,
         location: location ?? _profileModel!.location,
@@ -75,7 +90,7 @@ class ProfileViewModel extends LoadingViewModel {
       final result = await repo.updateProfile(
         userId: userId,
         displayName: displayName,
-        profilePicture: profilePicture,
+        profilePicture: profilePictureBase64,
         location: location,
       );
 

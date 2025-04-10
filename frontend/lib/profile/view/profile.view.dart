@@ -67,7 +67,7 @@ class _ProfileState extends State<Profile> {
                     profileViewModel.fetchData(widget.userId);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF11384A),
+                    backgroundColor: const Color(0xFF1E3765),
                   ),
                   child: const Text('Try Again'),
                 ),

@@ -328,7 +328,7 @@ class FilterBottomSheet extends StatelessWidget {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF11384A),
+              backgroundColor: const Color(0xFF1E3765),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),

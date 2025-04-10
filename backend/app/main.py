@@ -1,4 +1,3 @@
-
 import base64
 from app.models import (
     ConversationsGetResponse,
@@ -851,6 +850,39 @@ async def update_user(userid: str, body: UserPutRequest, current_user: dict = De
             if not re.match(r"^[a-zA-Z0-9_.+-]+@(utoronto\.ca|mail\.utoronto\.ca)$", update_data["email"]):
                 raise HTTPException(
                     status_code=400, detail="Invalid email format.")
+
+        # Handle profile picture upload if provided
+        if "profile_picture" in update_data and update_data["profile_picture"]:
+            try:
+                # Ensure static directory exists
+                os.makedirs(STATIC_DIR, exist_ok=True)
+
+                # Get base64 data
+                image_b64 = update_data["profile_picture"]
+                if image_b64.startswith("data:image"):
+                    image_b64 = image_b64.split(",")[1]
+
+                # Decode base64
+                try:
+                    img_data = base64.b64decode(image_b64)
+                except Exception:
+                    raise HTTPException(
+                        status_code=422, detail="Invalid base64 image format")
+
+                # Generate filename using user ID
+                filename = f"profile_{userid}.jpg"
+                filepath = os.path.join(STATIC_DIR, filename)
+
+                # Save the file
+                with open(filepath, "wb") as f:
+                    f.write(img_data)
+
+                # Update the profile_picture field to be the URL path
+                update_data["profile_picture"] = f"/static/{filename}"
+
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500, detail=f"Failed to save profile picture: {str(e)}")
 
         await users_collection.update_one({"_id": ObjectId(userid)}, {"$set": update_data})
 

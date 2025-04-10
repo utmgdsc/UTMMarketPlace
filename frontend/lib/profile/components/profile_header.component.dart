@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:utm_marketplace/profile/components/edit_profile_dialog.component.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
 
 class ProfileHeader extends StatelessWidget {
   final String displayName;
@@ -18,6 +19,18 @@ class ProfileHeader extends StatelessWidget {
     required this.ratingCount,
     required this.isOwnProfile,
   });
+
+  ImageProvider? _getImageProvider(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return null;
+    }
+    
+    // Prepend the base URL if it's a static file path
+    final fullImageUrl = imageUrl.startsWith('/static/')
+        ? '${dio.options.baseUrl}$imageUrl'
+        : imageUrl;
+    return NetworkImage(fullImageUrl);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +81,8 @@ class ProfileHeader extends StatelessWidget {
       ),
       child: CircleAvatar(
         radius: 65,
-        backgroundImage: profilePicture != null && profilePicture!.isNotEmpty
-            ? NetworkImage(profilePicture!) as ImageProvider
-            : null,
-        backgroundColor: const Color(0xFF11384A),
+        backgroundImage: _getImageProvider(profilePicture),
+        backgroundColor: const Color(0xFF1E3765),
         child: profilePicture == null || profilePicture!.isEmpty
             ? const Icon(Icons.person, size: 65, color: Colors.white)
             : null,
@@ -97,14 +108,23 @@ class ProfileHeader extends StatelessWidget {
     final ratingStars = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ...List.generate(5, (index) {
-          return Icon(
-            index < rating ? Icons.star : Icons.star_border,
-            color: Colors.black,
-            size: 20,
-          );
-        }),
-        Text(' ($rating/5, $ratingCount reviews)'),
+        const Icon(Icons.star, color: Colors.amber),
+        const SizedBox(width: 4),
+        Text(
+          rating.toStringAsFixed(1),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          '($ratingCount)',
+          style: const TextStyle(
+            color: Colors.grey,
+            fontSize: 16,
+          ),
+        ),
       ],
     );
 
@@ -113,17 +133,17 @@ class ProfileHeader extends StatelessWidget {
         Stack(
           children: [
             Container(
-              height: 175,
-              color: const Color(0xFF11384A),
+              height: 200,
+              color: const Color(0xFF1E3765),
             ),
             Column(
               children: [
                 profileAppBar,
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 40),
                       profileImage,
                     ],
                   ),
@@ -132,8 +152,11 @@ class ProfileHeader extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 2),
         userName,
+        const SizedBox(height: 4),
         userEmail,
+        const SizedBox(height: 8),
         ratingStars,
       ],
     );
