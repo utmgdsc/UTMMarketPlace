@@ -12,21 +12,37 @@ class SavedItemsModel {
     this.total = 0,
   });
 
-  factory SavedItemsModel.fromJson(Map<String, dynamic> json) {
+  factory SavedItemsModel.fromJson(dynamic json) {
     try {
-      final List<dynamic> savedItems = json['saved_items'] ?? [];
+      debugPrint('SavedItemsModel.fromJson input: $json');
       
-      debugPrint('SavedItemsModel.fromJson: $json');
+      // Handle tuple response from backend when empty
+      if (json is List) {
+        return SavedItemsModel(
+          items: [],
+          total: 0,
+        );
+      }
+
+      // Handle dictionary response when there are items
+      if (json is Map<String, dynamic>) {
+        final List<dynamic> savedItems = json['saved_items'] ?? [];
+        
+        return SavedItemsModel(
+          items: savedItems.map((item) => ListingItem.fromJson({
+            'id': item['id'] ?? '',
+            'image_url': item['pictures'] != null && item['pictures'].isNotEmpty ? item['pictures'][0] : '',
+            'title': item['title'] ?? 'No Title',
+            'price': (item['price'] ?? 0).toDouble(),
+          })).toList(),
+          total: json['total'] ?? 0,
+        );
+      }
+
+      // If response is neither a list nor a map, return empty model
+      debugPrint('Unexpected response type: ${json.runtimeType}');
+      return SavedItemsModel(items: [], total: 0);
       
-      return SavedItemsModel(
-        items: savedItems.map((item) => ListingItem.fromJson({
-          'id': item['id'] ?? '',
-          'image_url': item['pictures'] != null && item['pictures'].isNotEmpty ? item['pictures'][0] : '',
-          'title': item['title'] ?? 'No Title',
-          'price': (item['price'] ?? 0).toDouble(),
-        })).toList(),
-        total: json['total'] ?? 0,
-      );
     } catch (e) {
       debugPrint('Error parsing saved items: $e');
       debugPrint('Original JSON: $json');

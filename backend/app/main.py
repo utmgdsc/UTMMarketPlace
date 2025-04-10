@@ -603,7 +603,10 @@ async def get_saved_items(current_user: dict = Depends(get_current_user)):
 
         saved_ids = user.get("saved_posts", [])
         if not saved_ids:
-            return [], 0
+            return SavedItemsGetResponse(
+                saved_items=[],
+                total=0
+            )
 
         # Convert only valid ObjectIds
         object_ids = [ObjectId(item_id)
