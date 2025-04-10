@@ -37,7 +37,7 @@ class CreateListingModel {
       'price': price,
       'description': description,
       'condition': condition,
-      'images': images,
+      'pictures': images,
       'campus': campus,
     };
   }

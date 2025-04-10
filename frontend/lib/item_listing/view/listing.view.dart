@@ -16,6 +16,7 @@ class ListingView extends StatefulWidget {
 class _ListingViewState extends State<ListingView> {
   late ListingViewModel viewModel;
   final double hPad = 16.0; // Horizontal padding
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -23,8 +24,21 @@ class _ListingViewState extends State<ListingView> {
     viewModel = Provider.of<ListingViewModel>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      viewModel.fetchData();
+      viewModel.fetchData(limit: 6);
     });
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent) {
+        viewModel.fetchMoreData(limit: 6);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Widget _buildItemGrid(ListingViewModel listingViewModel) {
@@ -43,10 +57,10 @@ class _ListingViewState extends State<ListingView> {
             },
             child: ItemCard(
               id: item.id,
-              name: item.name,
+              name: item.title,
               price: item.price,
               category: item.condition,
-              imageUrl: item.imageUrl ?? '',
+              imageUrls: item.pictures,
             ),
           );
         },
@@ -158,7 +172,8 @@ class _ListingViewState extends State<ListingView> {
             Expanded(
               child: Consumer<ListingViewModel>(
                 builder: (_, listingViewModel, child) {
-                  if (listingViewModel.isLoading) {
+                  if (listingViewModel.isLoading &&
+                      listingViewModel.items.isEmpty) {
                     return const ListingLoadingComponent();
                   }
 
@@ -167,6 +182,7 @@ class _ListingViewState extends State<ListingView> {
                   }
 
                   return ListView(
+                    controller: _scrollController,
                     children: [
                       const Padding(
                         padding:
@@ -183,6 +199,11 @@ class _ListingViewState extends State<ListingView> {
                         ),
                       ),
                       _buildItemGrid(listingViewModel),
+                      if (listingViewModel.isLoadingMore)
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
                     ],
                   );
                 },

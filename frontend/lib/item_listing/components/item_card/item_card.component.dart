@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
+import 'package:dio/dio.dart';
 
 class ItemCard extends StatelessWidget {
   final String? id;
   final String name;
   final double price;
-  final String? imageUrl;
+  final List<String>? imageUrls;
   final String? category;
 
   const ItemCard({
@@ -12,25 +14,100 @@ class ItemCard extends StatelessWidget {
     this.id,
     required this.name,
     required this.price,
-    this.imageUrl,
+    this.imageUrls,
     this.category,
   });
 
+  Future<ImageProvider?> _fetchImage(String url) async {
+    final response = await dio.get(
+      url,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return MemoryImage(response.data);
+  }
+
+  Widget buildLoadingImage() {
+    return Container(
+      height: 250.0,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+        color: Colors.grey[200],
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget buildErrorImage() {
+    return Container(
+      height: 250.0,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+        color: Colors.grey[200],
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.broken_image,
+          size: 50,
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget buildPlaceholderImage() {
+    return Container(
+      height: 250.0,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+        color: Colors.grey[200],
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.image_not_supported,
+          size: 50,
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget buildLoadedImage(ImageProvider image) {
+    return Container(
+      height: 250.0,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+        image: DecorationImage(
+          image: image,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  Widget buildImageWidget() {
+    if (imageUrls != null && imageUrls!.isNotEmpty) {
+      return FutureBuilder<ImageProvider?>(
+        future: _fetchImage(imageUrls!.first),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return buildLoadingImage();
+          } else if (snapshot.hasError || !snapshot.hasData) {
+            return buildErrorImage();
+          } else {
+            return buildLoadedImage(snapshot.data!);
+          }
+        },
+      );
+    } else {
+      return buildPlaceholderImage();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final imageWidget = imageUrl != null
-        ? Container(
-            width: double.infinity,
-            height: 250.0,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-              image: DecorationImage(
-                image: NetworkImage(imageUrl!),
-                fit: BoxFit.cover,
-              ),
-            ),
-          )
-        : SizedBox.shrink();
+    final imageWidget = buildImageWidget();
 
     final nameWidget = Text(
       name,
