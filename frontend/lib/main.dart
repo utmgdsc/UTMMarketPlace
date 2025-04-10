@@ -57,7 +57,10 @@ Future<void> main() async {
           create: (_) => ProfileViewModel(repo: locator<ProfileRepository>()),
         ),
         ChangeNotifierProvider(
-          create: (_) => PostingViewModel(repo: locator<PostingRepository>()),
+          create: (_) => PostingViewModel(
+            repo: locator<PostingRepository>(),
+            savedItemsRepo: locator<SavedItemsRepository>(),
+          ),
         ),
         ChangeNotifierProvider(
           create: (_) =>

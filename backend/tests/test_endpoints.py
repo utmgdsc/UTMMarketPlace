@@ -20,6 +20,70 @@ async def cleanup_test_user(email: str):
     await users_collection.delete_one({"email": email})
     await users_collection.delete_one({"email": "duplicate@mail.utoronto.ca"})
 
+# Helper function to populate an account with necessary fields
+async def populate_test_account(email="test_user@mail.utoronto.ca", password="TestPass123!"):
+    user_data = {
+        "display_name": "Marwan",
+        "date_joined": datetime.now(timezone.utc).isoformat(),
+        "saved_posts": [],
+        "location": "St. George",
+        "rating": 4.5,
+        "rating_count": 10,
+    }
+    
+    result = await users_collection.insert_one(user_data)
+    user_id = str(result.inserted_id)
+    
+    print(f"Created test account with ID: {user_id}")
+    return user_id
+
+@pytest.mark.asyncio
+async def test_mongo_modify_user():
+    """Test to populate a MongoDB user account with necessary fields"""
+    # Create a fully populated test account
+    user_id = await populate_test_account()
+    return user_id
+
+# Function to modify an existing account with required fields
+@pytest.mark.asyncio
+async def test_modify_existing_account():
+    """Update an existing account with necessary fields"""
+    email = "marwan.yousef@utoronto.ca"
+    
+    # Find the user by email
+    user = await users_collection.find_one({"email": email})
+    
+    if not user:
+        print(f"⚠️ User with email {email} not found in database")
+        return None
+    
+    user_id = str(user["_id"])
+    
+    # Update with necessary fields
+    update_data = {
+        "$set": {
+            "display_name": "Marwan",
+            "saved_posts": ["67f3264c01480bf52748c8da"],
+            "location": "St. George",
+            "rating": 4.5,
+            "rating_count": 10
+        }
+    }
+    
+    # Apply the update
+    result = await users_collection.update_one({"_id": ObjectId(user_id)}, update_data)
+    
+    if result.modified_count == 1:
+        print(f"✅ Successfully updated account with ID: {user_id}")
+    else:
+        print(f"⚠️ No changes made to account with ID: {user_id}")
+    
+    # Return the updated user
+    updated_user = await users_collection.find_one({"_id": ObjectId(user_id)})
+    print(f"Updated user: {updated_user}")
+    
+    return user_id
+
 @pytest.fixture(scope="session")
 def event_loop():
     """Create an instance of the default event loop for each test case."""
