@@ -1,4 +1,5 @@
 
+import base64
 from app.models import (
     ConversationsGetResponse,
     ErrorResponse,
@@ -11,6 +12,7 @@ from app.models import (
     MessagesGetResponse,
     MessagesPostRequest,
     MessagesPostResponse,
+    ReviewItem,
     SavedItemsDeleteResponse,
     SavedItemsGetResponse,
     SavedItemsPostRequest,
@@ -23,10 +25,13 @@ from app.models import (
     OwnUserGetResponse,
     OtherUserGetResponse,
     UserPutRequest,
-    BaseUserResponse
+    BaseUserResponse,
+    ReviewGetResponse,
+    ReviewPostRequest,
+    ReviewPostResponse
 )
 
-from app.MongoClient_async import listings_collection, users_collection
+from app.MongoClient_async import listings_collection, users_collection, reviews_collection
 from dateutil.parser import parse as dateutil_parse
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
@@ -110,9 +115,9 @@ async def authenticate_user(email: str, password):
     return user
 
 
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
-    raise HTTPException(status_code=422, detail="Invalid request.")
+# @app.exception_handler(RequestValidationError)
+# async def validation_exception_handler(request, exc):
+#     raise HTTPException(status_code=422, detail="Invalid request.")
 
 ######################################## LISTINGS ENDPOINTS ########################################
 
@@ -263,8 +268,9 @@ async def get_search(
 
 
 @app.get('/listing/{listing_id}',
-         response_model=ListingGetResponseItem,
+         response_model=None,
          responses={
+             '200': {'model': ListingGetResponseItem},
              '400': {'model': ErrorResponse},
              '404': {'model': ErrorResponse},
              '422': {'model': ErrorResponse},
@@ -278,30 +284,74 @@ async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorRes
     try:
         # Validate ObjectId
         if not ObjectId.is_valid(listing_id):
-            return ListingGetResponseItem(error="Invalid listing ID format. Must be a valid Id.")
+            raise HTTPException(
+                status_code=400, details="Invalid listing ID format. Must be a valid Id.")
 
         # Fetch listing from MongoDB
-        listing = await listings_collection.find_one({"_id": ObjectId(listing_id)})
+        pipeline = [
+            {
+                "$addFields": {
+                    "seller_id_as_objid": {"$convert": {"input": "$seller_id", "to": "objectId"}}
+                }
+            },
+            {
+                "$match": {
+                    "_id": ObjectId(listing_id)
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "users",
+                    "localField": "seller_id_as_objid",
+                    "foreignField": "_id",
+                    "as": "seller_doc"  # returns an array of docs that match this filter as "seller_doc" field
+                }
+            },
+            {
+                # flatten the "seller_doc" field since we expect only one match anyways
+                "$unwind": "$seller_doc"
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "title": 1,
+                    "price": 1,
+                    "description": 1,
+                    "seller_id": 1,
+                    "pictures": 1,
+                    "category": 1,
+                    "condition": 1,
+                    "campus": 1,
+                    "date_posted": 1,
+                    "seller_name": "$seller_doc.display_name",
+                }
+            }
+        ]
+        cursor = listings_collection.aggregate(pipeline)
+        listing = await cursor.to_list(length=1)
 
         # Check if listing exists
         if not listing:
             return HTTPException(status_code=404, detail="Listing not found.")
 
+        listing = listing[0]  # take the first document
         # Convert MongoDB document to Pydantic model
-
         return ListingGetResponseItem(
-            id=str(listing.get("_id")),
+            id=str(listing["_id"]),
             title=listing.get("title"),
             price=listing.get("price"),
             description=listing.get("description"),
             seller_id=listing.get("seller_id"),
+            seller_name=listing.get("seller_name", ""),
             pictures=listing.get("pictures", []),
             category=listing.get("category"),
-            date_posted=listing.get("date_posted"),
+            condition=listing.get("condition"),
             campus=listing.get("campus"),
+            date_posted=listing.get("date_posted"),
         )
     except Exception as e:
-        return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
+        raise HTTPException(
+            status_code=500, detail="Internal Server Error. Please try again later.")
 
 
 @app.get('/listings',
@@ -654,6 +704,119 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error. Please try again later. Error: {str(e)}")
+
+
+@app.get(
+    '/reviews',
+    response_model=ReviewGetResponse,
+    responses={
+        '400': {'model': ErrorResponse},
+        '404': {'model': ErrorResponse},
+        '500': {'model': ErrorResponse},
+    },
+    tags=['reviews'],
+)
+async def get_reviews(seller_id: str) -> Union[ReviewGetResponse, ErrorResponse]:
+    """
+    Get reviews for a seller
+    """
+    print("SELLER ID: ", seller_id)
+    try:
+        reviews_cursor = reviews_collection.find(
+            {"seller_id": ObjectId(seller_id)})
+        reviews = await reviews_cursor.to_list()
+
+        if not reviews:
+            return ReviewGetResponse(
+                seller_id=seller_id,
+                total_reviews=0,
+                average_rating=0.0,
+                reviews=[]
+            )
+
+        total_reviews = len(reviews)
+        average_rating = round(
+            sum(r['rating'] for r in reviews)/total_reviews, 2) if total_reviews > 0 else 0.0
+
+        return ReviewGetResponse(
+            seller=seller_id,
+            total_reviews=total_reviews,
+            average_rating=average_rating,
+            reviews=[
+                ReviewItem(
+                    reviewer_id=str(r["reviewer_id"]),
+                    rating=r["rating"],
+                    comment=r.get("comment"),
+                    timestamp=r["timestamp"],
+                )
+                for r in reviews
+            ]
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Internal server Error. {str(e)}")
+
+
+@app.post(
+    '/reviews',
+    response_model=ReviewPostResponse,
+    responses={
+        '201': {'model': ReviewPostResponse},
+        '400': {'model': ErrorResponse},
+        '404': {'model': ErrorResponse},
+        '500': {'model': ErrorResponse},
+    },
+    tags=['reviews'],
+)
+async def post_reviews(
+    body: ReviewPostRequest,
+    current_user: dict = Depends(get_current_user)
+) -> Optional[Union[ReviewPostResponse, ErrorResponse]]:
+    """
+    Create a review for a seller
+    """
+    try:
+        # check if the seller exists
+        seller = await users_collection.find_one({"_id": ObjectId(body.seller_id)})
+        if not seller:
+            raise HTTPException(status_code=404, detail="Seller not found")
+
+        # check if the reviewer has already left a review
+        reviews = seller.get("reviews")
+        if reviews:
+            for review in reviews:
+                if current_user["id"] == review.get("reviewer_id"):
+                    raise HTTPException(
+                        status_code=404, detail="You have already left the user a review")
+
+        review = {
+            "seller_id": ObjectId(body.seller_id),
+            "reviewer_id": ObjectId(current_user["id"]),
+            "rating": body.rating,
+            "comment": body.comment,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+        await reviews_collection.insert_one(review)
+
+        # recalculate average
+        current_rating = seller.get("rating", 0.0)
+        rating_count = seller.get('rating_count', 0)
+        new_avg = round((current_rating * rating_count +
+                        body.rating) / (rating_count + 1), 2)
+
+        await users_collection.update_one(
+            {"_id": ObjectId(body.seller_id)},
+            {"$set": {"rating": new_avg},
+             "$inc": {"rating_count": 1}}
+        )
+
+        return ReviewPostResponse(message="Review submitted successfully")
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 
 @app.put('/user/{userid}',
