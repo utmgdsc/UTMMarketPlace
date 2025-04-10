@@ -101,21 +101,22 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     }
   }
 
+  ImageProvider? getImageProvider() {
+    if (_imageFile != null) {
+      return FileImage(_imageFile!);
+    } else if (widget.currentImageUrl != null &&
+        widget.currentImageUrl!.isNotEmpty) {
+      // Prepend the base URL if it's a static file path
+      final imageUrl = widget.currentImageUrl!.startsWith('/static/')
+          ? '${dio.options.baseUrl}${widget.currentImageUrl}'
+          : widget.currentImageUrl!;
+      return NetworkImage(imageUrl);
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    ImageProvider? getImageProvider() {
-      if (_imageFile != null) {
-        return FileImage(_imageFile!);
-      } else if (widget.currentImageUrl != null && widget.currentImageUrl!.isNotEmpty) {
-        // Prepend the base URL if it's a static file path
-        final imageUrl = widget.currentImageUrl!.startsWith('/static/')
-            ? '${dio.options.baseUrl}${widget.currentImageUrl}'
-            : widget.currentImageUrl!;
-        return NetworkImage(imageUrl);
-      }
-      return null;
-    }
-
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -141,8 +142,11 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                     radius: 50,
                     backgroundImage: getImageProvider(),
                     backgroundColor: const Color(0xFF1E3765),
-                    child: (_imageFile == null && (widget.currentImageUrl == null || widget.currentImageUrl!.isEmpty))
-                        ? const Icon(Icons.person, size: 50, color: Colors.white)
+                    child: (_imageFile == null &&
+                            (widget.currentImageUrl == null ||
+                                widget.currentImageUrl!.isEmpty))
+                        ? const Icon(Icons.person,
+                            size: 50, color: Colors.white)
                         : null,
                   ),
                   Positioned(
