@@ -1,5 +1,6 @@
-import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:utm_marketplace/create_listing/model/create_listing.model.dart';
 import 'package:utm_marketplace/create_listing/repository/create_listing.repository.dart';
 import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
@@ -11,15 +12,17 @@ class CreateListingViewModel extends LoadingViewModel {
   String _condition = '';
   String get condition => _condition;
 
-  File? _image;
-  File? get image => _image;
-  bool get hasImage => _image != null;
+  String? _campus;
+  String? get campus => _campus;
+  final List<XFile> _images = [];
+  List<XFile> get images => _images;
+  bool get hasImages => _images.isNotEmpty;
 
   bool _showValidationErrors = false;
   bool get showValidationErrors => _showValidationErrors;
 
-  void setImage(File image) {
-    _image = image;
+  void addMedia(XFile image) {
+    _images.add(image);
     notifyListeners();
   }
 
@@ -28,9 +31,22 @@ class CreateListingViewModel extends LoadingViewModel {
     notifyListeners();
   }
 
+  void clearCondition() {
+    _condition = '';
+  }
+
+  void setCampus(String? campus) {
+    _campus = campus;
+    notifyListeners();
+  }
+
   void setShowValidationErrors(bool value) {
     _showValidationErrors = value;
     notifyListeners();
+  }
+
+  void clearImages() {
+    _images.clear();
   }
 
   // Validation methods
@@ -81,8 +97,12 @@ class CreateListingViewModel extends LoadingViewModel {
 
     final isFormValid = formKey.currentState?.validate() ?? false;
     final hasConditionSelected = condition.isNotEmpty;
+    final hasCampusSelected = campus != null;
 
-    return isFormValid && hasImage && hasConditionSelected;
+    return isFormValid &&
+        hasImages &&
+        hasConditionSelected &&
+        hasCampusSelected;
   }
 
   Future<bool> submitForm({
@@ -113,18 +133,28 @@ class CreateListingViewModel extends LoadingViewModel {
   }) async {
     try {
       isLoading = true;
+      debugPrint(
+          'Creating listing with title: $title, price: $price, description: $description, condition: $_condition');
       final listing = CreateListingModel(
         title: title,
         price: price,
         description: description,
         condition: _condition,
+        campus: _campus,
+        // Images are sent to backend as base64 to store the file on backend
+        images: await Future.wait(_images.map((image) async {
+          final bytes = await image.readAsBytes();
+          return base64Encode(bytes);
+        }).toList()),
       );
 
       if (!listing.isValid) {
+        debugPrint('Listing is not valid');
         return false;
       }
 
-      return await repo.createListing(listing);
+      final result = await repo.createListing(listing);
+      return result;
     } catch (e) {
       debugPrint('Error creating listing: $e');
       return false;

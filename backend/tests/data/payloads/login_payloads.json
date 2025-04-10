@@ -1,0 +1,13 @@
+{
+  "valid_login": {
+    "email": "testy@mail.utoronto.ca",
+    "password": "1"
+  },
+  "incorrect_password": {
+    "email": "testy@mail.utoronto.ca",
+    "password": "wrong_password"
+  },
+  "missing_password": {
+    "email": "testy@mail.utoronto.ca"
+  }
+} 

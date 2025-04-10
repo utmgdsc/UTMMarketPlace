@@ -5,6 +5,7 @@ import 'package:utm_marketplace/create_listing/view_models/create_listing.viewmo
 import 'package:utm_marketplace/create_listing/components/image_selector.component.dart';
 import 'package:utm_marketplace/create_listing/components/form_input_field.component.dart';
 import 'package:utm_marketplace/create_listing/components/condition_selector.component.dart';
+import 'package:utm_marketplace/create_listing/components/campus_selector.component.dart';
 
 class CreateListingView extends StatefulWidget {
   const CreateListingView({super.key});
@@ -31,6 +32,8 @@ class _CreateListingViewState extends State<CreateListingView> {
     _titleController.dispose();
     _priceController.dispose();
     _descriptionController.dispose();
+    viewModel.clearImages();
+    viewModel.clearCondition();
     super.dispose();
   }
 
@@ -60,7 +63,18 @@ class _CreateListingViewState extends State<CreateListingView> {
     );
 
     if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Posting successfully created!'),
+        ),
+      );
       context.pop();
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error in posting. Please try again later.'),
+        ),
+      );
     }
   }
 
@@ -110,6 +124,12 @@ class _CreateListingViewState extends State<CreateListingView> {
           const SizedBox(height: 16),
           Consumer<CreateListingViewModel>(
             builder: (_, model, __) => ConditionSelector(
+              showValidationErrors: model.showValidationErrors,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Consumer<CreateListingViewModel>(
+            builder: (_, model, __) => CampusSelector(
               showValidationErrors: model.showValidationErrors,
             ),
           ),

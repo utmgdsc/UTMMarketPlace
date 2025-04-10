@@ -221,5 +221,3 @@ class ReviewGetResponse(BaseModel):
     total_reviews: Optional[int] = None
     average_rating: Optional[float] = None
     reviews: Optional[List[ReviewItem]] = None
-
-

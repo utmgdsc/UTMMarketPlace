@@ -16,6 +16,7 @@ class ListingView extends StatefulWidget {
 class _ListingViewState extends State<ListingView> {
   late ListingViewModel viewModel;
   final double hPad = 16.0; // Horizontal padding
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -23,8 +24,80 @@ class _ListingViewState extends State<ListingView> {
     viewModel = Provider.of<ListingViewModel>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      viewModel.fetchData();
+      viewModel.fetchData(limit: 6);
     });
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent) {
+        viewModel.fetchMoreData(limit: 6);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildItemGrid(ListingViewModel listingViewModel) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(hPad, 8.0, hPad, 8.0),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: itemCardDelegate(),
+        itemCount: listingViewModel.items.length,
+        itemBuilder: (context, index) {
+          final item = listingViewModel.items[index];
+          return GestureDetector(
+            onTap: () {
+              context.push('/item/${item.id}');
+            },
+            child: ItemCard(
+              id: item.id,
+              name: item.title,
+              price: item.price,
+              category: item.condition,
+              imageUrls: item.pictures,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search_off_rounded,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No items found',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try adjusting your filters or search criteria',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -71,7 +144,7 @@ class _ListingViewState extends State<ListingView> {
               ),
             ),
           ),
-          SizedBox(width: 8.0),
+          const SizedBox(width: 8.0),
           Container(
             decoration: BoxDecoration(
               color: Colors.grey[200],
@@ -82,30 +155,12 @@ class _ListingViewState extends State<ListingView> {
                 Icons.filter_list,
                 color: Colors.grey[600],
               ),
-              onPressed: () {
-                debugPrint('Filter button pressed');
-              },
+              onPressed: () => viewModel.showFilterBottomSheet(context),
             ),
           ),
         ],
       ),
     );
-
-    final trendingLabel = Padding(
-      padding: EdgeInsets.only(left: hPad, bottom: 5.0, top: 5.0),
-      child: const Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          'Trending',
-          style: TextStyle(
-            fontSize: 28,
-            color: Colors.black,
-          ),
-        ),
-      ),
-    );
-
-    final emptyState = const Center(child: Text('No items available.'));
 
     return Scaffold(
       appBar: appBar,
@@ -113,43 +168,42 @@ class _ListingViewState extends State<ListingView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            searchBar,
             Expanded(
               child: Consumer<ListingViewModel>(
                 builder: (_, listingViewModel, child) {
-                  if (listingViewModel.isLoading) {
+                  if (listingViewModel.isLoading &&
+                      listingViewModel.items.isEmpty) {
                     return const ListingLoadingComponent();
                   }
+
                   if (listingViewModel.items.isEmpty) {
-                    return emptyState;
+                    return _buildEmptyState();
                   }
+
                   return ListView(
+                    controller: _scrollController,
                     children: [
-                      searchBar,
-                      trendingLabel,
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(hPad, 8.0, hPad, 8.0),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          gridDelegate: itemCardDelegate(),
-                          itemCount: listingViewModel.items.length,
-                          itemBuilder: (context, index) {
-                            final item = listingViewModel.items[index];
-                            return GestureDetector(
-                              onTap: () {
-                                context.push('/item/${item.id}');
-                              },
-                              child: ItemCard(
-                                id: item.id,
-                                name: item.name,
-                                price: item.price,
-                                category: item.category,
-                                imageUrl: item.imageUrl ?? '',
-                              ),
-                            );
-                          },
+                      const Padding(
+                        padding:
+                            EdgeInsets.only(left: 16, bottom: 5.0, top: 5.0),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Trending',
+                            style: TextStyle(
+                              fontSize: 28,
+                              color: Colors.black,
+                            ),
+                          ),
                         ),
                       ),
+                      _buildItemGrid(listingViewModel),
+                      if (listingViewModel.isLoadingMore)
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
                     ],
                   );
                 },
