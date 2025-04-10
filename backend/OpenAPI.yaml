@@ -270,7 +270,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  
   /conversations:
     get:
       tags:
@@ -278,7 +277,7 @@ paths:
       summary: Retrieve user conversations
       description: Returns a list of conversations the user is involved in.
       parameters:
-        - name: user_id
+        - name: userid
           in: query
           required: true
           description: The ID of the user whose conversations are being retrieved.
@@ -290,30 +289,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  conversations:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        conversation_id:
-                          type: string
-                        participant_ids:
-                          type: array
-                          items:
-                            type: string
-                        last_message:
-                          type: string
-                        last_timestamp:
-                          type: string
-                          format: date-time
-                example:
-                  conversations:
-                    - conversation_id: "abc123"
-                      participant_ids: ["101", "202"]
-                      last_message: "See you soon!"
-                      last_timestamp: "2025-04-04T18:00:00Z"
+                ref: "#/components/schemas/ConversationsGetResponse"
         "400":
           description: Missing or invalid user_id
           content:
@@ -370,18 +346,26 @@ paths:
       summary: Retrieve messages between two users
       description: Retrieve a list of messages exchanged between two users.
       parameters:
-        - name: user1
+        - name: conversation_id
           in: query
           required: true
-          description: The unique identifier of first participant of the conversation.
+          description: The unique identifier of the conversation.
           schema:
             type: string
-        - name: user2
+        - name: limit
           in: query
-          required: true
-          description: The unique identifier of the second participant of the conversation.
+          required: false
+          description: The number of messages to retrieve.
+          schema:
+            type: integer
+            default: 10
+        - name: next
+          in: query
+          required: false
+          description: The last seen pagination token.
           schema:
             type: string
+  
       responses:
         "200":
           description: A list of messages exchanged between the specified users.
@@ -491,7 +475,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: User not found
           content:
@@ -553,7 +536,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-
   /saved_items:
     post:
       tags:
@@ -584,7 +566,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-    
+
     get:
       tags:
         - saved_items
@@ -595,7 +577,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SavedItemsGetResponse"  
+                $ref: "#/components/schemas/SavedItemsGetResponse"
         "400":
           description: Bad Request - Missing or invalid user_id
           content:
@@ -619,8 +601,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"  
-    
+                $ref: "#/components/schemas/ErrorResponse"
+
     delete:
       tags:
         - saved_items
@@ -633,7 +615,7 @@ paths:
           description: The unique identifier of the saved item to delete.
           schema:
             type: string
-          
+
       responses:
         "200":
           description: User details retrieved successfully
@@ -661,6 +643,88 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /reviews:
+    post:
+      tags:
+        - reviews
+      summary: Create a review for a seller
+      description: Allows a user to submit a rating for a seller
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewPostRequest"
+      responses:
+        "201":
+          description: Review submitted successfully
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewPostResponse"
+        "400":
+          description: Invalid input (e.g. bad rating format or missing fields)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Seller not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    
+    get:
+      tags:
+        - reviews
+      summary: Get reviews for a seller
+      description: Retrieves a list of reviews for the specified seller.
+      parameters:
+        - name: seller_id
+          in: query
+          required: true
+          description: The ID of the seller whose reviews are being requested.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of reviews for the specified seller
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewGetResponse"
+        "400":
+          description: Missing or invalid seller_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Reviewer has already left the seller a review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -715,15 +779,16 @@ components:
     LogInPostResponse:
       type: object
       required:
-        - user_id
+        - access_token
+        - token_type
       properties:
-        user_id:
-          type: integer
-        message:
+        access_token:
+          type: string
+        token_type:
           type: string
       example:
-        user_id: 42
-        message: "User logged in successfully."
+        access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkiOiJ2YWx1ZSIsImtleTIiOiJ2YWx1ZTIiLCJpYXQiOjE2MzQxNzgxMTB9.vnXM0oxw05QH1Vs6RsvYp6LaEqFFqZ-NExQMXBgP7Mk"
+        token_type: "bearer"
 
     SignUpPostResponse:
       type: object
@@ -731,7 +796,7 @@ components:
         - user_id
       properties:
         user_id:
-          type: integer
+          type: string
         message:
           type: string
       example:
@@ -741,7 +806,9 @@ components:
     SearchGetResponse:
       type: object
       required:
-        - query
+        - listings
+        - total
+        - next_page_token
       properties:
         listings:
           type: array
@@ -749,6 +816,8 @@ components:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
+        next_page_token:
+          type: string
 
     ListingGetResponseItem:
       type: object
@@ -784,6 +853,9 @@ components:
           format: date-time
         campus:
           type: string
+        seller_name:  
+          type: string
+          description:  The display_name of the user matching seller_id. This field will only be present when querying for a single listing.
       example:
         id: "1"
         title: "MacBook Pro for sale"
@@ -798,6 +870,10 @@ components:
 
     ListingsGetResponseAll:
       type: object
+      required:
+        - listings
+        - total
+        - next_page_token
       properties:
         listings:
           type: array
@@ -805,6 +881,8 @@ components:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
           type: integer
+        next_page_token:
+          type: string
 
     ListingsPostRequest:
       type: object
@@ -890,7 +968,6 @@ components:
     MessagesPostRequest:
       type: object
       required:
-        - sender_id
         - recipient_id
         - content
       properties:
@@ -908,6 +985,26 @@ components:
         recipient_id: "202"
         content: "Hello, is this still available?"
 
+        MessagesPostRequest:
+      type: object
+      required:
+        - recipient_id
+        - content
+      properties:
+        sender_id:
+          type: string
+          description: The unique identifier of the user sending the message.
+        recipient_id:
+          type: string
+          description: The unique identifier of the user receiving the message.
+        content:
+          type: string
+          description: The content of the message.
+      example:
+        sender_id: "101"
+        recipient_id: "202"
+        content: "Hello, is this still available?"
+    
     MessagesPostResponse:
       type: object
       required:
@@ -955,7 +1052,37 @@ components:
           type: string
           format: date-time
           description: The time when the message was sent.
-
+      
+    Conversation:
+      type: Object
+      properties:
+        conversation_id:
+          type: string
+        participant_ids:
+          type: array
+          items:
+            type: string
+        last_message:
+          type: string
+        last_timestamp:
+          type: string
+          format: date-time
+    
+    ConversationsGetResponse:
+      type: object   
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Conversation"
+            
+      example:
+        conversations:
+          - conversation_id: "abc123"
+            participant_ids: ["101", "202"]
+            last_message: "See you soon!"
+            last_timestamp: "2025-04-04T18:00:00Z"
+    
     SettingsPutRequest:
       type: object
       properties:
@@ -990,6 +1117,7 @@ components:
         theme: "dark"
         text_size: 12
         message: "User settings updated successfully."
+    
     UserGetResponse:
       type: object
       required:
@@ -1000,7 +1128,6 @@ components:
       properties:
         display_name:
           type: string
-          type: string
         profile_picture:
           type: string
         email:
@@ -1010,11 +1137,11 @@ components:
           type: string
         location:
           type: string
-        rating: 
+        rating:
           type: number
           format: float
         rating_count:
-          type: integer 
+          type: integer
         saved_posts:
           type: array
           items:
@@ -1026,30 +1153,25 @@ components:
         location: "Toronto"
         rating: 4.2
         rating_count: 6
+    
     UserPutRequest:
       type: object
       properties:
         display_name:
           type: string
-          type: string
         profile_picture:
-          type: string
           type: string
         email:
           type: string
           format: email
-          type: string
-          format: email
         location:
-          type: string
           type: string
       example:
         display_name: "Drake"
         profile_picture: "https://example.com/image1.jpg"
         email: zesty123@utoronto.ca
         location: "Toronto"
-    
-    
+
     SavedItemsPostRequest:
       type: object
       required:
@@ -1058,7 +1180,7 @@ components:
         id:
           type: string
       example:
-        id: "101"    
+        id: "101"
 
     SavedItemsPostResponse:
       type: object
@@ -1067,7 +1189,7 @@ components:
           type: string
       example:
         message: "Item saved successfully."
-    
+
     SavedItemsGetResponse:
       type: object
       required:
@@ -1078,7 +1200,7 @@ components:
           items:
             $ref: "#/components/schemas/ListingGetResponseItem"
         total:
-          type: integer      
+          type: integer
       example:
         saved_items:
           - id: "1"
@@ -1092,6 +1214,7 @@ components:
             date_posted: "2025-02-22T10:00:00Z"
             campus: "UTM"
         total: 1
+    
     SavedItemsDeleteResponse:
       type: object
       properties:
@@ -1099,4 +1222,78 @@ components:
           type: string
       example:
         message: "Saved item deleted successfully."
-        
+
+    ReviewPostRequest:
+      type: object
+      required:
+        - seller_id
+        - rating
+      properties:
+        seller_id:
+          type: string
+          description: The user ID of the seller being reviewed.
+        rating:
+          type: number
+          format: float
+          minimum: 1
+          maximum: 5
+          description: Rating between 1.0 and 5.0.
+        comment:
+          type: string
+          description: Optional comment about the seller.
+      example:
+        seller_id: "101"
+        rating: 4.5
+        comment: "Very responsive and item was as described."
+
+    ReviewPostResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+      example:
+        message: "Review submitted successfully."
+  
+    ReviewGetResponse:
+      type: object
+      properties:
+        seller_id:
+          type: string
+        total_reviews:
+          type: integer
+        average_rating:
+          type: number
+          format: float
+        reviews:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewItem"
+      example:
+        seller_id: "101"
+        total_reviews: 3
+        average_rating: 4.7
+        reviews:
+          - reviewer_id: "202"
+            rating: 5
+            comment: "Great experience!"
+            timestamp: "2025-04-01T12:00:00Z"
+          - reviewer_id: "303"
+            rating: 4.5
+            comment: "Smooth transaction."
+            timestamp: "2025-03-28T09:30:00Z"
+
+    ReviewItem:
+      type: object
+      properties:
+        reviewer_id:
+          type: string
+        rating:
+          type: number
+          format: float
+        comment:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

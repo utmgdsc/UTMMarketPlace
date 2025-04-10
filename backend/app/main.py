@@ -1,5 +1,5 @@
 
-from app.models import (
+from models import (
     ConversationsGetResponse,
     ErrorResponse,
     ListingGetResponseItem,
@@ -11,6 +11,8 @@ from app.models import (
     MessagesGetResponse,
     MessagesPostRequest,
     MessagesPostResponse,
+    MessageGetResponseItem,
+    ReviewItem,
     SavedItemsDeleteResponse,
     SavedItemsGetResponse,
     SavedItemsPostRequest,
@@ -20,11 +22,16 @@ from app.models import (
     SettingsPutResponse,
     SignUpPostRequest,
     SignUpPostResponse,
-    UserGetResponse,
+    OwnUserGetResponse,
+    OtherUserGetResponse,
     UserPutRequest,
-    UserPutResponse,  
+    BaseUserResponse,
+    ReviewGetResponse,
+    ReviewPostRequest,
+    ReviewPostResponse
 )
-from app.MongoClient_async import listings_collection, users_collection
+
+from MongoClient_async import listings_collection, users_collection, messages_collection
 from dateutil.parser import parse as dateutil_parse
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
@@ -105,7 +112,7 @@ async def authenticate_user(email: str, password):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    raise HTTPException(status_code=422, detail="Invalid request.")
+    raise HTTPException(status_code=422, detail=f"Invalid request. {exc}")
 
 ######################################## LISTINGS ENDPOINTS ########################################
 
@@ -573,9 +580,9 @@ async def delete_saved_item(saved_item_id: str = Query(..., description="ID of t
 
 
 @app.get('/user/{userid}',
-         response_model=UserGetResponse,
+         response_model=Union[OwnUserGetResponse, OtherUserGetResponse],
          responses={
-             '200': {'model': UserGetResponse},
+             '200': {'model': Union[OwnUserGetResponse, OtherUserGetResponse]},
              '400': {'model': ErrorResponse},
              '404': {'model': ErrorResponse},
              '422': {'model': ErrorResponse},
@@ -588,7 +595,7 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        response = {
+        base_response = {
             "display_name": user["display_name"],
             "profile_picture": user.get("profile_picture"),
             "email": user["email"],
@@ -599,18 +606,20 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
         }
 
         if current_user["id"] == userid:
-            response["saved_posts"] = user.get("saved_posts", [])
+            return OwnUserGetResponse(**base_response, saved_posts=user.get("saved_posts", []))
+        else:
+            return OtherUserGetResponse(**base_response)
 
-        return UserGetResponse(**response)
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Internal Server Error. Please try again later. Error: {str(e)}")
+            status_code=500, detail=f"Internal Server Error. Please try again later.")
+
 
 
 @app.put('/user/{userid}',
          response_model=None,
          responses={
-             '201': {'model': UserGetResponse},
+             '201': {'model': BaseUserResponse},
              '400': {'model': ErrorResponse},
              '403': {'model': ErrorResponse},
              '404': {'model': ErrorResponse},
@@ -618,7 +627,7 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
              '500': {'model': ErrorResponse},
          },
          )
-async def update_user(userid: str, body: UserPutRequest, current_user: dict = Depends(get_current_user)) -> Union[UserGetResponse, ErrorResponse]:
+async def update_user(userid: str, body: UserPutRequest, current_user: dict = Depends(get_current_user)) -> Union[BaseUserResponse, ErrorResponse]:
     """
     Update user details only if the user matches.
     """
@@ -644,17 +653,21 @@ async def update_user(userid: str, body: UserPutRequest, current_user: dict = De
 
         updated_user = await users_collection.find_one({"_id": ObjectId(userid)})
 
-        return UserGetResponse(
+        return BaseUserResponse(
             display_name=updated_user["display_name"],
             profile_picture=updated_user.get("profile_picture"),
             email=updated_user["email"],
             user_id=str(updated_user["_id"]),
             location=updated_user.get("location", ""),
+            rating=updated_user.get("rating", 0.0),
+            rating_count=updated_user.get("rating_count", 0),
+            saved_posts=updated_user.get("saved_posts", []),
         )
 
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Internal Server Error. Please try again later")
+            status_code=500, detail=f"Internal Server Error. Please try again later.")
+
 
 ######################################## LOGIN/SIGNUP ENDPOINTS ########################################
 
@@ -737,38 +750,86 @@ async def post_sign_up(
 
 
 ######################################## MESSAGES ########################################
-@app.get(
-    '/conversations',
-    response_model=ConversationsGetResponse,
-    responses={
-        '400': {'model': ErrorResponse},
-        '422': {'model': ErrorResponse},
-        '500': {'model': ErrorResponse},
-    },
-)
-def get_conversations(user_id: str) -> Union[ConversationsGetResponse, ErrorResponse]:
-    """
-    Retrieve user conversations
-    """
-    pass
+@app.get("/conversations", response_model=ConversationsGetResponse)
+async def get_conversations(userid: str = Query(...), 
+                            current_user: dict = Depends(get_current_user)):
+    try:
+        # Validate user_id
+        if current_user["id"] != userid:
+            raise HTTPException(
+                status_code=403, detail="Unauthorized to update this user")
+        
+        user_id = current_user["id"]
+        pipeline = [
+            {
+                "$match": {
+                    "$or": [
+                        {"sender_id": user_id},
+                        {"recipient_id": user_id}
+                    ]
+                }
+            },
+            { "$sort": { "timestamp": -1 } },
+            {
+                "$group": {
+                    "_id": "$conversation_id",
+                    "last_message": { "$first": "$content" },
+                    "last_timestamp": { "$first": "$timestamp" },
+                    
+                    "participants": { "$addToSet": "$sender_id" },
+                }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "conversation_id": "$_id",
+                    "participant_ids": "$participants",
+                    "last_message": 1,
+                    "last_timestamp": 1
+                }
+            }
+        ]
+
+        result = await messages_collection.aggregate(pipeline).to_list(length=100)
+
+        # Clean up participant_ids to always include both sender & recipient
+        for convo in result:
+            if user_id not in convo["participant_ids"]:
+                convo["participant_ids"].append(user_id)
+
+        return ConversationsGetResponse(conversations=result)
+    
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch conversations: {str(e)}")
 
 
-@app.post(
-    '/messages',
-    response_model=None,
-    responses={
-        '201': {'model': MessagesPostResponse},
-        '422': {'model': ErrorResponse},
-        '500': {'model': ErrorResponse},
-    },
-)
-def post_messages(
+
+@app.post("/messages", response_model=MessagesPostResponse)
+async def create_message(
     body: MessagesPostRequest,
-) -> Optional[Union[MessagesPostResponse, ErrorResponse]]:
-    """
-    Send a message
-    """
-    pass
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        # Validate recipient_id format
+        if not ObjectId.is_valid(body.recipient_id):
+            raise HTTPException(status_code=400, detail="Invalid recipient ID format.")
+        
+        conversation_id = "_".join(sorted([current_user["id"], body.recipient_id]))
+        message = {
+            "sender_id": current_user["id"],
+            "recipient_id": body.recipient_id,
+            "content": body.content,
+            "timestamp": datetime.now(timezone.utc),
+            "conversation_id": conversation_id,
+        }
+        result = await messages_collection.insert_one(message)
+        return MessagesPostResponse(message_id=str(result.inserted_id), message=message["content"], timestamp=message["timestamp"])
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send message: {str(e)}")
 
 
 @app.get(
@@ -776,17 +837,57 @@ def post_messages(
     response_model=MessagesGetResponse,
     responses={
         '400': {'model': ErrorResponse},
-        '404': {'model': ErrorResponse},
+        '403': {'model': ErrorResponse},
         '500': {'model': ErrorResponse},
     },
 )
-def get_messages(
-    user1: str, user2: str = ...
-) -> Union[MessagesGetResponse, ErrorResponse]:
+async def get_messages(
+    conversation_id: str = Query(...),
+    limit: int = Query(10, ge=1, le=50),
+    next: Optional[str] = Query(None),
+    current_user: dict = Depends(get_current_user),
+):
     """
-    Retrieve messages between two users
+    Retrieve messages in a specific conversation.
     """
-    pass
+    try:
+        # Verify user is a participant in the conversation
+        # You can do this by checking a cached list, or fetching 1 message
+        sample = await messages_collection.find_one({"conversation_id": conversation_id})
+        if not sample or current_user["id"] not in [sample["sender_id"], sample["recipient_id"]]:
+            raise HTTPException(status_code=403, detail="You are not part of this conversation.")
+
+        query = {"conversation_id": conversation_id}
+        if next:
+            try:
+                query["timestamp"] = {"$gt": datetime.fromisoformat(next)}
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid 'next' timestamp format.")
+
+        cursor = messages_collection.find(query).sort("timestamp", 1).limit(limit)
+        messages = await cursor.to_list(length=limit)
+
+        response_data = [
+            MessageGetResponseItem(
+                message_id=str(msg["_id"]),
+                sender_id=msg["sender_id"],
+                recipient_id=msg["recipient_id"],
+                content=msg["content"],
+                timestamp=msg["timestamp"],
+            )
+            for msg in messages
+        ]
+
+        return MessagesGetResponse(
+            messages=response_data,
+            total=len(response_data),
+            next_page_token=messages[-1]["timestamp"].isoformat() if messages else None
+        )
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 
 ######################################## SETTINGS ########################################
