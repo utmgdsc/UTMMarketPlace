@@ -31,7 +31,7 @@ from app.models import (
     ReviewPostResponse
 )
 
-from app.MongoClient_async import listings_collection, users_collection, reviews_collection
+from app.MongoClient_async import listings_collection, users_collection, reviews_collection, init_indexes
 
 from dateutil.parser import parse as dateutil_parse
 from bson import ObjectId
@@ -120,6 +120,9 @@ async def validation_exception_handler(request, exc):
     raise HTTPException(status_code=422, detail=f"Invalid request.")
 
 
+@app.on_event("startup")
+async def on_startup():
+    await init_indexes()
 
 ######################################## LISTINGS ENDPOINTS ########################################
 
