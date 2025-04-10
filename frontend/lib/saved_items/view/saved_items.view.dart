@@ -35,7 +35,7 @@ class _SavedItemsViewState extends State<SavedItemsView> {
             Icon(
               Icons.error_outline,
               size: 80,
-              color: Theme.of(context).colorScheme.error.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.error.withValues(alpha: 179),
             ),
             const SizedBox(height: 16),
             Text(
@@ -52,7 +52,7 @@ class _SavedItemsViewState extends State<SavedItemsView> {
               errorMessage,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 179),
               ),
               textAlign: TextAlign.center,
               maxLines: 3,
@@ -115,14 +115,14 @@ class _SavedItemsViewState extends State<SavedItemsView> {
                   Icon(
                     Icons.favorite_border,
                     size: 80,
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 128),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No saved items',
                     style: TextStyle(
                       fontSize: 18,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 179),
                     ),
                   ),
                 ],
