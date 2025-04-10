@@ -17,6 +17,8 @@ class _ListingViewState extends State<ListingView> {
   late ListingViewModel viewModel;
   final double hPad = 16.0; // Horizontal padding
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -33,24 +35,38 @@ class _ListingViewState extends State<ListingView> {
         viewModel.fetchMoreData(limit: 6);
       }
     });
+
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text;
+      });
+    });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
-  Widget _buildItemGrid(ListingViewModel listingViewModel) {
+  Widget _buildItemGrid(ListingViewModel listingViewModel, String searchQuery) {
+    final searchItems = searchQuery.isNotEmpty
+        ? listingViewModel.items
+            .where((item) =>
+                item.title.toLowerCase().contains(searchQuery.toLowerCase()))
+            .toList()
+        : listingViewModel.items;
+
     return Padding(
       padding: EdgeInsets.fromLTRB(hPad, 8.0, hPad, 8.0),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: itemCardDelegate(),
-        itemCount: listingViewModel.items.length,
+        itemCount: searchItems.length,
         itemBuilder: (context, index) {
-          final item = listingViewModel.items[index];
+          final item = searchItems[index];
           return GestureDetector(
             onTap: () {
               context.push('/item/${item.id}');
@@ -122,6 +138,7 @@ class _ListingViewState extends State<ListingView> {
         children: [
           Expanded(
             child: TextField(
+              controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search',
                 hintStyle: TextStyle(
@@ -198,7 +215,7 @@ class _ListingViewState extends State<ListingView> {
                           ),
                         ),
                       ),
-                      _buildItemGrid(listingViewModel),
+                      _buildItemGrid(listingViewModel, _searchQuery),
                       if (listingViewModel.isLoadingMore)
                         const Padding(
                           padding: EdgeInsets.all(8.0),
