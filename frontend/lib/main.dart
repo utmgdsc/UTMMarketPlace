@@ -73,6 +73,9 @@ Future<void> main() async {
         ChangeNotifierProvider(
           create: (_) => FilterViewModel(),
         ),
+        Provider<ProfileRepository>(
+          create: (_) => ProfileRepository(),
+        ),
       ],
       child: const MyApp(),
     ),

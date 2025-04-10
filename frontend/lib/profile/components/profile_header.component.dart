@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:utm_marketplace/profile/components/edit_profile_dialog.component.dart';
+import 'package:utm_marketplace/profile/view_models/profile.viewmodel.dart';
+import 'package:utm_marketplace/profile/repository/profile.repository.dart';
 import 'package:utm_marketplace/shared/dio/dio.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -20,16 +23,49 @@ class ProfileHeader extends StatelessWidget {
     required this.isOwnProfile,
   });
 
-  ImageProvider? _getImageProvider(String? imageUrl) {
-    if (imageUrl == null || imageUrl.isEmpty) {
-      return null;
+  Widget _buildProfileImage(BuildContext context) {
+    final imageVersion = Provider.of<ProfileViewModel>(context, listen: false).imageVersion;
+    
+    if (profilePicture == null || profilePicture!.isEmpty) {
+      return CircleAvatar(
+        radius: 65,
+        backgroundColor: const Color(0xFF1E3765),
+        child: const Icon(Icons.person, size: 65, color: Colors.white),
+      );
     }
     
     // Prepend the base URL if it's a static file path
-    final fullImageUrl = imageUrl.startsWith('/static/')
-        ? '${dio.options.baseUrl}$imageUrl'
-        : imageUrl;
-    return NetworkImage(fullImageUrl);
+    final fullImageUrl = profilePicture!.startsWith('/static/')
+        ? '${dio.options.baseUrl}$profilePicture?v=$imageVersion'
+        : '$profilePicture?v=$imageVersion';
+    
+    return FutureBuilder<ImageProvider>(
+      future: Provider.of<ProfileRepository>(context, listen: false)
+          .fetchImageProvider(fullImageUrl),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircleAvatar(
+            radius: 65,
+            backgroundColor: const Color(0xFF1E3765),
+            child: const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          );
+        } else if (snapshot.hasError || !snapshot.hasData) {
+          return CircleAvatar(
+            radius: 65,
+            backgroundColor: const Color(0xFF1E3765),
+            child: const Icon(Icons.error, size: 65, color: Colors.white),
+          );
+        } else {
+          return CircleAvatar(
+            radius: 65,
+            backgroundImage: snapshot.data,
+            backgroundColor: const Color(0xFF1E3765),
+          );
+        }
+      },
+    );
   }
 
   @override
@@ -79,14 +115,7 @@ class ProfileHeader extends StatelessWidget {
           width: 3,
         ),
       ),
-      child: CircleAvatar(
-        radius: 65,
-        backgroundImage: _getImageProvider(profilePicture),
-        backgroundColor: const Color(0xFF1E3765),
-        child: profilePicture == null || profilePicture!.isEmpty
-            ? const Icon(Icons.person, size: 65, color: Colors.white)
-            : null,
-      ),
+      child: _buildProfileImage(context),
     );
 
     final userName = Text(

@@ -3,6 +3,7 @@ import 'package:utm_marketplace/shared/dio/dio.dart';
 import 'package:utm_marketplace/shared/secure_storage/secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 
 class ProfileRepository {
   // Helper method to extract user ID from JWT token
@@ -23,6 +24,20 @@ class ProfileRepository {
     }
     
     return userId;
+  }
+
+  // Method to fetch an image and return it as a MemoryImage
+  Future<ImageProvider> fetchImageProvider(String imageUrl) async {
+    try {
+      final response = await dio.get(
+        imageUrl,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return MemoryImage(response.data);
+    } catch (e) {
+      debugPrint('Error fetching image: $e');
+      throw Exception('Failed to load image');
+    }
   }
 
   Future<ProfileModel> fetchData(String userId) async {
