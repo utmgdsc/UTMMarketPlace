@@ -3,7 +3,8 @@ import 'package:utm_marketplace/shared/dio/dio.dart';
 class ListingRepo {
   final Map<String, dynamic> _cache = {};
 
-  Future<dynamic> fetchData({int limit = 6, String? nextPageToken, String? query}) async {
+  Future<dynamic> fetchData(
+      {int limit = 6, String? nextPageToken, String? query}) async {
     final cacheKey = '$limit-$nextPageToken-$query';
     if (_cache.containsKey(cacheKey)) {
       return _cache[cacheKey];
@@ -22,7 +23,8 @@ class ListingRepo {
         queryParameters['query'] = query;
       }
 
-      final response = await dio.get('/listings', queryParameters: queryParameters);
+      final response =
+          await dio.get('/listings', queryParameters: queryParameters);
 
       if (response.statusCode == 200) {
         _cache[cacheKey] = response.data;

@@ -62,7 +62,8 @@ class Item {
             : null,
         category: json["category"],
         condition: json["condition"],
-        datePosted: json["date_posted"]?.substring(0, json["date_posted"].length - 17),
+        datePosted:
+            json["date_posted"]?.substring(0, json["date_posted"].length - 17),
         campus: json["campus"],
         sellerId: json["seller_id"],
         sellerName: json["seller_name"],

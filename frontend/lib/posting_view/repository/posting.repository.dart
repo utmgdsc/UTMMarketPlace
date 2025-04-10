@@ -5,7 +5,6 @@ import 'package:utm_marketplace/shared/dio/dio.dart';
 class PostingRepository {
   Future<PostingModel> fetchData(String itemid) async {
     try {
-
       final response = await dio.get('/listing/$itemid');
 
       debugPrint("Item ID: $itemid");

@@ -20,11 +20,13 @@ class ListingViewModel extends LoadingViewModel {
 
   bool isLoadingMore = false;
 
-  Future<void> fetchData({int limit = 5, String? nextPageToken, String? query}) async {
+  Future<void> fetchData(
+      {int limit = 5, String? nextPageToken, String? query}) async {
     try {
       isLoading = true;
 
-      final response = await repo.fetchData(limit: limit, nextPageToken: nextPageToken, query: query);
+      final response = await repo.fetchData(
+          limit: limit, nextPageToken: nextPageToken, query: query);
       _listingModel = ListingModel.fromJson(response);
       _allItems = _listingModel!.items;
       _filteredItems = _allItems;
@@ -40,14 +42,18 @@ class ListingViewModel extends LoadingViewModel {
   }
 
   Future<void> fetchMoreData({int limit = 5, String? query}) async {
-    if (_listingModel?.nextPageToken == null || _listingModel!.nextPageToken!.isEmpty) {
+    if (_listingModel?.nextPageToken == null ||
+        _listingModel!.nextPageToken!.isEmpty) {
       return;
     }
 
     try {
       isLoadingMore = true;
 
-      final response = await repo.fetchData(limit: limit, nextPageToken: _listingModel!.nextPageToken, query: query);
+      final response = await repo.fetchData(
+          limit: limit,
+          nextPageToken: _listingModel!.nextPageToken,
+          query: query);
       final newListingModel = ListingModel.fromJson(response);
       _listingModel = newListingModel;
       _allItems.addAll(newListingModel.items);
