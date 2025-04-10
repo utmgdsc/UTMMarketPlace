@@ -89,7 +89,7 @@ class _ProfileState extends State<Profile> {
             id: item.id,
             name: item.title,
             price: item.price,
-            imageUrl: item.imageUrl,
+            imageUrls: [item.imageUrl],
           );
         },
       ),

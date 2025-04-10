@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/posting_view/view_models/posting.viewmodel.dart';
 import 'package:utm_marketplace/shared/components/loading.component.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
 
 class PostingView extends StatefulWidget {
   final String itemId;
@@ -23,6 +25,90 @@ class _PostingViewState extends State<PostingView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       viewModel.fetchData(widget.itemId);
     });
+  }
+
+  Future<ImageProvider?> _fetchImage(String url) async {
+    final response = await dio.get(
+      url,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return MemoryImage(response.data);
+  }
+
+  Widget buildImageWidget(String url) {
+    return FutureBuilder<ImageProvider?>(
+      future: _fetchImage(url),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError || !snapshot.hasData) {
+          return const Center(
+            child: Icon(
+              Icons.broken_image,
+              size: 50,
+              color: Colors.grey,
+            ),
+          );
+        } else {
+          return Container(
+            height: 250.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4.0),
+              image: DecorationImage(
+                image: snapshot.data!,
+                fit: BoxFit.cover,
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget buildImageCarousel(dynamic item) {
+    if (item.pictures != null && item.pictures!.isNotEmpty) {
+      return SizedBox(
+        height: 250.0,
+        child: PageView.builder(
+          itemCount: item.pictures!.length,
+          itemBuilder: (context, index) {
+            final pictureUrl = item.pictures![index];
+            if (pictureUrl.isEmpty) {
+              return Container(
+                height: 250.0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4.0),
+                  color: Colors.grey[200],
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.image_not_supported,
+                    size: 50,
+                    color: Colors.grey,
+                  ),
+                ),
+              );
+            }
+            return buildImageWidget(pictureUrl);
+          },
+        ),
+      );
+    } else {
+      return Container(
+        height: 250.0,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4.0),
+          color: Colors.grey[200],
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.image_not_supported,
+            size: 50,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -47,14 +133,7 @@ class _PostingViewState extends State<PostingView> {
               return itemUnavailable;
             }
 
-            final itemImage = item.imageUrl != null
-                ? Image.network(
-                    item.imageUrl!,
-                    width: double.infinity,
-                    height: 250,
-                    fit: BoxFit.cover,
-                  )
-                : Container();
+            final itemImage = buildImageCarousel(item);
 
             final itemTitle = Text(
               item.name,
@@ -69,20 +148,33 @@ class _PostingViewState extends State<PostingView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 8.0),
-                const Text(
-                  'Aubery Drake',
-                  style: TextStyle(
+                Text(
+                  'Seller: ${item.sellerName}',
+                  style: const TextStyle(
                     fontSize: 16,
                     color: Colors.grey,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 4.0),
-                const Text(
-                  'XX/XX/XXXX',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
+                Text(
+                  'Category: ${item.category ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  'Condition: ${item.condition ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  'Campus: ${item.campus ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  'Date Posted: ${item.datePosted ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
                 ),
               ],
             );

@@ -6,27 +6,57 @@ import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
 import 'package:utm_marketplace/item_listing/components/filter_bottom_sheet/filter_bottom_sheet.component.dart';
 
 class ListingViewModel extends LoadingViewModel {
+  final ListingRepo repo;
+
   ListingViewModel({
     required this.repo,
   });
 
-  final ListingRepo repo;
   List<Item> _allItems = [];
   List<Item> _filteredItems = [];
+  ListingModel? _listingModel;
 
   List<Item> get items => _filteredItems;
 
-  Future<void> fetchData() async {
+  bool isLoadingMore = false;
+
+  Future<void> fetchData({int limit = 5, String? nextPageToken, String? query}) async {
     try {
       isLoading = true;
-      final model = await repo.fetchData();
-      _allItems = model.items;
+
+      final response = await repo.fetchData(limit: limit, nextPageToken: nextPageToken, query: query);
+      _listingModel = ListingModel.fromJson(response);
+      _allItems = _listingModel!.items;
       _filteredItems = _allItems;
+      debugPrint('Fetched ${_filteredItems.length} items');
+      debugPrint('Items: ${_filteredItems.map((item) => item.title).toList()}');
       notifyListeners();
     } catch (exc) {
       debugPrint('Error in fetchData : ${exc.toString()}');
     } finally {
       isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchMoreData({int limit = 5, String? query}) async {
+    if (_listingModel?.nextPageToken == null || _listingModel!.nextPageToken!.isEmpty) {
+      return;
+    }
+
+    try {
+      isLoadingMore = true;
+
+      final response = await repo.fetchData(limit: limit, nextPageToken: _listingModel!.nextPageToken, query: query);
+      final newListingModel = ListingModel.fromJson(response);
+      _listingModel = newListingModel;
+      _allItems.addAll(newListingModel.items);
+      _filteredItems = _allItems;
+      notifyListeners();
+    } catch (exc) {
+      debugPrint('Error in fetchMoreData : ${exc.toString()}');
+    } finally {
+      isLoadingMore = false;
       notifyListeners();
     }
   }

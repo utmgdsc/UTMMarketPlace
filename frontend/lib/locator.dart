@@ -11,7 +11,8 @@ import 'package:utm_marketplace/saved_items/repository/saved_items.repository.da
 final GetIt locator = GetIt.instance;
 
 void setupLocator() {
-  locator.registerFactory<ListingRepo>(() => ListingRepoImpl());
+  // locator.registerFactory<ListingRepo>(() => ListingRepoImpl());
+  // locator.registerFactory<PostingRepository>(() => PostingRepositoryImpl());
   locator.registerLazySingleton(() => MessageRepository());
   locator.registerLazySingleton(() => NotificationRepository());
   locator.registerLazySingleton(() => MenuRepository());
@@ -19,4 +20,5 @@ void setupLocator() {
   locator.registerLazySingleton(() => PostingRepository());
   locator.registerLazySingleton(() => CreateListingRepository());
   locator.registerLazySingleton(() => SavedItemsRepository());
+  locator.registerLazySingleton(() => ListingRepo());
 }

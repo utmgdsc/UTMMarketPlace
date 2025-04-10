@@ -12,13 +12,12 @@ class PostingModel {
 
   Item item;
 
-  factory PostingModel.fromJson(Map<String, dynamic> json, String itemid) {
-    List<Item> items =
-        List<Item>.from(json["items"].map((x) => Item.fromJson(x)));
-    Item? foundItem = items.firstWhere((item) => item.id == itemid,
-        orElse: () => Item(name: '', price: 0.0));
-    return PostingModel(item: foundItem);
-  }
+  factory PostingModel.fromJson(Map<String, dynamic> json, String itemid) =>
+      PostingModel(
+        item: json["id"] == itemid
+            ? Item.fromJson(json)
+            : Item(name: '', price: 0.0),
+      );
   Map<String, dynamic> toJson() => {
         "item": item.toJson(),
       };
@@ -32,30 +31,57 @@ class Item {
     this.description,
     this.imageUrl,
     this.category,
+    this.condition,
+    this.datePosted,
+    this.campus,
+    this.sellerId,
+    this.sellerName,
+    this.pictures,
   });
 
   String? id;
   String name;
   double price;
   String? description;
-  String? imageUrl;
+  List<String>? imageUrl;
   String? category;
+  String? condition;
+  String? datePosted;
+  String? campus;
+  String? sellerId;
+  String? sellerName;
+  List<String>? pictures;
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
         id: json["id"],
-        name: json["name"],
+        name: json["title"],
         description: json["description"],
         price: json["price"].toDouble(),
-        imageUrl: json["image_url"],
+        imageUrl: (json["pictures"] != null && json["pictures"].isNotEmpty)
+            ? List<String>.from(json["pictures"])
+            : null,
         category: json["category"],
+        condition: json["condition"],
+        datePosted: json["date_posted"]?.substring(0, json["date_posted"].length - 17),
+        campus: json["campus"],
+        sellerId: json["seller_id"],
+        sellerName: json["seller_name"],
+        pictures: json["pictures"] != null
+            ? List<String>.from(json["pictures"])
+            : null,
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        "name": name,
+        "title": name,
         "description": description,
         "price": price,
-        "image_url": imageUrl,
+        "pictures": pictures,
         "category": category,
+        "condition": condition,
+        "date_posted": datePosted,
+        "campus": campus,
+        "seller_id": sellerId,
+        "seller_name": sellerName,
       };
 }

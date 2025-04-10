@@ -1,17 +1,37 @@
-import 'package:flutter/services.dart';
-import 'package:utm_marketplace/item_listing/model/listing.model.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
 
-abstract class ListingRepo {
-  Future<ListingModel> fetchData();
-}
+class ListingRepo {
+  final Map<String, dynamic> _cache = {};
 
-class ListingRepoImpl extends ListingRepo {
-  @override
-  Future<ListingModel> fetchData() async {
-    await Future.delayed(const Duration(milliseconds: 1800));
+  Future<dynamic> fetchData({int limit = 6, String? nextPageToken, String? query}) async {
+    final cacheKey = '$limit-$nextPageToken-$query';
+    if (_cache.containsKey(cacheKey)) {
+      return _cache[cacheKey];
+    }
 
-    final resp =
-        await rootBundle.loadString('assets/data/temp_listing_data.json');
-    return listingModelFromJson(resp);
+    try {
+      final queryParameters = <String, dynamic>{
+        'limit': limit.toString(),
+      };
+
+      if (nextPageToken != null) {
+        queryParameters['next'] = nextPageToken;
+      }
+
+      if (query != null) {
+        queryParameters['query'] = query;
+      }
+
+      final response = await dio.get('/listings', queryParameters: queryParameters);
+
+      if (response.statusCode == 200) {
+        _cache[cacheKey] = response.data;
+        return response.data;
+      } else {
+        throw Exception('Failed to load listings');
+      }
+    } catch (e) {
+      throw Exception('Failed to load listings: $e');
+    }
   }
 }
