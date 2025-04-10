@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:utm_marketplace/profile/components/edit_profile_dialog.component.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
 
 class ProfileHeader extends StatelessWidget {
-  final String name;
+  final String displayName;
   final String email;
-  final String imageUrl;
+  final String? profilePicture;
   final double rating;
+  final int ratingCount;
   final bool isOwnProfile;
 
   const ProfileHeader({
     super.key,
-    required this.name,
+    required this.displayName,
     required this.email,
-    required this.imageUrl,
+    this.profilePicture,
     required this.rating,
+    required this.ratingCount,
     required this.isOwnProfile,
   });
+
+  ImageProvider? _getImageProvider(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return null;
+    }
+    
+    // Prepend the base URL if it's a static file path
+    final fullImageUrl = imageUrl.startsWith('/static/')
+        ? '${dio.options.baseUrl}$imageUrl'
+        : imageUrl;
+    return NetworkImage(fullImageUrl);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +54,8 @@ class ProfileHeader extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (context) => EditProfileDialog(
-                    currentName: name,
-                    currentImageUrl: imageUrl,
+                    currentName: displayName,
+                    currentImageUrl: profilePicture,
                   ),
                 );
               },
@@ -66,12 +81,16 @@ class ProfileHeader extends StatelessWidget {
       ),
       child: CircleAvatar(
         radius: 65,
-        backgroundImage: AssetImage(imageUrl),
+        backgroundImage: _getImageProvider(profilePicture),
+        backgroundColor: const Color(0xFF1E3765),
+        child: profilePicture == null || profilePicture!.isEmpty
+            ? const Icon(Icons.person, size: 65, color: Colors.white)
+            : null,
       ),
     );
 
     final userName = Text(
-      name,
+      displayName,
       style: const TextStyle(
         fontSize: 32,
         fontWeight: FontWeight.bold,
@@ -89,14 +108,23 @@ class ProfileHeader extends StatelessWidget {
     final ratingStars = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ...List.generate(5, (index) {
-          return Icon(
-            index < rating ? Icons.star : Icons.star_border,
-            color: Colors.black,
-            size: 20,
-          );
-        }),
-        Text(' ($rating/5)'),
+        const Icon(Icons.star, color: Colors.amber),
+        const SizedBox(width: 4),
+        Text(
+          rating.toStringAsFixed(1),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          '($ratingCount)',
+          style: const TextStyle(
+            color: Colors.grey,
+            fontSize: 16,
+          ),
+        ),
       ],
     );
 
@@ -105,17 +133,17 @@ class ProfileHeader extends StatelessWidget {
         Stack(
           children: [
             Container(
-              height: 175,
-              color: const Color(0xFF11384A),
+              height: 200,
+              color: const Color(0xFF1E3765),
             ),
             Column(
               children: [
                 profileAppBar,
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 40),
                       profileImage,
                     ],
                   ),
@@ -124,8 +152,11 @@ class ProfileHeader extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 2),
         userName,
+        const SizedBox(height: 4),
         userEmail,
+        const SizedBox(height: 8),
         ratingStars,
       ],
     );

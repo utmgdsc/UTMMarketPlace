@@ -142,7 +142,7 @@ class _SavedItemsViewState extends State<SavedItemsView> {
                   id: item.id,
                   name: item.title,
                   price: item.price,
-                  imageUrl: item.imageUrl,
+                  imageUrls: [item.imageUrl],
                 ),
               );
             },

@@ -18,7 +18,7 @@ class ProfileActions extends StatelessWidget {
     final savedItemsButton = ElevatedButton(
       onPressed: () => context.push('/saved-items'),
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF11384A),
+        backgroundColor: const Color(0xFF1E3765),
         minimumSize: const Size(double.infinity, 45),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(25),
@@ -37,7 +37,7 @@ class ProfileActions extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: showListings ? Colors.white : const Color(0xFF11384A),
+          color: showListings ? Colors.white : const Color(0xFF1E3765),
           borderRadius: BorderRadius.circular(25),
         ),
         child: Center(
@@ -59,7 +59,7 @@ class ProfileActions extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: !showListings ? Colors.white : const Color(0xFF11384A),
+          color: !showListings ? Colors.white : const Color(0xFF1E3765),
           borderRadius: BorderRadius.circular(25),
         ),
         child: Center(
@@ -77,7 +77,7 @@ class ProfileActions extends StatelessWidget {
     final toggleTabs = Container(
       height: 45,
       decoration: BoxDecoration(
-        color: const Color(0xFF11384A),
+        color: const Color(0xFF1E3765),
         borderRadius: BorderRadius.circular(25),
       ),
       child: Row(
