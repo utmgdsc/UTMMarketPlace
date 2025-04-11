@@ -177,8 +177,11 @@ class SavedItemsDeleteResponse(BaseModel):
 
 class ReviewPostRequest(BaseModel):
     seller_id: str = Field(..., description='The user ID of the seller being reviewed.')
-    rating: confloat(ge=1.0, le=5.0) = Field(
-        ..., description='Rating between 1.0 and 5.0.'
+    rating: float = Field(
+        ..., 
+        description='Rating between 1.0 and 5.0.',
+        ge=1.0,
+        le=5.0
     )
     comment: Optional[str] = Field(
         None, description='Optional comment about the seller.'
