@@ -25,6 +25,58 @@ class _SavedItemsViewState extends State<SavedItemsView> {
     });
   }
 
+  Widget _buildErrorState(String errorMessage) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 80,
+              color: Theme.of(context).colorScheme.error.withValues(alpha: 179),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Failed to load saved items',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              errorMessage,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 179),
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                viewModel.fetchData();
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text('Retry'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,11 +91,52 @@ class _SavedItemsViewState extends State<SavedItemsView> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              viewModel.fetchData();
+            },
+          ),
+        ],
       ),
       body: Consumer<SavedItemsViewModel>(
         builder: (context, savedItemsViewModel, _) {
           if (savedItemsViewModel.isLoading) {
             return const SavedItemsLoadingComponent();
+          }
+
+          if (savedItemsViewModel.errorMessage.isNotEmpty) {
+            return _buildErrorState(savedItemsViewModel.errorMessage);
+          }
+
+          if (savedItemsViewModel.items.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.favorite_border,
+                    size: 80,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 128),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No saved items',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 179),
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
 
           return GridView.builder(

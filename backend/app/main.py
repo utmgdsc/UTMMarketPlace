@@ -1,4 +1,5 @@
 import base64
+
 from app.models import (
     ConversationsGetResponse,
     ErrorResponse,
@@ -51,6 +52,7 @@ from fastapi.security import HTTPBearer
 from pydantic import ValidationError
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
+import base64
 load_dotenv()  # Load environment variables from .env
 JWT_SECRET = os.getenv("JWT_SECRET")
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
@@ -987,6 +989,39 @@ async def update_user(userid: str, body: UserPutRequest, current_user: dict = De
                 raise HTTPException(
                     status_code=400, detail="Invalid email format.")
 
+        # Handle profile picture upload if provided
+        if "profile_picture" in update_data and update_data["profile_picture"]:
+            try:
+                # Ensure static directory exists
+                os.makedirs(STATIC_DIR, exist_ok=True)
+
+                # Get base64 data
+                image_b64 = update_data["profile_picture"]
+                if image_b64.startswith("data:image"):
+                    image_b64 = image_b64.split(",")[1]
+
+                # Decode base64
+                try:
+                    img_data = base64.b64decode(image_b64)
+                except Exception:
+                    raise HTTPException(
+                        status_code=422, detail="Invalid base64 image format")
+
+                # Generate filename using user ID
+                filename = f"profile_{userid}.jpg"
+                filepath = os.path.join(STATIC_DIR, filename)
+
+                # Save the file
+                with open(filepath, "wb") as f:
+                    f.write(img_data)
+
+                # Update the profile_picture field to be the URL path
+                update_data["profile_picture"] = f"/static/{filename}"
+
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500, detail=f"Failed to save profile picture: {str(e)}")
+
         await users_collection.update_one({"_id": ObjectId(userid)}, {"$set": update_data})
 
         updated_user = await users_collection.find_one({"_id": ObjectId(userid)})
@@ -1072,8 +1107,14 @@ async def post_sign_up(
     hashed_password = pbkdf2_sha256.hash(password)
 
     # Store User in Database
+    user_default_data = {"email": email,
+                 "password": hashed_password,
+                 "display_name": email,
+                 "rating": 0,
+                 "location": "",
+                 "rating_count": 0}
     try:
-        result = await users_collection.insert_one({"email": email, "password": hashed_password})
+        result = await users_collection.insert_one(user_default_data)
         return JSONResponse(
             status_code=201,
             content={"user_id": str(result.inserted_id), "message": "User registered successfully."})
