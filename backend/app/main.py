@@ -127,8 +127,10 @@ async def validation_exception_handler(request, exc):
 
 @app.get(
     '/search',
-    response_model=SearchGetResponse,
-    responses={'500': {'model': ErrorResponse}},
+    response_model=None,
+    responses={
+        '200': {'model': SearchGetResponse},
+        '500': {'model': ErrorResponse}},
 )
 async def get_search(
     # Used in for full text search
@@ -254,7 +256,7 @@ async def get_search(
         if not response_data:
             return SearchGetResponse(listings=[],
                                      total=0,
-                                     next_page_token=None)
+                                     next_page_token="")
 
         listings = ListingsGetResponseAll(
             listings=response_data,
@@ -430,7 +432,7 @@ async def get_listings(
         listings = await cursor.to_list(length=limit)
 
         if not listings:
-            return ListingsGetResponseAll(listings=[], total=0, next_page_token=None)
+            return ListingsGetResponseAll(listings=[], total=0, next_page_token="")
 
         # Convert documents to Pydantic models
         response_data = [
