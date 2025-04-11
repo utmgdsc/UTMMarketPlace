@@ -20,7 +20,12 @@ class ListingViewModel extends LoadingViewModel {
 
   bool isLoadingMore = false;
 
-  Future<void> fetchData(
+  Future<void> searchForRelevantListings(String searchQuery) async {
+    // TODO: implement
+  }
+
+  /// Handler to load initial listings from backend.
+  Future<void> fetchInitialListings(
       {int limit = 5, String? nextPageToken, String? query}) async {
     try {
       isLoading = true;
@@ -41,7 +46,8 @@ class ListingViewModel extends LoadingViewModel {
     }
   }
 
-  Future<void> fetchMoreData({int limit = 5, String? query}) async {
+  /// Handler to load more listings from the backend. This is used to paginate the listings.
+  Future<void> fetchMoreListings({int limit = 5, String? query}) async {
     if (_listingModel?.nextPageToken == null ||
         _listingModel!.nextPageToken!.isEmpty) {
       return;
@@ -67,7 +73,7 @@ class ListingViewModel extends LoadingViewModel {
     }
   }
 
-  void applyFilters(FilterOptions filters) {
+  void setFilters(FilterOptions filters) {
     _filteredItems = _allItems.where((item) {
       if (filters.condition != null && item.condition != filters.condition) {
         return false;
@@ -104,25 +110,5 @@ class ListingViewModel extends LoadingViewModel {
     }
 
     notifyListeners();
-  }
-
-  void showFilterBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (context, scrollController) => SingleChildScrollView(
-          controller: scrollController,
-          child: const FilterBottomSheet(),
-        ),
-      ),
-    );
-  }
+  } 
 }
