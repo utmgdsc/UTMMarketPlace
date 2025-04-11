@@ -10,9 +10,6 @@ class SavedItemsViewModel extends LoadingViewModel {
 
   List<ListingItem> _items = [];
   List<ListingItem> get items => _items;
-  
-  String _errorMessage = '';
-  String get errorMessage => _errorMessage;
 
   String _errorMessage = '';
   String get errorMessage => _errorMessage;
