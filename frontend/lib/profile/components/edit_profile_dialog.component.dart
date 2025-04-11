@@ -72,9 +72,6 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
         profilePicture: _imageFile,
       );
 
-      // Refresh user data to update all components with the new profile picture
-      await viewModel.refreshUserData();
-
       if (currentContext.mounted) {
         if (success) {
           Navigator.pop(currentContext);
