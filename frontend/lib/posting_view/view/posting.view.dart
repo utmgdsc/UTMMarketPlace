@@ -226,11 +226,11 @@ class _PostingViewState extends State<PostingView> {
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                 ),
                 onPressed: () {
-                  final sellerEmail =
+                  final sellerId =
                       Provider.of<PostingViewModel>(context, listen: false)
-                          .item?.sellerEmail;
-                  if (sellerEmail != null) {
-                    context.push('/profile/$sellerEmail');
+                          .item?.sellerId;
+                  if (sellerId != null) {
+                    context.push('/profile/$sellerId');
                   }
                 },
                 child: Text(

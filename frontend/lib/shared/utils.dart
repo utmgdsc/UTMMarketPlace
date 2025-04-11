@@ -4,16 +4,6 @@ import 'package:utm_marketplace/shared/secure_storage/secure_storage.dart';
 
 typedef SuccessReason = ({bool success, String reason});
 
-String? _globalEmail;
-
-void storeEmail(String userEmail) {
-  _globalEmail = userEmail;
-}
-
-String? getEmail() {
-  return _globalEmail;
-}
-
 // JWT Operations
 Future<void> storeToken(String token) async {
   await secureStorage.write(key: 'jwt_token', value: token);
