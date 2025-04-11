@@ -209,7 +209,7 @@ async def get_search(
             {
                 "$match": {
                     "campus": campus}} if campus else None,
-            sort_stage, 
+            sort_stage,
             {"$limit": limit},
             {"$project": {
                 "id": {"$toString": "$_id"},
@@ -360,8 +360,10 @@ async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorRes
 
 
 @app.get('/listings',
-         response_model=ListingsGetResponseAll,
-         responses={'500': {'model': ErrorResponse}},
+         response_model=None,
+         responses={
+             '200': {'model': ListingsGetResponseAll},
+             '500': {'model': ErrorResponse}},
          )
 async def get_listings(
     query: Optional[str] = Query(None, description="query"),
@@ -670,7 +672,6 @@ async def delete_saved_item(saved_item_id: str = Query(..., description="ID of t
         raise e
     except Exception as e:
         return ErrorResponse(detail="Internal Server Error. Please try again later.")
-
 
 
 ######################################## USER ENDPOINTS ########################################
