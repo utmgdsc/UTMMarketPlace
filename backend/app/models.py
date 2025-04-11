@@ -7,6 +7,8 @@ from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field, SecretStr, confloat
+
+
 class BaseUserResponse(BaseModel):
     display_name: str
     profile_picture: Optional[str] = None
@@ -59,24 +61,28 @@ class ListingGetResponseItem(BaseModel):
     price: float
     description: Optional[str] = None
     seller_id: str
-    seller_name: Optional[str] = None
     pictures: List[str]
     category: Optional[str] = None
     condition: str
     date_posted: Optional[datetime] = None
     campus: Optional[str] = None
+    seller_name: Optional[str] = Field(
+        None,
+        description='The display_name of the user matching seller_id. This field will only be present when querying for a single listing.',
+    )
 
 
 class ListingsGetResponseAll(BaseModel):
-    listings: Optional[List[ListingGetResponseItem]] = None
-    total: Optional[int] = None
-    next_page_token: Optional[str] = None
+    listings: List[ListingGetResponseItem]
+    total: int
+    next_page_token: str
 
 
 class ListingsPostRequest(BaseModel):
     title: str
     price: float
     description: Optional[str] = None
+    seller_id: str
     pictures: List[str]
     category: Optional[str] = None
     condition: str
@@ -97,9 +103,6 @@ class ListingsPostResponse(BaseModel):
 
 
 class MessagesPostRequest(BaseModel):
-    sender_id: str = Field(
-        ..., description='The unique identifier of the user sending the message.'
-    )
     recipient_id: str = Field(
         ..., description='The unique identifier of the user receiving the message.'
     )
@@ -124,6 +127,17 @@ class MessageGetResponseItem(BaseModel):
     )
     content: str = Field(..., description='The content of the message.')
     timestamp: datetime = Field(..., description='The time when the message was sent.')
+
+
+class Conversation(BaseModel):
+    conversation_id: Optional[str] = None
+    participant_ids: Optional[List[str]] = None
+    last_message: Optional[str] = None
+    last_timestamp: Optional[datetime] = None
+
+
+class ConversationsGetResponse(BaseModel):
+    conversations: Optional[List[Conversation]] = None
 
 
 class SettingsPutRequest(BaseModel):
@@ -160,7 +174,8 @@ class UserPutRequest(BaseModel):
 
 
 class SavedItemsPostRequest(BaseModel):
-    id: str = Field(..., description='Must be id linking to a listing')
+    id: str
+
 
 class SavedItemsPostResponse(BaseModel):
     message: Optional[str] = None
@@ -199,26 +214,16 @@ class ReviewItem(BaseModel):
     timestamp: Optional[datetime] = None
 
 
-class Conversation(BaseModel):
-    conversation_id: Optional[str] = None
-    participant_ids: Optional[List[str]] = None
-    last_message: Optional[str] = None
-    last_timestamp: Optional[datetime] = None
-
-
-class ConversationsGetResponse(BaseModel):
-    conversations: Optional[List[Conversation]] = None
-
-
 class MessagesGetResponse(BaseModel):
     messages: Optional[List[MessageGetResponseItem]] = None
     total: Optional[int] = None
 
 
 class SearchGetResponse(BaseModel):
-    listings: Optional[List[ListingGetResponseItem]] = None
-    total: Optional[int] = None
-    next_page_token: Optional[str] = None
+    listings: List[ListingGetResponseItem]
+    total: int
+    next_page_token: str
+
 
 class ReviewGetResponse(BaseModel):
     seller_id: Optional[str] = None

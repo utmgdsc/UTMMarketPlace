@@ -13,5 +13,7 @@ client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI, tlsCAFile=certifi.whe
 db = client[DB_NAME]
 listings_collection = db["listings"]
 users_collection = db["users"]  # Reference to listings collection
+messages_collection = db["messages"]
+
 # we can add more collections here later
 reviews_collection = db["reviews"]

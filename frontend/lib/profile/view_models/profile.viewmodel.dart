@@ -12,6 +12,7 @@ class ProfileViewModel extends LoadingViewModel {
   bool _showListings = true;
   bool _isUpdating = false;
   String? _errorMessage;
+  int _imageVersion = 0;
 
   ProfileViewModel({required this.repo});
 
@@ -19,6 +20,7 @@ class ProfileViewModel extends LoadingViewModel {
   bool get showListings => _showListings;
   bool get isUpdating => _isUpdating;
   String? get errorMessage => _errorMessage;
+  int get imageVersion => _imageVersion;
 
   void toggleView() {
     _showListings = !_showListings;
@@ -30,7 +32,6 @@ class ProfileViewModel extends LoadingViewModel {
       _errorMessage = null;
       isLoading = true;
       notifyListeners();
-      
       final result = await repo.fetchData(userId);
       _profileModel = result;
       notifyListeners();
@@ -41,6 +42,18 @@ class ProfileViewModel extends LoadingViewModel {
     } finally {
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> refreshUserData() async {
+    if (_profileModel == null) return;
+
+    try {
+      _imageVersion++;
+
+      await fetchData(_profileModel!.id);
+    } catch (e) {
+      debugPrint('Error refreshing user data: ${e.toString()}');
     }
   }
 
@@ -61,32 +74,49 @@ class ProfileViewModel extends LoadingViewModel {
       if (profilePicture != null) {
         try {
           final bytes = await profilePicture.readAsBytes();
-          profilePictureBase64 = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+          profilePictureBase64 =
+              'data:image/jpeg;base64,${base64Encode(bytes)}';
         } catch (e) {
-          debugPrint('Error converting profile picture to base64: ${e.toString()}');
+          debugPrint(
+              'Error converting profile picture to base64: ${e.toString()}');
           return false;
         }
       }
 
-      // Create optimistic update
-      final updatedProfile = ProfileModel(
-        id: _profileModel!.id,
-        displayName: displayName ?? _profileModel!.displayName,
-        email: _profileModel!.email,
-        profilePicture: profilePictureBase64 ?? _profileModel!.profilePicture,
-        rating: _profileModel!.rating,
-        ratingCount: _profileModel!.ratingCount,
-        location: location ?? _profileModel!.location,
-        savedPosts: _profileModel!.savedPosts,
-        reviews: _profileModel!.reviews,
-        listings: _profileModel!.listings,
-      );
+      if (profilePicture != null) {
+        final previewProfile = ProfileModel(
+          id: _profileModel!.id,
+          displayName: displayName ?? _profileModel!.displayName,
+          email: _profileModel!.email,
+          profilePicture: _profileModel!.profilePicture,
+          rating: _profileModel!.rating,
+          ratingCount: _profileModel!.ratingCount,
+          location: location ?? _profileModel!.location,
+          savedPosts: _profileModel!.savedPosts,
+          reviews: _profileModel!.reviews,
+          listings: _profileModel!.listings,
+        );
 
-      // Update UI immediately
-      _profileModel = updatedProfile;
-      notifyListeners();
+        _profileModel = previewProfile;
+        notifyListeners();
+      } else if (displayName != null || location != null) {
+        final updatedProfile = ProfileModel(
+          id: _profileModel!.id,
+          displayName: displayName ?? _profileModel!.displayName,
+          email: _profileModel!.email,
+          profilePicture: _profileModel!.profilePicture,
+          rating: _profileModel!.rating,
+          ratingCount: _profileModel!.ratingCount,
+          location: location ?? _profileModel!.location,
+          savedPosts: _profileModel!.savedPosts,
+          reviews: _profileModel!.reviews,
+          listings: _profileModel!.listings,
+        );
 
-      // Make API call
+        _profileModel = updatedProfile;
+        notifyListeners();
+      }
+
       final result = await repo.updateProfile(
         userId: userId,
         displayName: displayName,
@@ -94,7 +124,8 @@ class ProfileViewModel extends LoadingViewModel {
         location: location,
       );
 
-      // Update with server response
+      _imageVersion++;
+
       _profileModel = result;
       notifyListeners();
       return true;
