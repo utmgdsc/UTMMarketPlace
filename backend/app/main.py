@@ -536,17 +536,18 @@ async def post_listings(
         return ErrorResponse(status_code=422, details="Validation error. Please check your input data.")
     except Exception as e:
         return ErrorResponse(status_code=500, details="Internal Server Error. Please try again later.")
-    
+
 ######################################## SAVED ITEMS ENDPOINTS ###################################
 
-@app.post("/saved_items", 
-    response_model=SavedItemsPostResponse,
-    responses={
-    400: {"model": ErrorResponse},
-    404: {"model": ErrorResponse},
-    409: {"model": ErrorResponse},
-    500: {"model": ErrorResponse},
-})
+
+@app.post("/saved_items",
+          response_model=SavedItemsPostResponse,
+          responses={
+              400: {"model": ErrorResponse},
+              404: {"model": ErrorResponse},
+              409: {"model": ErrorResponse},
+              500: {"model": ErrorResponse},
+          })
 async def save_item(
 
     body: SavedItemsPostRequest,
@@ -559,7 +560,8 @@ async def save_item(
         item_id = body.id
         # Validate the ID format
         if not ObjectId.is_valid(item_id):
-            raise HTTPException(status_code=400, detail="Invalid listing ID format.")
+            raise HTTPException(
+                status_code=400, detail="Invalid listing ID format.")
 
         # Check if the listing exists
         listing = await listings_collection.find_one({"_id": ObjectId(item_id)})
@@ -569,7 +571,8 @@ async def save_item(
         # Check if the user exists
         user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
         if not user:
-            raise HTTPException(status_code=400, detail="User not found. Please log in or sign up.")
+            raise HTTPException(
+                status_code=400, detail="User not found. Please log in or sign up.")
 
         # Check if the item is already saved
         saved_posts = user.get("saved_posts", [])
@@ -577,9 +580,9 @@ async def save_item(
             raise HTTPException(status_code=409, detail="Item already saved.")
 
         if len(saved_posts) >= 30:
-            raise HTTPException(status_code=400, detail="You can only save up to 30 items.")
+            raise HTTPException(
+                status_code=400, detail="You can only save up to 30 items.")
 
-    
         saved_posts.append(item_id)
         await users_collection.update_one({"_id": ObjectId(current_user["id"])}, {"$set": {"saved_posts": saved_posts}})
         return SavedItemsPostResponse(message="Item saved successfully.")
@@ -587,17 +590,18 @@ async def save_item(
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal Server Error. Please try again later. {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Internal Server Error. Please try again later. {e}")
 
 
 @app.get("/saved_items",
-    response_model=SavedItemsGetResponse,
-    responses={
-        200: {"description": "List of saved listings"},
-        400: {"model": ErrorResponse},
-        500: {"model": ErrorResponse},
-    },
-)
+         response_model=SavedItemsGetResponse,
+         responses={
+             200: {"description": "List of saved listings"},
+             400: {"model": ErrorResponse},
+             500: {"model": ErrorResponse},
+         },
+         )
 async def get_saved_items(current_user: dict = Depends(get_current_user)):
     try:
         user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
@@ -606,12 +610,14 @@ async def get_saved_items(current_user: dict = Depends(get_current_user)):
 
         saved_ids = user.get("saved_posts", [])
         if not saved_ids:
-            return [], 0
+            return SavedItemsGetResponse(saved_items=[], total=0)
 
         # Convert only valid ObjectIds
-        object_ids = [ObjectId(item_id) for item_id in saved_ids if ObjectId.is_valid(item_id)]
+        object_ids = [ObjectId(item_id)
+                      for item_id in saved_ids if ObjectId.is_valid(item_id)]
 
-        listings_cursor = listings_collection.find({"_id": {"$in": object_ids}})
+        listings_cursor = listings_collection.find(
+            {"_id": {"$in": object_ids}})
         listings = await listings_cursor.to_list(length=30)
 
         response_data = [
@@ -632,21 +638,22 @@ async def get_saved_items(current_user: dict = Depends(get_current_user)):
         return SavedItemsGetResponse(
             saved_items=response_data,
             total=len(response_data),
-            )
+        )
 
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(detail="Internal Server Error. Please try again later.")
+        raise HTTPException(
+            detail="Internal Server Error. Please try again later.")
 
 
-@app.delete("/saved_items", 
-    response_model=SavedItemsDeleteResponse,        
-    responses={
-    400: {"model": ErrorResponse},
-    404: {"model": ErrorResponse},
-    500: {"model": ErrorResponse},
-})
+@app.delete("/saved_items",
+            response_model=SavedItemsDeleteResponse,
+            responses={
+                400: {"model": ErrorResponse},
+                404: {"model": ErrorResponse},
+                500: {"model": ErrorResponse},
+            })
 async def delete_saved_item(saved_item_id: str = Query(..., description="ID of the item to remove"), current_user: dict = Depends(get_current_user)):
     try:
         user = await users_collection.find_one({"_id": ObjectId(current_user["id"])})
@@ -655,11 +662,12 @@ async def delete_saved_item(saved_item_id: str = Query(..., description="ID of t
 
         saved_posts = user.get("saved_posts", [])
         if saved_item_id not in saved_posts:
-            raise HTTPException(status_code=404, detail="Item not found in saved list")
+            raise HTTPException(
+                status_code=404, detail="Item not found in saved list")
 
         saved_posts.remove(saved_item_id)
         await users_collection.update_one({"_id": ObjectId(current_user["id"])}, {"$set": {"saved_posts": saved_posts}})
-        return SavedItemsDeleteResponse(message= "Item removed from saved list.")
+        return SavedItemsDeleteResponse(message="Item removed from saved list.")
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -739,7 +747,10 @@ async def get_saved_items(current_user: dict = Depends(get_current_user)):
 
         saved_ids = user.get("saved_posts", [])
         if not saved_ids:
-            return [], 0
+            return SavedItemsGetResponse(
+                saved_items=[],
+                total=0,
+            )
 
         # Convert only valid ObjectIds
         object_ids = [ObjectId(item_id)
@@ -840,7 +851,6 @@ async def get_user(userid: str, current_user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error. Please try again later.")
-
 
 
 @app.get(
@@ -1108,11 +1118,11 @@ async def post_sign_up(
 
     # Store User in Database
     user_default_data = {"email": email,
-                 "password": hashed_password,
-                 "display_name": email,
-                 "rating": 0,
-                 "location": "",
-                 "rating_count": 0}
+                         "password": hashed_password,
+                         "display_name": email,
+                         "rating": 0,
+                         "location": "",
+                         "rating_count": 0}
     try:
         result = await users_collection.insert_one(user_default_data)
         return JSONResponse(
@@ -1124,18 +1134,18 @@ async def post_sign_up(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Internal server error: {str(e)}")
-        
+
 
 ######################################## MESSAGES ########################################
 @app.get("/conversations", response_model=ConversationsGetResponse)
-async def get_conversations(userid: str = Query(...), 
+async def get_conversations(userid: str = Query(...),
                             current_user: dict = Depends(get_current_user)):
     try:
         # Validate user_id
         if current_user["id"] != userid:
             raise HTTPException(
                 status_code=403, detail="Unauthorized to update this user")
-        
+
         user_id = current_user["id"]
         pipeline = [
             {
@@ -1146,14 +1156,14 @@ async def get_conversations(userid: str = Query(...),
                     ]
                 }
             },
-            { "$sort": { "timestamp": -1 } },
+            {"$sort": {"timestamp": -1}},
             {
                 "$group": {
                     "_id": "$conversation_id",
-                    "last_message": { "$first": "$content" },
-                    "last_timestamp": { "$first": "$timestamp" },
-                    
-                    "participants": { "$addToSet": "$sender_id" },
+                    "last_message": {"$first": "$content"},
+                    "last_timestamp": {"$first": "$timestamp"},
+
+                    "participants": {"$addToSet": "$sender_id"},
                 }
             },
             {
@@ -1175,12 +1185,12 @@ async def get_conversations(userid: str = Query(...),
                 convo["participant_ids"].append(user_id)
 
         return ConversationsGetResponse(conversations=result)
-    
+
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch conversations.")
-
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch conversations.")
 
 
 @app.post("/messages", response_model=MessagesPostResponse)
@@ -1191,9 +1201,11 @@ async def create_message(
     try:
         # Validate recipient_id format
         if not ObjectId.is_valid(body.recipient_id):
-            raise HTTPException(status_code=400, detail="Invalid recipient ID format.")
-        
-        conversation_id = "_".join(sorted([current_user["id"], body.recipient_id]))
+            raise HTTPException(
+                status_code=400, detail="Invalid recipient ID format.")
+
+        conversation_id = "_".join(
+            sorted([current_user["id"], body.recipient_id]))
         message = {
             "sender_id": current_user["id"],
             "recipient_id": body.recipient_id,
@@ -1232,16 +1244,19 @@ async def get_messages(
         # You can do this by checking a cached list, or fetching 1 message
         sample = await messages_collection.find_one({"conversation_id": conversation_id})
         if not sample or current_user["id"] not in [sample["sender_id"], sample["recipient_id"]]:
-            raise HTTPException(status_code=403, detail="You are not part of this conversation.")
+            raise HTTPException(
+                status_code=403, detail="You are not part of this conversation.")
 
         query = {"conversation_id": conversation_id}
         if next:
             try:
                 query["timestamp"] = {"$gt": datetime.fromisoformat(next)}
             except ValueError:
-                raise HTTPException(status_code=400, detail="Invalid 'next' timestamp format.")
+                raise HTTPException(
+                    status_code=400, detail="Invalid 'next' timestamp format.")
 
-        cursor = messages_collection.find(query).sort("timestamp", 1).limit(limit)
+        cursor = messages_collection.find(
+            query).sort("timestamp", 1).limit(limit)
         messages = await cursor.to_list(length=limit)
 
         response_data = [
