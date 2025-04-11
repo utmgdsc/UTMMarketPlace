@@ -165,7 +165,7 @@ class _CreateListingViewState extends State<CreateListingView> {
         child: ElevatedButton(
           onPressed: _handleSubmit,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF11384A),
+            backgroundColor: const Color(0xFF1E3765),
             minimumSize: const Size(double.infinity, 50),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),

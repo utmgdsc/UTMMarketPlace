@@ -7,7 +7,6 @@ import 'package:utm_marketplace/posting_view/view/posting.view.dart';
 import 'package:utm_marketplace/shared/components/shell/shell.layout.dart';
 import 'package:utm_marketplace/messages/view/messages.view.dart';
 import 'package:utm_marketplace/messages/view/conversation_detail.view.dart';
-import 'package:utm_marketplace/notifications/view/notifications.view.dart';
 import 'package:utm_marketplace/menu/view/menu.view.dart';
 import 'package:utm_marketplace/create_listing/view/create_listing.view.dart';
 import 'package:utm_marketplace/shared/utils.dart';
@@ -38,9 +37,9 @@ final router = GoRouter(
           currentIndex = 0;
         } else if (location.startsWith('/messages')) {
           currentIndex = 1;
-        } else if (location.startsWith('/marketplace')) {
+        } else if (location.startsWith('/create-listing')) {
           currentIndex = 2;
-        } else if (location.startsWith('/notifications')) {
+        } else if (location.startsWith('/marketplace')) {
           currentIndex = 3;
         } else {
           currentIndex = 4;
@@ -79,10 +78,6 @@ final router = GoRouter(
               conversationId: conversationId,
             );
           },
-        ),
-        GoRoute(
-          path: '/notifications',
-          builder: (context, state) => const NotificationsView(),
         ),
         GoRoute(
           path: '/menu',

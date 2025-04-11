@@ -58,13 +58,13 @@ class BottomNav extends StatelessWidget {
             label: '',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            icon: Icon(Icons.add_circle_outline),
+            activeIcon: Icon(Icons.add_circle),
             label: '',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_outlined),
-            activeIcon: Icon(Icons.notifications),
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
             label: '',
           ),
           const BottomNavigationBarItem(
@@ -93,10 +93,10 @@ class BottomNav extends StatelessWidget {
               context.push('/messages');
               break;
             case 2:
-              context.push('/marketplace');
+              context.push('/create-listing');
               break;
             case 3:
-              context.push('/notifications');
+              context.push('/marketplace');
               break;
             case 4:
               context.push('/menu');

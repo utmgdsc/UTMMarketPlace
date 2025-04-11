@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:utm_marketplace/shared/secure_storage/secure_storage.dart';
+import 'auth_interceptor.dart';
 
 // TODO: Import the secure storage file and the auth interceptor file once they have been tested
 // import 'package:utm_marketplace/shared/secure_storage/secure_storage.dart';
@@ -12,5 +14,5 @@ void configureDio() {
   dio.options.connectTimeout = Duration(seconds: 10);
   dio.options.receiveTimeout = Duration(seconds: 10);
 
-  // dio.interceptors.add(AuthInterceptor(dio, secureStorage));
+  dio.interceptors.add(AuthInterceptor(dio, secureStorage));
 }
