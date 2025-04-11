@@ -17,8 +17,3 @@ messages_collection = db["messages"]
 
 # we can add more collections here later
 reviews_collection = db["reviews"]
-
-async def init_indexes():
-    await messages_collection.create_index(
-        [("conversation_id", 1), ("timestamp", 1)]
-    )
