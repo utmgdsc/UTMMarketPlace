@@ -792,7 +792,14 @@ async def post_reviews(
             for review in reviews:
                 if current_user["id"] == review.get("reviewer_id"):
                     raise HTTPException(
-                        status_code=404, detail="You have already left the user a review")
+                    status_code=404, detail="You have already left the user a review")
+
+        # check if the seller and the current user have a conversation
+        conversation_id = "_".join(sorted([current_user["id"], body.seller_id]))
+        conversation = await messages_collection.find_one({"conversation_id": conversation_id})
+        if not conversation:
+            raise HTTPException(
+            status_code=403, detail="You cannot leave a review without having a conversation with the seller")
 
         review = {
             "seller_id": ObjectId(body.seller_id),
