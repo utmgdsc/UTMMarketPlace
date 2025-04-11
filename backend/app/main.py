@@ -32,7 +32,7 @@ from app.models import (
     ReviewPostResponse
 )
 
-from app.MongoClient_async import listings_collection, users_collection, reviews_collection, init_indexes
+from app.MongoClient_async import listings_collection, users_collection, reviews_collection, messages_collection, init_indexes
 
 from dateutil.parser import parse as dateutil_parse
 from bson import ObjectId
