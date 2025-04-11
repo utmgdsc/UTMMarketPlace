@@ -153,7 +153,6 @@ async def get_search(
     """
     search listings
     """
-    price_order = 0
     limit = min(max(limit, 1), 30)
     try:
         if query:
@@ -191,9 +190,8 @@ async def get_search(
 
         pipeline = [
             search_stage,
-            # Price filter with stable sort using _id as tiebreaker
-            {"$sort": {"price": price_order, "_id": 1}
-             } if price_order in [-1, 1] else {"$sort": {"_id": 1}},
+            # Stable sort using _id as tiebreaker
+            {"$sort": {"_id": 1}},
             # Lower and upper limits of price (0 -> +inf by default)
             {
                 "$match": {
@@ -207,9 +205,11 @@ async def get_search(
                 "$match": {
                     "date_posted": {"$gte": dateutil_parse(date_range).isoformat()}}}
                 if date_range is not None else None,
+            # Campus filter
             {
                 "$match": {
                     "campus": campus}} if campus else None,
+            sort_stage, 
             {"$limit": limit},
             {"$project": {
                 "id": {"$toString": "$_id"},
