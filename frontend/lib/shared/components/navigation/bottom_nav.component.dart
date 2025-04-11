@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:utm_marketplace/shared/components/navigation/nav_profile_image.component.dart';
-import 'package:utm_marketplace/shared/utils.dart';
 
 class BottomNav extends StatelessWidget {
   final int currentIndex;
@@ -78,16 +77,7 @@ class BottomNav extends StatelessWidget {
 
           switch (index) {
             case 0:
-              if (!context.mounted) return;
-              final email = getEmail();
-              if (email != null) {
-                debugPrint('email: $email');
-                if (context.mounted) {
-                  context.push('/profile/$email');
-                }
-              } else {
-                debugPrint('email is null');
-              }
+              context.push('/profile/me');
               break;
             case 1:
               context.push('/messages');
