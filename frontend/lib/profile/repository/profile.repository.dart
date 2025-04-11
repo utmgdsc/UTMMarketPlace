@@ -95,10 +95,15 @@ class ProfileRepository {
 
       // Prepare update data
       final updateData = {};
-      if (displayName != null) updateData['display_name'] = displayName;
-      if (profilePicture != null)
+      if (displayName != null) {
+        updateData['display_name'] = displayName;
+      }
+      if (profilePicture != null) {
         updateData['profile_picture'] = profilePicture;
-      if (location != null) updateData['location'] = location;
+      }
+      if (location != null) {
+        updateData['location'] = location;
+      }
 
       // Make API call
       final response = await dio.put(
