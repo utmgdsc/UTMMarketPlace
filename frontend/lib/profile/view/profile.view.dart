@@ -30,7 +30,7 @@ class _ProfileState extends State<Profile> {
     super.initState();
     viewModel = Provider.of<ProfileViewModel>(context, listen: false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      viewModel.fetchData(widget.userId);
+      viewModel.fetchUserProfileById(widget.userId);
     });
   }
 
@@ -64,7 +64,7 @@ class _ProfileState extends State<Profile> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    profileViewModel.fetchData(widget.userId);
+                    profileViewModel.fetchUserProfileById(widget.userId);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1E3765),

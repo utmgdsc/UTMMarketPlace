@@ -27,12 +27,12 @@ class ProfileViewModel extends LoadingViewModel {
     notifyListeners();
   }
 
-  Future<void> fetchData(String userId) async {
+  Future<void> fetchUserProfileById(String userId) async {
     try {
       _errorMessage = null;
       isLoading = true;
       notifyListeners();
-      final result = await repo.fetchData(userId);
+      final result = await repo.fetchUserProfileById(userId);
       _profileModel = result;
       notifyListeners();
     } catch (e) {
@@ -51,7 +51,7 @@ class ProfileViewModel extends LoadingViewModel {
     try {
       _imageVersion++;
 
-      await fetchData(_profileModel!.id);
+      await fetchUserProfileById(_profileModel!.id);
     } catch (e) {
       debugPrint('Error refreshing user data: ${e.toString()}');
     }
