@@ -60,6 +60,7 @@ class ListingGetResponseItem(BaseModel):
     description: Optional[str] = None
     seller_id: str
     seller_name: Optional[str] = None
+    seller_email: Optional[str] = None
     pictures: List[str]
     category: Optional[str] = None
     condition: str

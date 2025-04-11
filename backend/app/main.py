@@ -323,6 +323,7 @@ async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorRes
                     "campus": 1,
                     "date_posted": 1,
                     "seller_name": "$seller_doc.display_name",
+                    "seller_email": "$seller_doc.email",
                 }
             }
         ]
@@ -342,6 +343,7 @@ async def get_listing(listing_id: str) -> Union[ListingGetResponseItem, ErrorRes
             description=listing.get("description"),
             seller_id=listing.get("seller_id"),
             seller_name=listing.get("seller_name", ""),
+            seller_email=listing.get("seller_email", ""),
             pictures=listing.get("pictures", []),
             category=listing.get("category"),
             condition=listing.get("condition"),
