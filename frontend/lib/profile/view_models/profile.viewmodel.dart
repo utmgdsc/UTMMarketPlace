@@ -32,7 +32,6 @@ class ProfileViewModel extends LoadingViewModel {
       _errorMessage = null;
       isLoading = true;
       notifyListeners();
-
       final result = await repo.fetchData(userId);
       _profileModel = result;
       notifyListeners();

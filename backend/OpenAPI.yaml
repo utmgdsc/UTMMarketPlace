@@ -277,7 +277,7 @@ paths:
       summary: Retrieve user conversations
       description: Returns a list of conversations the user is involved in.
       parameters:
-        - name: user_id
+        - name: userid
           in: query
           required: true
           description: The ID of the user whose conversations are being retrieved.
@@ -289,30 +289,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  conversations:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        conversation_id:
-                          type: string
-                        participant_ids:
-                          type: array
-                          items:
-                            type: string
-                        last_message:
-                          type: string
-                        last_timestamp:
-                          type: string
-                          format: date-time
-                example:
-                  conversations:
-                    - conversation_id: "abc123"
-                      participant_ids: ["101", "202"]
-                      last_message: "See you soon!"
-                      last_timestamp: "2025-04-04T18:00:00Z"
+                ref: "#/components/schemas/ConversationsGetResponse"
         "400":
           description: Missing or invalid user_id
           content:
@@ -369,18 +346,26 @@ paths:
       summary: Retrieve messages between two users
       description: Retrieve a list of messages exchanged between two users.
       parameters:
-        - name: user1
+        - name: conversation_id
           in: query
           required: true
-          description: The unique identifier of first participant of the conversation.
+          description: The unique identifier of the conversation.
           schema:
             type: string
-        - name: user2
+        - name: limit
           in: query
-          required: true
-          description: The unique identifier of the second participant of the conversation.
+          required: false
+          description: The number of messages to retrieve.
+          schema:
+            type: integer
+            default: 10
+        - name: next
+          in: query
+          required: false
+          description: The last seen pagination token.
           schema:
             type: string
+  
       responses:
         "200":
           description: A list of messages exchanged between the specified users.
@@ -834,7 +819,6 @@ components:
         next_page_token:
           type: string
 
-
     ListingGetResponseItem:
       type: object
       required:
@@ -984,13 +968,9 @@ components:
     MessagesPostRequest:
       type: object
       required:
-        - sender_id
         - recipient_id
         - content
       properties:
-        sender_id:
-          type: string
-          description: The unique identifier of the user sending the message.
         recipient_id:
           type: string
           description: The unique identifier of the user receiving the message.
@@ -998,10 +978,9 @@ components:
           type: string
           description: The content of the message.
       example:
-        sender_id: "101"
         recipient_id: "202"
         content: "Hello, is this still available?"
-
+    
     MessagesPostResponse:
       type: object
       required:
@@ -1049,7 +1028,37 @@ components:
           type: string
           format: date-time
           description: The time when the message was sent.
-
+      
+    Conversation:
+      type: Object
+      properties:
+        conversation_id:
+          type: string
+        participant_ids:
+          type: array
+          items:
+            type: string
+        last_message:
+          type: string
+        last_timestamp:
+          type: string
+          format: date-time
+    
+    ConversationsGetResponse:
+      type: object   
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Conversation"
+            
+      example:
+        conversations:
+          - conversation_id: "abc123"
+            participant_ids: ["101", "202"]
+            last_message: "See you soon!"
+            last_timestamp: "2025-04-04T18:00:00Z"
+    
     SettingsPutRequest:
       type: object
       properties:
@@ -1084,6 +1093,7 @@ components:
         theme: "dark"
         text_size: 12
         message: "User settings updated successfully."
+    
     UserGetResponse:
       type: object
       required:
@@ -1119,6 +1129,7 @@ components:
         location: "Toronto"
         rating: 4.2
         rating_count: 6
+    
     UserPutRequest:
       type: object
       properties:
@@ -1179,6 +1190,7 @@ components:
             date_posted: "2025-02-22T10:00:00Z"
             campus: "UTM"
         total: 1
+
     SavedItemsDeleteResponse:
       type: object
       properties:

@@ -47,7 +47,6 @@ class SavedItemsViewModel extends LoadingViewModel {
       } else {
         debugPrint('SavedItemsViewModel: Failed to save item');
       }
-
       return result;
     } catch (e) {
       debugPrint('Error in saveItem: ${e.toString()}');
@@ -59,7 +58,6 @@ class SavedItemsViewModel extends LoadingViewModel {
     try {
       debugPrint('SavedItemsViewModel: Removing item $itemId...');
       final result = await repo.unsaveItem(itemId);
-
       if (result) {
         debugPrint('SavedItemsViewModel: Item removed successfully');
         // Remove the item from the local list without fetching again
@@ -68,7 +66,6 @@ class SavedItemsViewModel extends LoadingViewModel {
       } else {
         debugPrint('SavedItemsViewModel: Failed to remove item');
       }
-
       return result;
     } catch (e) {
       debugPrint('Error in unsaveItem: ${e.toString()}');
