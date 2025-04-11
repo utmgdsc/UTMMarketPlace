@@ -971,9 +971,6 @@ components:
         - recipient_id
         - content
       properties:
-        sender_id:
-          type: string
-          description: The unique identifier of the user sending the message.
         recipient_id:
           type: string
           description: The unique identifier of the user receiving the message.
@@ -981,7 +978,6 @@ components:
           type: string
           description: The content of the message.
       example:
-        sender_id: "101"
         recipient_id: "202"
         content: "Hello, is this still available?"
     
