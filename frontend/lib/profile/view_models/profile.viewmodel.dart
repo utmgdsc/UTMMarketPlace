@@ -32,7 +32,7 @@ class ProfileViewModel extends LoadingViewModel {
       _errorMessage = null;
       isLoading = true;
       notifyListeners();
-      
+
       final result = await repo.fetchData(userId);
       _profileModel = result;
       notifyListeners();
@@ -48,10 +48,10 @@ class ProfileViewModel extends LoadingViewModel {
 
   Future<void> refreshUserData() async {
     if (_profileModel == null) return;
-    
+
     try {
       _imageVersion++;
-      
+
       await fetchData(_profileModel!.id);
     } catch (e) {
       debugPrint('Error refreshing user data: ${e.toString()}');
@@ -75,9 +75,11 @@ class ProfileViewModel extends LoadingViewModel {
       if (profilePicture != null) {
         try {
           final bytes = await profilePicture.readAsBytes();
-          profilePictureBase64 = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+          profilePictureBase64 =
+              'data:image/jpeg;base64,${base64Encode(bytes)}';
         } catch (e) {
-          debugPrint('Error converting profile picture to base64: ${e.toString()}');
+          debugPrint(
+              'Error converting profile picture to base64: ${e.toString()}');
           return false;
         }
       }
@@ -124,7 +126,7 @@ class ProfileViewModel extends LoadingViewModel {
       );
 
       _imageVersion++;
-      
+
       _profileModel = result;
       notifyListeners();
       return true;

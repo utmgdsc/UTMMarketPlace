@@ -49,7 +49,7 @@ class PostingViewModel extends LoadingViewModel {
 
       _postingModel = await repo.fetchData(itemid);
       item = _postingModel.item;
-      
+
       // Check if this item is saved
       try {
         final savedItems = await savedItemsRepo.fetchData();

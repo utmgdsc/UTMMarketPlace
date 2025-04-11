@@ -15,16 +15,21 @@ class SavedItemsModel {
   factory SavedItemsModel.fromJson(Map<String, dynamic> json) {
     try {
       final List<dynamic> savedItems = json['saved_items'] ?? [];
-      
+
       debugPrint('SavedItemsModel.fromJson: $json');
-      
+
       return SavedItemsModel(
-        items: savedItems.map((item) => ListingItem.fromJson({
-          'id': item['id'] ?? '',
-          'image_url': item['pictures'] != null && item['pictures'].isNotEmpty ? item['pictures'][0] : '',
-          'title': item['title'] ?? 'No Title',
-          'price': (item['price'] ?? 0).toDouble(),
-        })).toList(),
+        items: savedItems
+            .map((item) => ListingItem.fromJson({
+                  'id': item['id'] ?? '',
+                  'image_url':
+                      item['pictures'] != null && item['pictures'].isNotEmpty
+                          ? item['pictures'][0]
+                          : '',
+                  'title': item['title'] ?? 'No Title',
+                  'price': (item['price'] ?? 0).toDouble(),
+                }))
+            .toList(),
         total: json['total'] ?? 0,
       );
     } catch (e) {

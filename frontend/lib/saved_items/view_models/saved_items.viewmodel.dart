@@ -10,7 +10,7 @@ class SavedItemsViewModel extends LoadingViewModel {
 
   List<ListingItem> _items = [];
   List<ListingItem> get items => _items;
-  
+
   String _errorMessage = '';
   String get errorMessage => _errorMessage;
 
@@ -19,11 +19,12 @@ class SavedItemsViewModel extends LoadingViewModel {
       _errorMessage = '';
       isLoading = true;
       notifyListeners();
-      
+
       debugPrint('SavedItemsViewModel: Fetching saved items...');
       final model = await repo.fetchData();
-      
-      debugPrint('SavedItemsViewModel: Received ${model.items.length} saved items');
+
+      debugPrint(
+          'SavedItemsViewModel: Received ${model.items.length} saved items');
       _items = model.items;
     } catch (e) {
       _errorMessage = 'Failed to load saved items: $e';
@@ -38,14 +39,15 @@ class SavedItemsViewModel extends LoadingViewModel {
     try {
       debugPrint('SavedItemsViewModel: Saving item $itemId...');
       final result = await repo.saveItem(itemId);
-      
+
       if (result) {
-        debugPrint('SavedItemsViewModel: Item saved successfully, refreshing list');
+        debugPrint(
+            'SavedItemsViewModel: Item saved successfully, refreshing list');
         await fetchData(); // Refresh the list after saving
       } else {
         debugPrint('SavedItemsViewModel: Failed to save item');
       }
-      
+
       return result;
     } catch (e) {
       debugPrint('Error in saveItem: ${e.toString()}');
@@ -57,7 +59,7 @@ class SavedItemsViewModel extends LoadingViewModel {
     try {
       debugPrint('SavedItemsViewModel: Removing item $itemId...');
       final result = await repo.unsaveItem(itemId);
-      
+
       if (result) {
         debugPrint('SavedItemsViewModel: Item removed successfully');
         // Remove the item from the local list without fetching again
@@ -66,7 +68,7 @@ class SavedItemsViewModel extends LoadingViewModel {
       } else {
         debugPrint('SavedItemsViewModel: Failed to remove item');
       }
-      
+
       return result;
     } catch (e) {
       debugPrint('Error in unsaveItem: ${e.toString()}');

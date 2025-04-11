@@ -24,8 +24,9 @@ class ProfileHeader extends StatelessWidget {
   });
 
   Widget _buildProfileImage(BuildContext context) {
-    final imageVersion = Provider.of<ProfileViewModel>(context, listen: false).imageVersion;
-    
+    final imageVersion =
+        Provider.of<ProfileViewModel>(context, listen: false).imageVersion;
+
     if (profilePicture == null || profilePicture!.isEmpty) {
       return CircleAvatar(
         radius: 65,
@@ -33,12 +34,12 @@ class ProfileHeader extends StatelessWidget {
         child: const Icon(Icons.person, size: 65, color: Colors.white),
       );
     }
-    
+
     // Prepend the base URL if it's a static file path
     final fullImageUrl = profilePicture!.startsWith('/static/')
         ? '${dio.options.baseUrl}$profilePicture?v=$imageVersion'
         : '$profilePicture?v=$imageVersion';
-    
+
     return FutureBuilder<ImageProvider>(
       future: Provider.of<ProfileRepository>(context, listen: false)
           .fetchImageProvider(fullImageUrl),

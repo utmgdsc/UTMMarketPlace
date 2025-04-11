@@ -8,8 +8,9 @@ class NavProfileImage extends StatelessWidget {
   const NavProfileImage({super.key});
 
   Widget _buildProfileImage(BuildContext context, String? profilePicture) {
-    final imageVersion = Provider.of<ProfileViewModel>(context, listen: false).imageVersion;
-    
+    final imageVersion =
+        Provider.of<ProfileViewModel>(context, listen: false).imageVersion;
+
     if (profilePicture == null || profilePicture.isEmpty) {
       return CircleAvatar(
         radius: 13,
@@ -17,12 +18,12 @@ class NavProfileImage extends StatelessWidget {
         child: const Icon(Icons.person, size: 13, color: Colors.white),
       );
     }
-    
+
     // Prepend the base URL if it's a static file path
     final fullImageUrl = profilePicture.startsWith('/static/')
         ? '${dio.options.baseUrl}$profilePicture?v=$imageVersion'
         : '$profilePicture?v=$imageVersion';
-    
+
     return FutureBuilder<ImageProvider>(
       future: Provider.of<ProfileRepository>(context, listen: false)
           .fetchImageProvider(fullImageUrl),

@@ -114,16 +114,17 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
         backgroundColor: const Color(0xFF1E3765),
       );
     }
-    
+
     // If we have a current image URL but no local file
     if (widget.currentImageUrl != null && widget.currentImageUrl!.isNotEmpty) {
-      final imageVersion = Provider.of<ProfileViewModel>(context, listen: false).imageVersion;
-      
+      final imageVersion =
+          Provider.of<ProfileViewModel>(context, listen: false).imageVersion;
+
       // Prepend the base URL if it's a static file path
       final fullImageUrl = widget.currentImageUrl!.startsWith('/static/')
           ? '${dio.options.baseUrl}${widget.currentImageUrl}?v=$imageVersion'
           : '${widget.currentImageUrl}?v=$imageVersion';
-          
+
       return FutureBuilder<ImageProvider>(
         future: Provider.of<ProfileRepository>(context, listen: false)
             .fetchImageProvider(fullImageUrl),
@@ -152,7 +153,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
         },
       );
     }
-    
+
     // If we have no image
     return CircleAvatar(
       radius: 50,

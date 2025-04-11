@@ -7,14 +7,16 @@ class SavedItemsRepository {
   Future<SavedItemsModel> fetchData() async {
     try {
       final response = await dio.get('/saved_items');
-      
-      debugPrint('SavedItemsRepository response status: ${response.statusCode}');
-      
+
+      debugPrint(
+          'SavedItemsRepository response status: ${response.statusCode}');
+
       if (response.statusCode == 200) {
         return SavedItemsModel.fromJson(response.data);
       } else {
         debugPrint('Failed to load saved items: ${response.statusMessage}');
-        throw Exception('Failed to load saved items: ${response.statusMessage}');
+        throw Exception(
+            'Failed to load saved items: ${response.statusMessage}');
       }
     } on DioException catch (e) {
       debugPrint('DioException in fetchData: ${e.message}');

@@ -24,7 +24,7 @@ class _SavedItemsViewState extends State<SavedItemsView> {
       viewModel.fetchData();
     });
   }
-  
+
   Widget _buildErrorState(String errorMessage) {
     return Center(
       child: Padding(
@@ -52,7 +52,10 @@ class _SavedItemsViewState extends State<SavedItemsView> {
               errorMessage,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 179),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 179),
               ),
               textAlign: TextAlign.center,
               maxLines: 3,
@@ -102,7 +105,7 @@ class _SavedItemsViewState extends State<SavedItemsView> {
           if (savedItemsViewModel.isLoading) {
             return const SavedItemsLoadingComponent();
           }
-          
+
           if (savedItemsViewModel.errorMessage.isNotEmpty) {
             return _buildErrorState(savedItemsViewModel.errorMessage);
           }
@@ -115,14 +118,20 @@ class _SavedItemsViewState extends State<SavedItemsView> {
                   Icon(
                     Icons.favorite_border,
                     size: 80,
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 128),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 128),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No saved items',
                     style: TextStyle(
                       fontSize: 18,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 179),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 179),
                     ),
                   ),
                 ],
