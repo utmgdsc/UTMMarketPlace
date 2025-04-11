@@ -44,36 +44,7 @@ class _ProfileState extends State<Profile> {
 
         final profile = profileViewModel.profile;
         if (profile == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Error loading profile',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                if (profileViewModel.errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      profileViewModel.errorMessage!,
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    profileViewModel.fetchUserProfileById(widget.userId);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E3765),
-                  ),
-                  child: const Text('Try Again'),
-                ),
-              ],
-            ),
-          );
+          return _buildProfileLoadingError(profileViewModel);
         }
 
         return SingleChildScrollView(
@@ -102,6 +73,39 @@ class _ProfileState extends State<Profile> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildProfileLoadingError(ProfileViewModel vm) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'Error loading profile',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          if (vm.errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                vm.errorMessage!,
+                style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              vm.fetchUserProfileById(widget.userId);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1E3765),
+            ),
+            child: const Text('Try Again'),
+          ),
+        ],
+      ),
     );
   }
 
