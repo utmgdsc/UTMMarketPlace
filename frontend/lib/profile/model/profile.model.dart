@@ -7,7 +7,7 @@ class ProfileModel {
   final int ratingCount;
   final String? location;
   final List<String>? savedPosts;
-  final List<Review> reviews;
+  List<Review> reviews;
   final List<ListingItem> listings;
 
   ProfileModel({
@@ -33,9 +33,26 @@ class ProfileModel {
       ratingCount: json['rating_count'] ?? 0,
       location: json['location'],
       savedPosts: (json['saved_posts'] as List?)?.cast<String>(),
-      reviews: [], // Reviews are not part of the current API response
+      reviews: [],
       listings: [], // Listings are not part of the current API response
     );
+  }
+
+  Future<void> fetchReviews(Map<String, dynamic> reviewsJson) async {
+    try {
+      reviews = (reviewsJson['reviews'] as List<dynamic>)
+          .map((reviewJson) => Review(
+                reviewerId: reviewJson['reviewer_id'],
+                reviewerName: '', // Name is not provided in the response
+                reviewerImage: '', // Image is not provided in the response
+                rating: reviewJson['rating'].toDouble(),
+                comment: reviewJson['comment'] ?? '',
+                date: DateTime.parse(reviewJson['timestamp']),
+              ))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch and set reviews: $e');
+    }
   }
 }
 

@@ -33,6 +33,9 @@ class ProfileViewModel extends LoadingViewModel {
       isLoading = true;
       notifyListeners();
       final result = await repo.fetchData(userId);
+
+      final reviews = await repo.fetchReviews(userId);
+      result.fetchReviews(reviews);
       _profileModel = result;
       notifyListeners();
     } catch (e) {
@@ -52,6 +55,9 @@ class ProfileViewModel extends LoadingViewModel {
       _imageVersion++;
 
       await fetchData(_profileModel!.id);
+
+      final reviews = await repo.fetchReviews(_profileModel!.id);
+      _profileModel?.fetchReviews(reviews);
     } catch (e) {
       debugPrint('Error refreshing user data: ${e.toString()}');
     }

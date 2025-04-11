@@ -240,6 +240,8 @@ class _ProfileState extends State<Profile> {
         leading: CircleAvatar(
           radius: 24,
           backgroundImage: NetworkImage(review.reviewerImage),
+          onBackgroundImageError: (_, __) => setState(() {}),
+          child: Icon(Icons.person, size: 24),
         ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
