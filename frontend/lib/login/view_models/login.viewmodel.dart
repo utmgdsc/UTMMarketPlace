@@ -55,6 +55,7 @@ class LoginViewModel extends LoadingViewModel {
         case 200:
           final token = response.data['access_token'];
           await storeToken(token);
+          storeEmail(email!);
           if (!isTokenExpired(token)) {
             debugPrint('Token is valid');
           } else {
