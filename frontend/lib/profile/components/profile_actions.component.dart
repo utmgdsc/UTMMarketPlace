@@ -326,15 +326,16 @@ class ProfileActions extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: savedItemsButton,
           ),
-        if (!isOwnProfile)
+        if (!isOwnProfile) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: addMessageButton,
           ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: addReviewButton,
-        ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: addReviewButton,
+          ),
+        ],
         const SizedBox(height: 4),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
