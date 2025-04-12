@@ -5,16 +5,19 @@ import 'package:utm_marketplace/messages/components/message_bubble.component.dar
 import 'package:utm_marketplace/messages/view_models/message.viewmodel.dart';
 import 'package:utm_marketplace/shared/components/loading.component.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:async';
 import 'package:utm_marketplace/shared/dio/dio.dart';
 
 class ConversationDetailView extends StatefulWidget {
   final String conversationId;
+  final String recipientId;
   final String username;
   final String userImageUrl;
 
   const ConversationDetailView({
     super.key,
     required this.username,
+    required this.recipientId,
     required this.userImageUrl,
     required this.conversationId,
   });
@@ -27,13 +30,20 @@ class _ConversationDetailViewState extends State<ConversationDetailView> {
   late MessageViewModel viewModel;
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  ImageProvider? _cachedImage;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     viewModel = Provider.of<MessageViewModel>(context, listen: false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      viewModel.fetchConversation(widget.conversationId);
+      viewModel.fetchConversation(widget.conversationId, false);
+    });
+
+    _refreshTimer = Timer.periodic(const Duration(seconds: 7), (_) {
+      debugPrint("Refreshing conversation data...");
+      viewModel.fetchConversation(widget.conversationId, true);
     });
   }
 
@@ -41,6 +51,7 @@ class _ConversationDetailViewState extends State<ConversationDetailView> {
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _refreshTimer?.cancel();
     super.dispose();
   }
 
@@ -58,10 +69,12 @@ class _ConversationDetailViewState extends State<ConversationDetailView> {
     if (_messageController.text.trim().isEmpty) return;
 
     viewModel.messageText = _messageController.text;
-    final success = await viewModel.sendMessage();
+    debugPrint('Recipient ID: ${widget.recipientId}');
+    final success = await viewModel.sendMessage(widget.recipientId);
 
     if (success) {
       _messageController.clear();
+      await viewModel.fetchConversation(widget.conversationId, true);
       _scrollToBottom();
     }
   }
@@ -191,11 +204,16 @@ class _ConversationDetailViewState extends State<ConversationDetailView> {
   }
 
   Future<ImageProvider?> _fetchImage(String url) async {
+    if (_cachedImage != null) {
+      return _cachedImage;
+    }
+
     final response = await dio.get(
       url,
       options: Options(responseType: ResponseType.bytes),
     );
-    return MemoryImage(response.data);
+    _cachedImage = MemoryImage(response.data);
+    return _cachedImage;
   }
 
   Widget buildImageWidget(String? imageUrl) {
@@ -204,7 +222,13 @@ class _ConversationDetailViewState extends State<ConversationDetailView> {
         future: _fetchImage(imageUrl),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return buildLoadingImage();
+            if (_cachedImage != null) {
+              return CircleAvatar(
+                backgroundImage: _cachedImage,
+              );
+            } else {
+              return buildLoadingImage();
+            }
           } else if (snapshot.hasError) {
             debugPrint('Error fetching image: ${snapshot.error}');
             return buildPlaceholderImage();

@@ -78,6 +78,7 @@ class _MessagesViewState extends State<MessagesView> {
               extra: {
               'username': conversation.userName,
               'userImageUrl': conversation.userImageUrl,
+              'recipientId': viewModel.getRecipientId(conversation),
               },
             );
             },

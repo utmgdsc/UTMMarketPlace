@@ -63,7 +63,7 @@ class Message {
   final DateTime timestamp;
   final String senderId;
   final String recipientId;
-  final bool isFromCurrentUser;
+  bool isFromCurrentUser;
 
   Message({
     required this.id,
@@ -71,7 +71,7 @@ class Message {
     required this.timestamp,
     required this.senderId,
     required this.recipientId,
-    this.isFromCurrentUser = false,
+    required this.isFromCurrentUser,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -81,6 +81,7 @@ class Message {
       timestamp: DateTime.parse(json['timestamp']),
       senderId: json['sender_id'],
       recipientId: json['recipient_id'],
+      isFromCurrentUser: json['is_from_current_user'] == true,
     );
   }
 }

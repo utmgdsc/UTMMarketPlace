@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:utm_marketplace/messages/model/message.model.dart';
 import 'package:utm_marketplace/shared/dio/dio.dart';
+import 'package:utm_marketplace/shared/secure_storage/secure_storage.dart';
 
 class MessageRepository {
   Future<MessageModel> fetchConversations(String userId) async {
@@ -37,10 +40,22 @@ class MessageRepository {
       final response = await dio.get('/messages',
           queryParameters: {'conversation_id': conversationId});
 
+      final token = await secureStorage.read(key: 'jwt_token');
+
+      if (token == null) {
+        throw Exception('User is not authenticated');
+      }
+
+      final userId = _getUserIdFromToken(token);
+
       debugPrint('Response: ${response.data}');
       if (response.statusCode == 200) {
         final messages = (response.data['messages'] as List)
-            .map((msg) => Message.fromJson(msg))
+            .map((msg) {
+              final message = Message.fromJson(msg);
+              message.isFromCurrentUser = message.senderId == userId;
+              return message;
+            })
             .toList();
         return messages;
       } else {
@@ -51,12 +66,12 @@ class MessageRepository {
     }
   }
 
-  Future<bool> sendMessage(String conversationId, String content) async {
+  Future<bool> sendMessage(String recipientId, String content) async {
     try {
       final response = await dio.post(
         '/messages',
         data: {
-          'conversation_id': conversationId,
+          'recipient_id': recipientId,
           'content': content,
         },
       );
@@ -70,5 +85,25 @@ class MessageRepository {
     } catch (e) {
       throw Exception('Failed to send message: $e');
     }
+  }
+  
+  String _getUserIdFromToken(String token) {
+    // Decode JWT token (format: header.payload.signature)
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token format');
+    }
+
+    // Decode the payload (middle part)
+    String normalizedPayload = base64Url.normalize(parts[1]);
+    final payloadMap =
+        json.decode(utf8.decode(base64Url.decode(normalizedPayload)));
+    final userId = payloadMap['id'];
+
+    if (userId == null) {
+      throw Exception('User ID not found in token');
+    }
+
+    return userId;
   }
 }

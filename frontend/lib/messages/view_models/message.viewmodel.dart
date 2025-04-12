@@ -75,27 +75,33 @@ class MessageViewModel extends LoadingViewModel {
       ..sort((a, b) => b.lastMessageTime.compareTo(a.lastMessageTime));
   }
 
-  Future<void> fetchConversation(String conversationId) async {
+  Future<void> fetchConversation(String conversationId, bool pauseLoad) async {
     try {
-      isLoading = true;
-      _currentConversation = await repo.fetchConversation(conversationId) as List<Message>?;
+      if (!pauseLoad) {
+        isLoading = true;
+      }
+      _currentConversation =
+          await repo.fetchConversation(conversationId) as List<Message>?;
       notifyListeners();
     } catch (e) {
-      debugPrint('Error in fetchConversation: ${e.toString()} conversationId: $conversationId');
+      debugPrint(
+          'Error in fetchConversation: ${e.toString()} conversationId: $conversationId');
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<bool> sendMessage() async {
-    if (_messageText.trim().isEmpty || _currentConversation == null) {
+  Future<bool> sendMessage(String recipientId) async {
+    if (_messageText.trim().isEmpty) {
       return false;
     }
 
+    debugPrint('Sending message: $_messageText to recipient: $recipientId');
+
     try {
       final success = await repo.sendMessage(
-        _sortedConversations.firstWhere((conv) => conv.messages == _currentConversation).id,
+        recipientId,
         _messageText.trim(),
       );
 
@@ -110,4 +116,60 @@ class MessageViewModel extends LoadingViewModel {
       return false;
     }
   }
+
+  String getRecipientId(Conversation conversation) {
+    final userId = conversation.userId;
+    final parts = conversation.id.split('_');
+    final recipientId = parts.first == userId ? parts.last : parts.first;
+    debugPrint(
+        'Recipient ID: $recipientId, User ID: $userId, Conversation ID: ${conversation.id}');
+    return recipientId;
+  }
+
+  // Future<bool> sendMessage() async {
+  // if (_messageText.trim().isEmpty || _currentConversation == null) {
+  //   debugPrint('Message text is empty or no current conversation selected.');
+  //   return false;
+  // }
+
+  // try {
+  //   // Find the conversation ID
+  //   debugPrint('Current conversation: $_currentConversation');
+  //   debugPrint('Sorted conversations: $_sortedConversations');
+  //   final conversation = _sortedConversations.firstWhere(
+  //     (conv) => conv.messages.map((msg) => msg.id).toSet().containsAll(
+  //       _currentConversation!.map((msg) => msg.id),
+  //       ),
+  //     orElse: () {
+  //     debugPrint('No matching conversation found for the current messages.');
+  //     return Conversation(
+  //       id: '',
+  //       messages: [],
+  //       lastMessageTime: DateTime.now(),
+  //       userId: '',
+  //       userName: '',
+  //       userImageUrl: '',
+  //     );
+  //     },
+  //   );
+
+  //   final conversationId = conversation.id;
+
+  //   // Send the message
+  //   final success = await repo.sendMessage(
+  //     conversationId,
+  //     _messageText.trim(),
+  //   );
+
+  //   if (success) {
+  //     _messageText = '';
+  //     notifyListeners();
+  //   }
+
+  //   return success;
+  // } catch (e) {
+  //   debugPrint('Error in sendMessage: ${e.toString()}');
+  //   return false;
+  // }
+  // }
 }
