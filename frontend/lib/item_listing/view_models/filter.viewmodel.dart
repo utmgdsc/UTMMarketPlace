@@ -82,6 +82,6 @@ class FilterViewModel extends LoadingViewModel {
       upperPrice: _upperPrice,
       campus: _campus,
     );
-    listingViewModel.setFilters(filters);
+    listingViewModel.setFiltersAndGetResults(filters);
   }
 }

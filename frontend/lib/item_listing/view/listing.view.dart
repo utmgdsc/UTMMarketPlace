@@ -19,7 +19,6 @@ class _ListingViewState extends State<ListingView> {
   final double hPad = 16.0; // Horizontal padding
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
 
   @override
   void initState() {
@@ -27,20 +26,14 @@ class _ListingViewState extends State<ListingView> {
     viewModel = Provider.of<ListingViewModel>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      viewModel.fetchInitialListings(limit: 6);
+      viewModel.setSearchQueryAndGetResults("");
     });
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent) {
-        viewModel.fetchMoreListings(limit: 6);
+        viewModel.loadMoreListingsBasedOnCurrentSearchParams(limit: 6);
       }
-    });
-
-    _searchController.addListener(() {
-      setState(() {
-        _searchQuery = _searchController.text;
-      });
     });
   }
 
@@ -71,14 +64,8 @@ class _ListingViewState extends State<ListingView> {
     );
   }
 
-  Widget _buildItemGrid(ListingViewModel listingViewModel, String searchQuery) {
-    final searchItems = searchQuery.isNotEmpty
-        ? listingViewModel.items
-            .where((item) =>
-                item.title.toLowerCase().contains(searchQuery.toLowerCase()))
-            .toList()
-        : listingViewModel.items;
-
+  Widget _buildItemGrid(ListingViewModel listingViewModel) {
+    final searchItems = listingViewModel.items;
     return Padding(
       padding: EdgeInsets.fromLTRB(hPad, 8.0, hPad, 8.0),
       child: GridView.builder(
@@ -160,7 +147,7 @@ class _ListingViewState extends State<ListingView> {
           Expanded(
             child: TextField(
               controller: _searchController,
-              onSubmitted: viewModel.searchForRelevantListings,
+              onSubmitted: viewModel.setSearchQueryAndGetResults,
               decoration: InputDecoration(
                 hintText: 'Search',
                 hintStyle: TextStyle(
@@ -223,21 +210,7 @@ class _ListingViewState extends State<ListingView> {
                   return ListView(
                     controller: _scrollController,
                     children: [
-                      const Padding(
-                        padding:
-                            EdgeInsets.only(left: 16, bottom: 5.0, top: 5.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Trending',
-                            style: TextStyle(
-                              fontSize: 28,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ),
-                      _buildItemGrid(listingViewModel, _searchQuery),
+                      _buildItemGrid(listingViewModel),
                       if (listingViewModel.isLoadingMore)
                         const Padding(
                           padding: EdgeInsets.all(8.0),

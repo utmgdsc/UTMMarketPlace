@@ -83,7 +83,6 @@ class ListingsPostRequest(BaseModel):
     title: str
     price: float
     description: Optional[str] = None
-    seller_id: str
     pictures: List[str]
     category: Optional[str] = None
     condition: str
