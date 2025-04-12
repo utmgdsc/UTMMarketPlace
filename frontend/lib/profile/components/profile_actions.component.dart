@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:utm_marketplace/profile/view_models/profile.viewmodel.dart';
+import 'package:utm_marketplace/messages/repository/message.repository.dart';
 
 class ProfileActions extends StatelessWidget {
   final bool isOwnProfile;
@@ -153,6 +154,113 @@ class ProfileActions extends StatelessWidget {
       ),
     );
 
+    final addMessageButton = ElevatedButton(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            final TextEditingController messageController =
+                TextEditingController();
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: const Text('Start a Conversation'),
+              content: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return SizedBox(
+                    width: MediaQuery.of(context).size.width * 1,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: messageController,
+                          maxLines: 5,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter your message here',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              actions: [
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (messageController.text.isNotEmpty) {
+                        MessageRepository()
+                            .sendMessage(
+                                viewmodel.profile!.id, messageController.text)
+                            .then((_) {
+                          if (context.mounted) {
+                            if (viewmodel.errorMessage != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(viewmodel.errorMessage!),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Review submitted successfully'),
+                                ),
+                              );
+                            }
+                          }
+                        });
+                        Navigator.of(context).pop();
+                        context.push(
+                          '/messages/${viewmodel.conversationId}',
+                          extra: {
+                            'username': viewmodel.profileName,
+                            'userImageUrl': viewmodel.profileImageUrl,
+                            'recipientId': viewmodel.profileId,
+                          },
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please type a message'),
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E3765),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                    child: const Text(
+                      'Submit',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF1E3765),
+        minimumSize: const Size(double.infinity, 45),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25),
+        ),
+      ),
+      child: const Text(
+        'Message User',
+        style: TextStyle(color: Colors.white),
+      ),
+    );
+
     final listingsTab = GestureDetector(
       onTap: () {
         if (!showListings) onToggleView();
@@ -221,8 +329,12 @@ class ProfileActions extends StatelessWidget {
         if (!isOwnProfile)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: addReviewButton,
+            child: addMessageButton,
           ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: addReviewButton,
+        ),
         const SizedBox(height: 4),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),

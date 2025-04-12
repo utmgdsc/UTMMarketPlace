@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:utm_marketplace/profile/model/profile.model.dart';
 import 'package:utm_marketplace/profile/repository/profile.repository.dart';
+import 'package:utm_marketplace/shared/secure_storage/secure_storage.dart';
 import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -13,6 +14,10 @@ class ProfileViewModel extends LoadingViewModel {
   bool _isUpdating = false;
   String? _errorMessage;
   int _imageVersion = 0;
+  String profileName = '';
+  String profileImageUrl = '';
+  String profileId = '';
+  String conversationId = '';
 
   ProfileViewModel({required this.repo});
 
@@ -27,8 +32,34 @@ class ProfileViewModel extends LoadingViewModel {
     notifyListeners();
   }
 
+  String _getUserIdFromToken(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token format');
+    }
+
+    String normalizedPayload = base64Url.normalize(parts[1]);
+    final payloadMap =
+        json.decode(utf8.decode(base64Url.decode(normalizedPayload)));
+    final userId = payloadMap['id'];
+
+    if (userId == null) {
+      throw Exception('User ID not found in token');
+    }
+
+    return userId;
+  }
+
   Future<void> fetchUserProfileById(String userId) async {
     try {
+      final token = await secureStorage.read(key: 'jwt_token');
+
+      if (token == null) {
+        throw Exception('User is not authenticated');
+      }
+
+      final currentUserId = _getUserIdFromToken(token);
+
       _errorMessage = null;
       isLoading = true;
       notifyListeners();
@@ -37,6 +68,13 @@ class ProfileViewModel extends LoadingViewModel {
       final reviews = await repo.fetchReviews(userId);
       result.fetchReviews(reviews);
       _profileModel = result;
+      profileName = _profileModel?.displayName ?? '';
+      profileImageUrl = _profileModel?.profilePicture ?? '';
+      profileId = _profileModel?.id ?? '';
+      
+      final sortedIds = [currentUserId, userId];
+      sortedIds.sort((a, b) => a.compareTo(b));
+      conversationId = sortedIds.join('_');
       notifyListeners();
     } catch (e) {
       debugPrint('Error in fetchData: ${e.toString()}');
@@ -157,6 +195,7 @@ class ProfileViewModel extends LoadingViewModel {
       _imageVersion++;
 
       _profileModel = result;
+      profileName = result.displayName;
       notifyListeners();
       return true;
     } catch (e) {
