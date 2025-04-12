@@ -160,7 +160,7 @@ async def get_search(
             # Full text search
             search_stage = {
                 "$search": {
-                    "index": "Full_text_index_listings",
+                    "index": "full_text_index_listings_11APR2025",
                     "text": {
                         "query": query,
                         "path": {
@@ -171,7 +171,7 @@ async def get_search(
             }
         else:
             search_stage = {"$search": {
-                "index": "Full_text_index_listings",
+                "index": "full_text_index_listings_11APR2025",
                 # This is always true; essentially just gets all documents
                 "exists": {"path": "_id"},
             }}
@@ -378,7 +378,7 @@ async def get_listings(
             print("GOT Query", query)
             search_stage = {
                 "$search": {
-                    "index": "Full_text_index_listings",
+                    "index": "full_text_index_listings_11APR2025",
                     "text": {
                         "query": query,
                         "path": {
@@ -391,7 +391,7 @@ async def get_listings(
             print("NO QUERY")
             search_stage = {
                 "$search": {
-                    "index": "Full_text_index_listings",
+                    "index": "full_text_index_listings_11APR2025",
                     # This is always true; essentially just gets all documents
                     "exists": {"path": "_id"},
                 }
@@ -795,11 +795,17 @@ async def post_reviews(
                     status_code=404, detail="You have already left the user a review")
 
         # check if the seller and the current user have a conversation
-        conversation_id = "_".join(sorted([current_user["id"], body.seller_id]))
+        try:
+            user_id = ObjectId(current_user["id"])
+            seller_id = ObjectId(body.seller_id)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid user or seller ID format.")
+
+        conversation_id = "_".join(sorted([str(user_id), str(seller_id)]))
         conversation = await messages_collection.find_one({"conversation_id": conversation_id})
         if not conversation:
             raise HTTPException(
-            status_code=403, detail="You cannot leave a review without having a conversation with the seller")
+                status_code=403, detail="You cannot leave a review without having a conversation with the seller")
 
         review = {
             "seller_id": ObjectId(body.seller_id),
@@ -825,6 +831,9 @@ async def post_reviews(
 
         return ReviewPostResponse(message="Review submitted successfully")
 
+    except HTTPException as e:
+        raise HTTPException(
+            status_code=e.status_code, detail=f"Error: {e.detail}")
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error: {str(e)}")

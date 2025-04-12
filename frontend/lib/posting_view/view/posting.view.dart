@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/posting_view/view_models/posting.viewmodel.dart';
 import 'package:utm_marketplace/shared/components/loading.component.dart';
@@ -214,6 +215,22 @@ class _PostingViewState extends State<PostingView> {
               ],
             );
 
+            final sellerProfileButton = ElevatedButton(
+              onPressed: () {
+                context.push('/profile/${item.sellerId}');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              child: const Text(
+                'View Seller Profile',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -231,6 +248,8 @@ class _PostingViewState extends State<PostingView> {
                   ),
                   const SizedBox(height: 16.0),
                   itemDescription,
+                  const SizedBox(height: 16.0),
+                  sellerProfileButton,
                 ],
               ),
             );

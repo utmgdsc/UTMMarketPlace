@@ -105,6 +105,41 @@ class ProfileRepository {
     }
   }
 
+  Future<int> submitReview(String sellerId, String review, int rating) async {
+    try {
+      // Get the JWT token from secure storage
+      final token = await secureStorage.read(key: 'jwt_token');
+
+      if (token == null) {
+        throw Exception('User is not authenticated');
+      }
+
+      // Prepare review data
+      final reviewData = {
+        'seller_id': sellerId,
+        'comment': review,
+        'rating': rating,
+      };
+
+      // Make API call to submit the review
+      final response = await dio.post(
+        '/reviews',
+        data: reviewData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      return response.statusCode ?? 0;
+    } catch (e) {
+      debugPrint('Error submitting review: $e');
+      debugPrint("Error code: ${e is DioException ? (e).response?.statusCode : 0}");
+      return e is DioException ? (e).response?.statusCode ?? 0 : 0;
+    }
+  }
+
   Future<ProfileModel> updateProfile({
     required String userId,
     String? displayName,

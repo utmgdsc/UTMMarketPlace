@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:utm_marketplace/profile/view_models/profile.viewmodel.dart';
 
 class ProfileActions extends StatelessWidget {
   final bool isOwnProfile;
   final VoidCallback onToggleView;
   final bool showListings;
+  final ProfileViewModel viewmodel;
 
   const ProfileActions({
     super.key,
+    required this.viewmodel,
     required this.isOwnProfile,
     required this.onToggleView,
     required this.showListings,
@@ -26,6 +29,126 @@ class ProfileActions extends StatelessWidget {
       ),
       child: const Text(
         'Saved Items',
+        style: TextStyle(color: Colors.white),
+      ),
+    );
+
+    final addReviewButton = ElevatedButton(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            final TextEditingController reviewController =
+                TextEditingController();
+            int selectedRating = 0;
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: const Text('Write Review'),
+              content: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return SizedBox(
+                    width: MediaQuery.of(context).size.width * 1,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(5, (index) {
+                            return IconButton(
+                              icon: Icon(
+                                selectedRating > index
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                color: Colors.amber,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  selectedRating = index + 1;
+                                });
+                              },
+                            );
+                          }),
+                        ),
+                        TextField(
+                          controller: reviewController,
+                          maxLines: 5,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter your review here',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              actions: [
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (selectedRating > 0) {
+                        viewmodel
+                            .submitReview(
+                          reviewController.text,
+                          selectedRating,
+                        )
+                            .then((_) {
+                          if (context.mounted) {
+                            if (viewmodel.errorMessage != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(viewmodel.errorMessage!),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Review submitted successfully'),
+                                ),
+                              );
+                            }
+                          }
+                        });
+                        Navigator.of(context).pop();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select a rating'),
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E3765),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                    child: const Text(
+                      'Submit',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF1E3765),
+        minimumSize: const Size(double.infinity, 45),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25),
+        ),
+      ),
+      child: const Text(
+        'Add Review',
         style: TextStyle(color: Colors.white),
       ),
     );
@@ -94,6 +217,11 @@ class ProfileActions extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: savedItemsButton,
+          ),
+        if (!isOwnProfile)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: addReviewButton,
           ),
         const SizedBox(height: 4),
         Padding(

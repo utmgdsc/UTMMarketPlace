@@ -89,6 +89,7 @@ class _ProfileState extends State<Profile> {
               ),
               const SizedBox(height: 16),
               ProfileActions(
+                viewmodel: profileViewModel,
                 isOwnProfile: widget.isOwnProfile,
                 onToggleView: profileViewModel.toggleView,
                 showListings: profileViewModel.showListings,

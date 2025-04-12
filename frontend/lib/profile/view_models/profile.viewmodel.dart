@@ -63,6 +63,30 @@ class ProfileViewModel extends LoadingViewModel {
     }
   }
 
+  Future<void> submitReview(String review, int rating) async {
+    if (_profileModel == null) return;
+    int result = 0;
+
+    try {
+      _errorMessage = null;
+      isLoading = true;
+      notifyListeners();
+
+      result = await repo.submitReview(_profileModel!.id, review, rating);
+      if (result == 403) {
+        _errorMessage = "You must have spoken to the seller to leave a review.";
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error in submitReview: ${e.toString()} $result');
+      _errorMessage = e.toString();
+      notifyListeners();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> updateProfile({
     required String userId,
     String? displayName,
