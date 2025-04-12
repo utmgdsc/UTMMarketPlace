@@ -177,6 +177,11 @@ async def get_search(
                     "path": {
                         "wildcard": "*",
                     },
+                    "fuzzy": {
+                        "maxEdits": 2,
+                        "prefixLength": 0,
+                        "maxExpansions": 50
+                    }
                 },
                 "sort": sort_field,
             },
