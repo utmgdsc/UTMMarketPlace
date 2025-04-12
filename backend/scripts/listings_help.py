@@ -45,6 +45,18 @@ async def create_listings():
         }
         requests.post("http://127.0.0.1:8000/listings", headers=headers, json=data)
 
+    for i in range(20):
+        data = {
+                "title": f"something else {i}",
+                "price": f"{100 + i}",
+                "description": f"yes {i}",
+                "pictures": [f"{picture}"],
+                "condition": "Used" if i % 2 == 0 else "New",
+                "campus": "Mississauga" if i % 3 == 0 else "Scarborough",
+        }
+        requests.post("http://127.0.0.1:8000/listings", headers=headers, json=data)
+
+
     # Close connection
     client.close()
 
