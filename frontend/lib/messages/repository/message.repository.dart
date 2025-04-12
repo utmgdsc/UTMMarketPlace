@@ -1,31 +1,74 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import 'package:utm_marketplace/messages/model/message.model.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
 
 class MessageRepository {
-  Future<MessageModel> fetchData() async {
-    await Future.delayed(const Duration(seconds: 1));
+  Future<MessageModel> fetchConversations(String userId) async {
+    try {
+      final response =
+          await dio.get('/conversations', queryParameters: {'userid': userId});
 
-    final jsonString = await rootBundle.loadString('assets/data/messages.json');
-    final jsonData = json.decode(jsonString);
-    return MessageModel.fromJson(jsonData);
+      debugPrint('Response: ${response.data}');
+      if (response.statusCode == 200) {
+        final conversations = await Future.wait(
+          (response.data['conversations'] as List).map((conv) async {
+            final messages = await fetchConversation(conv['conversation_id']);
+            return Conversation(
+              id: conv['conversation_id'],
+              userId: userId,
+              userName: conv['other_user_name'],
+              userImageUrl: conv['other_user_profile_picture'],
+              messages: messages,
+              lastMessageTime: DateTime.parse(conv['last_timestamp']),
+            );
+          }),
+        );
+        return MessageModel(conversations: conversations);
+      } else {
+        throw Exception('Failed to fetch conversations');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch conversations: $e');
+    }
   }
 
-  Future<Conversation> fetchConversation(String conversationId) async {
-    await Future.delayed(const Duration(seconds: 1));
+  Future<List<Message>> fetchConversation(String conversationId) async {
+    try {
+      final response = await dio.get('/messages',
+          queryParameters: {'conversation_id': conversationId});
 
-    final jsonString = await rootBundle.loadString('assets/data/messages.json');
-    final jsonData = json.decode(jsonString);
-
-    final conversations = (jsonData['conversations'] as List)
-        .map((conv) => Conversation.fromJson(conv))
-        .toList();
-
-    return conversations.firstWhere((conv) => conv.id == conversationId);
+      debugPrint('Response: ${response.data}');
+      if (response.statusCode == 200) {
+        final messages = (response.data['messages'] as List)
+            .map((msg) => Message.fromJson(msg))
+            .toList();
+        return messages;
+      } else {
+        throw Exception('Failed to fetch messages');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch messages: $e');
+    }
   }
 
   Future<bool> sendMessage(String conversationId, String content) async {
-    await Future.delayed(const Duration(seconds: 1));
-    return true;
+    try {
+      final response = await dio.post(
+        '/messages',
+        data: {
+          'conversation_id': conversationId,
+          'content': content,
+        },
+      );
+
+      debugPrint('Response: ${response.data}');
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Exception('Failed to send message');
+      }
+    } catch (e) {
+      throw Exception('Failed to send message: $e');
+    }
   }
 }

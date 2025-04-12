@@ -131,6 +131,8 @@ class MessageGetResponseItem(BaseModel):
 
 class Conversation(BaseModel):
     conversation_id: Optional[str] = None
+    other_user_name: Optional[str] = None
+    other_user_profile_picture: Optional[str] = None
     participant_ids: Optional[List[str]] = None
     last_message: Optional[str] = None
     last_timestamp: Optional[datetime] = None

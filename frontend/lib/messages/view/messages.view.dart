@@ -72,9 +72,15 @@ class _MessagesViewState extends State<MessagesView> {
         final conversation = conversations[index];
         return ConversationListItem(
           conversation: conversation,
-          onTap: () {
-            context.push('/messages/${conversation.id}');
-          },
+            onTap: () {
+            context.push(
+              '/messages/${conversation.id}',
+              extra: {
+              'username': conversation.userName,
+              'userImageUrl': conversation.userImageUrl,
+              },
+            );
+            },
         );
       },
     );

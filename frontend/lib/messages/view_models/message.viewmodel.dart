@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:utm_marketplace/messages/model/message.model.dart';
 import 'package:utm_marketplace/messages/repository/message.repository.dart';
+import 'package:utm_marketplace/shared/secure_storage/secure_storage.dart';
 import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
 
 class MessageViewModel extends LoadingViewModel {
@@ -14,8 +17,8 @@ class MessageViewModel extends LoadingViewModel {
   List<Conversation> _sortedConversations = [];
   List<Conversation> get sortedConversations => _sortedConversations;
 
-  Conversation? _currentConversation;
-  Conversation? get currentConversation => _currentConversation;
+  List<Message>? _currentConversation;
+  List<Message>? get currentConversation => _currentConversation;
 
   String _messageText = '';
   String get messageText => _messageText;
@@ -25,10 +28,38 @@ class MessageViewModel extends LoadingViewModel {
     notifyListeners();
   }
 
+  String _getUserIdFromToken(String token) {
+    // Decode JWT token (format: header.payload.signature)
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token format');
+    }
+
+    // Decode the payload (middle part)
+    String normalizedPayload = base64Url.normalize(parts[1]);
+    final payloadMap =
+        json.decode(utf8.decode(base64Url.decode(normalizedPayload)));
+    final userId = payloadMap['id'];
+
+    if (userId == null) {
+      throw Exception('User ID not found in token');
+    }
+
+    return userId;
+  }
+
   Future<void> fetchData() async {
     try {
+      final token = await secureStorage.read(key: 'jwt_token');
+
+      if (token == null) {
+        throw Exception('User is not authenticated');
+      }
+
+      final targetUserId = _getUserIdFromToken(token);
+
       isLoading = true;
-      _messageModel = await repo.fetchData();
+      _messageModel = await repo.fetchConversations(targetUserId);
       _sortConversations();
       notifyListeners();
     } catch (e) {
@@ -47,10 +78,10 @@ class MessageViewModel extends LoadingViewModel {
   Future<void> fetchConversation(String conversationId) async {
     try {
       isLoading = true;
-      _currentConversation = await repo.fetchConversation(conversationId);
+      _currentConversation = await repo.fetchConversation(conversationId) as List<Message>?;
       notifyListeners();
     } catch (e) {
-      debugPrint('Error in fetchConversation: ${e.toString()}');
+      debugPrint('Error in fetchConversation: ${e.toString()} conversationId: $conversationId');
     } finally {
       isLoading = false;
       notifyListeners();
@@ -64,7 +95,7 @@ class MessageViewModel extends LoadingViewModel {
 
     try {
       final success = await repo.sendMessage(
-        _currentConversation!.id,
+        _sortedConversations.firstWhere((conv) => conv.messages == _currentConversation).id,
         _messageText.trim(),
       );
 

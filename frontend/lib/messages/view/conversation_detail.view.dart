@@ -1,15 +1,21 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/messages/components/message_bubble.component.dart';
 import 'package:utm_marketplace/messages/view_models/message.viewmodel.dart';
 import 'package:utm_marketplace/shared/components/loading.component.dart';
 import 'package:go_router/go_router.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
 
 class ConversationDetailView extends StatefulWidget {
   final String conversationId;
+  final String username;
+  final String userImageUrl;
 
   const ConversationDetailView({
     super.key,
+    required this.username,
+    required this.userImageUrl,
     required this.conversationId,
   });
 
@@ -76,13 +82,14 @@ class _ConversationDetailViewState extends State<ConversationDetailView> {
 
             return Row(
               children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundImage: NetworkImage(conversation.userImageUrl),
+                SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: buildImageWidget(widget.userImageUrl),
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  conversation.userName,
+                  widget.username,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -117,12 +124,12 @@ class _ConversationDetailViewState extends State<ConversationDetailView> {
                 child: ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  itemCount: conversation.messages.length,
+                  itemCount: conversation.length,
                   itemBuilder: (context, index) {
-                    final message = conversation.messages[index];
+                    final message = conversation[index];
                     return MessageBubble(
                       message: message,
-                      senderImageUrl: conversation.userImageUrl,
+                      senderImageUrl: widget.userImageUrl,
                     );
                   },
                 ),
@@ -180,6 +187,50 @@ class _ConversationDetailViewState extends State<ConversationDetailView> {
           );
         },
       ),
+    );
+  }
+
+  Future<ImageProvider?> _fetchImage(String url) async {
+    final response = await dio.get(
+      url,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return MemoryImage(response.data);
+  }
+
+  Widget buildImageWidget(String? imageUrl) {
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return FutureBuilder<ImageProvider?>(
+        future: _fetchImage(imageUrl),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return buildLoadingImage();
+          } else if (snapshot.hasError) {
+            debugPrint('Error fetching image: ${snapshot.error}');
+            return buildPlaceholderImage();
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return buildPlaceholderImage();
+          } else {
+            return CircleAvatar(
+              backgroundImage: snapshot.data!,
+            );
+          }
+        },
+      );
+    } else {
+      return buildPlaceholderImage();
+    }
+  }
+
+  Widget buildLoadingImage() {
+    return const CircleAvatar(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget buildPlaceholderImage() {
+    return const CircleAvatar(
+      child: Icon(Icons.person),
     );
   }
 }

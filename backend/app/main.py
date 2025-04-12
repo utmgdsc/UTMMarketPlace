@@ -1048,7 +1048,6 @@ async def get_conversations(userid: str = Query(...),
                     "_id": "$conversation_id",
                     "last_message": {"$first": "$content"},
                     "last_timestamp": {"$first": "$timestamp"},
-
                     "participants": {"$addToSet": "$sender_id"},
                 }
             },
@@ -1070,6 +1069,22 @@ async def get_conversations(userid: str = Query(...),
             if user_id not in convo["participant_ids"]:
                 convo["participant_ids"].append(user_id)
 
+            # Fetch the other participant's profile picture and name
+            other_user_id = None
+            for participant in convo["participant_ids"]:
+                if participant != user_id:
+                    other_user_id = participant
+                    break
+
+            if other_user_id:
+                other_user = await users_collection.find_one({"_id": ObjectId(other_user_id)})
+                if other_user:
+                    convo["other_user_name"] = other_user.get("display_name", "Unknown")
+                    convo["other_user_profile_picture"] = other_user.get("profile_picture", 'N/A')
+                    print(f"Other user: {convo['other_user_name']}")
+                    print(f"Other user profile picture: {convo['other_user_profile_picture']}")
+
+        print(f"Conversations: {result}")
         return ConversationsGetResponse(conversations=result)
 
     except HTTPException as e:

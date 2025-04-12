@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:utm_marketplace/messages/model/message.model.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
 
 class ConversationListItem extends StatelessWidget {
   final Conversation conversation;
@@ -32,7 +34,7 @@ class ConversationListItem extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 28,
-          backgroundImage: NetworkImage(conversation.userImageUrl),
+          child: buildImageWidget(conversation.userImageUrl),
         ),
         if (conversation.isUnread)
           Positioned(
@@ -106,6 +108,50 @@ class ConversationListItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Future<ImageProvider?> _fetchImage(String url) async {
+    final response = await dio.get(
+      url,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return MemoryImage(response.data);
+  }
+
+  Widget buildImageWidget(String? imageUrl) {
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return FutureBuilder<ImageProvider?>(
+        future: _fetchImage(imageUrl),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return buildLoadingImage();
+          } else if (snapshot.hasError) {
+            debugPrint('Error fetching image: ${snapshot.error}');
+            return buildPlaceholderImage();
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return buildPlaceholderImage();
+          } else {
+            return CircleAvatar(
+              backgroundImage: snapshot.data!,
+            );
+          }
+        },
+      );
+    } else {
+      return buildPlaceholderImage();
+    }
+  }
+
+  Widget buildLoadingImage() {
+    return const CircleAvatar(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget buildPlaceholderImage() {
+    return const CircleAvatar(
+      child: Icon(Icons.person),
     );
   }
 }
