@@ -60,6 +60,7 @@ class _ProfileState extends State<Profile> {
               ),
               const SizedBox(height: 16),
               ProfileActions(
+                viewmodel: profileViewModel,
                 isOwnProfile: widget.isOwnProfile,
                 onToggleView: profileViewModel.toggleView,
                 showListings: profileViewModel.showListings,
@@ -244,6 +245,8 @@ class _ProfileState extends State<Profile> {
         leading: CircleAvatar(
           radius: 24,
           backgroundImage: NetworkImage(review.reviewerImage),
+          onBackgroundImageError: (_, __) => setState(() {}),
+          child: Icon(Icons.person, size: 24),
         ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

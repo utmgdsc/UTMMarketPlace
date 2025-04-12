@@ -33,6 +33,9 @@ class ProfileViewModel extends LoadingViewModel {
       isLoading = true;
       notifyListeners();
       final result = await repo.fetchUserProfileById(userId);
+
+      final reviews = await repo.fetchReviews(userId);
+      result.fetchReviews(reviews);
       _profileModel = result;
       notifyListeners();
     } catch (e) {
@@ -52,8 +55,35 @@ class ProfileViewModel extends LoadingViewModel {
       _imageVersion++;
 
       await fetchUserProfileById(_profileModel!.id);
+
+      final reviews = await repo.fetchReviews(_profileModel!.id);
+      _profileModel?.fetchReviews(reviews);
     } catch (e) {
       debugPrint('Error refreshing user data: ${e.toString()}');
+    }
+  }
+
+  Future<void> submitReview(String review, int rating) async {
+    if (_profileModel == null) return;
+    int result = 0;
+
+    try {
+      _errorMessage = null;
+      isLoading = true;
+      notifyListeners();
+
+      result = await repo.submitReview(_profileModel!.id, review, rating);
+      if (result == 403) {
+        _errorMessage = "You must have spoken to the seller to leave a review.";
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error in submitReview: ${e.toString()} $result');
+      _errorMessage = e.toString();
+      notifyListeners();
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 

@@ -805,7 +805,20 @@ async def post_reviews(
             for review in reviews:
                 if current_user["id"] == review.get("reviewer_id"):
                     raise HTTPException(
-                        status_code=404, detail="You have already left the user a review")
+                    status_code=404, detail="You have already left the user a review")
+
+        # check if the seller and the current user have a conversation
+        try:
+            user_id = ObjectId(current_user["id"])
+            seller_id = ObjectId(body.seller_id)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid user or seller ID format.")
+
+        conversation_id = "_".join(sorted([str(user_id), str(seller_id)]))
+        conversation = await messages_collection.find_one({"conversation_id": conversation_id})
+        if not conversation:
+            raise HTTPException(
+                status_code=403, detail="You cannot leave a review without having a conversation with the seller")
 
         review = {
             "seller_id": ObjectId(body.seller_id),
@@ -831,6 +844,9 @@ async def post_reviews(
 
         return ReviewPostResponse(message="Review submitted successfully")
 
+    except HTTPException as e:
+        raise HTTPException(
+            status_code=e.status_code, detail=f"Error: {e.detail}")
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error: {str(e)}")

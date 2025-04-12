@@ -73,7 +73,7 @@ class BottomNav extends StatelessWidget {
           ),
         ],
         onTap: (index) {
-          if (index == currentIndex) return;
+          if (index == currentIndex && index != 0) return;
 
           switch (index) {
             case 0:

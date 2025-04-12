@@ -73,6 +73,73 @@ class ProfileRepository {
     }
   }
 
+  Future<Map<String, dynamic>> fetchReviews(String sellerId) async {
+    try {
+      // Get the JWT token from secure storage
+      final token = await secureStorage.read(key: 'jwt_token');
+
+      if (token == null) {
+        throw Exception('User is not authenticated');
+      }
+      
+      // If userId is "me", get the user ID from the token
+      String targetUserId = sellerId;
+      if (sellerId == 'me') {
+        targetUserId = _getUserIdFromToken(token);
+      }
+
+      // Make API call to fetch reviews
+      final response = await dio.get(
+        '/reviews',
+        queryParameters: {'seller_id': targetUserId},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to fetch reviews: $e');
+    }
+  }
+
+  Future<int> submitReview(String sellerId, String review, int rating) async {
+    try {
+      // Get the JWT token from secure storage
+      final token = await secureStorage.read(key: 'jwt_token');
+
+      if (token == null) {
+        throw Exception('User is not authenticated');
+      }
+
+      // Prepare review data
+      final reviewData = {
+        'seller_id': sellerId,
+        'comment': review,
+        'rating': rating,
+      };
+
+      // Make API call to submit the review
+      final response = await dio.post(
+        '/reviews',
+        data: reviewData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      return response.statusCode ?? 0;
+    } catch (e) {
+      debugPrint('Error submitting review: $e');
+      debugPrint("Error code: ${e is DioException ? (e).response?.statusCode : 0}");
+      return e is DioException ? (e).response?.statusCode ?? 0 : 0;
+    }
+  }
+
   Future<ProfileModel> updateProfile({
     required String userId,
     String? displayName,
