@@ -215,19 +215,32 @@ class _PostingViewState extends State<PostingView> {
               ],
             );
 
-            final sellerProfileButton = ElevatedButton(
-              onPressed: () {
-                context.push('/profile/${item.sellerId}');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+            final messageSeller = SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
                 ),
-              ),
-              child: const Text(
-                'View Seller Profile',
-                style: TextStyle(color: Colors.white),
+                onPressed: () {
+                  final sellerId =
+                      Provider.of<PostingViewModel>(context, listen: false)
+                          .item?.sellerId;
+                  if (sellerId != null) {
+                    context.push('/profile/$sellerId');
+                  }
+                },
+                child: Text(
+                  'View Seller',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Colors.white,
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
               ),
             );
 
@@ -248,8 +261,8 @@ class _PostingViewState extends State<PostingView> {
                   ),
                   const SizedBox(height: 16.0),
                   itemDescription,
-                  const SizedBox(height: 16.0),
-                  sellerProfileButton,
+                  const Spacer(),
+                  messageSeller,
                 ],
               ),
             );

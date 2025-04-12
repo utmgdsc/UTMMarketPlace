@@ -3,34 +3,6 @@ import 'package:flutter/material.dart';
 class ListingLoadingComponent extends StatelessWidget {
   const ListingLoadingComponent({super.key});
 
-  // Widget _buildSearchBarSkeleton() {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-  //     child: Row(
-  //       children: [
-  //         Expanded(
-  //           child: Container(
-  //             height: 50,
-  //             decoration: BoxDecoration(
-  //               color: Colors.grey[200],
-  //               borderRadius: BorderRadius.circular(30),
-  //             ),
-  //           ),
-  //         ),
-  //         const SizedBox(width: 8.0),
-  //         Container(
-  //           width: 50,
-  //           height: 50,
-  //           decoration: BoxDecoration(
-  //             color: Colors.grey[200],
-  //             borderRadius: BorderRadius.circular(30),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget _buildTrendingLabelSkeleton() {
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, bottom: 5.0, top: 5.0),

@@ -27,12 +27,12 @@ class ProfileViewModel extends LoadingViewModel {
     notifyListeners();
   }
 
-  Future<void> fetchData(String userId) async {
+  Future<void> fetchUserProfileById(String userId) async {
     try {
       _errorMessage = null;
       isLoading = true;
       notifyListeners();
-      final result = await repo.fetchData(userId);
+      final result = await repo.fetchUserProfileById(userId);
 
       final reviews = await repo.fetchReviews(userId);
       result.fetchReviews(reviews);
@@ -54,7 +54,7 @@ class ProfileViewModel extends LoadingViewModel {
     try {
       _imageVersion++;
 
-      await fetchData(_profileModel!.id);
+      await fetchUserProfileById(_profileModel!.id);
 
       final reviews = await repo.fetchReviews(_profileModel!.id);
       _profileModel?.fetchReviews(reviews);

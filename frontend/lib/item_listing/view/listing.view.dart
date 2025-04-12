@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:utm_marketplace/item_listing/components/filter_bottom_sheet/filter_bottom_sheet.component.dart';
 import 'package:utm_marketplace/item_listing/components/item_card/item_card.component.dart';
 import 'package:utm_marketplace/item_listing/view_models/listing.viewmodel.dart';
 import 'package:utm_marketplace/shared/themes/theme.dart';
@@ -17,6 +18,7 @@ class _ListingViewState extends State<ListingView> {
   late ListingViewModel viewModel;
   final double hPad = 16.0; // Horizontal padding
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -24,13 +26,13 @@ class _ListingViewState extends State<ListingView> {
     viewModel = Provider.of<ListingViewModel>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      viewModel.fetchData(limit: 6);
+      viewModel.setSearchQueryAndGetResults("");
     });
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent) {
-        viewModel.fetchMoreData(limit: 6);
+        viewModel.loadMoreListingsBasedOnCurrentSearchParams(limit: 6);
       }
     });
   }
@@ -38,19 +40,41 @@ class _ListingViewState extends State<ListingView> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => SingleChildScrollView(
+          controller: scrollController,
+          child: const FilterBottomSheet(),
+        ),
+      ),
+    );
+  }
+
   Widget _buildItemGrid(ListingViewModel listingViewModel) {
+    final searchItems = listingViewModel.items;
     return Padding(
       padding: EdgeInsets.fromLTRB(hPad, 8.0, hPad, 8.0),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: itemCardDelegate(),
-        itemCount: listingViewModel.items.length,
+        itemCount: searchItems.length,
         itemBuilder: (context, index) {
-          final item = listingViewModel.items[index];
+          final item = searchItems[index];
           return GestureDetector(
             onTap: () {
               context.push('/item/${item.id}');
@@ -122,6 +146,8 @@ class _ListingViewState extends State<ListingView> {
         children: [
           Expanded(
             child: TextField(
+              controller: _searchController,
+              onSubmitted: viewModel.setSearchQueryAndGetResults,
               decoration: InputDecoration(
                 hintText: 'Search',
                 hintStyle: TextStyle(
@@ -155,7 +181,7 @@ class _ListingViewState extends State<ListingView> {
                 Icons.filter_list,
                 color: Colors.grey[600],
               ),
-              onPressed: () => viewModel.showFilterBottomSheet(context),
+              onPressed: () => _showFilterBottomSheet(context),
             ),
           ),
         ],
@@ -184,20 +210,6 @@ class _ListingViewState extends State<ListingView> {
                   return ListView(
                     controller: _scrollController,
                     children: [
-                      const Padding(
-                        padding:
-                            EdgeInsets.only(left: 16, bottom: 5.0, top: 5.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Trending',
-                            style: TextStyle(
-                              fontSize: 28,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ),
                       _buildItemGrid(listingViewModel),
                       if (listingViewModel.isLoadingMore)
                         const Padding(

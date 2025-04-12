@@ -58,7 +58,7 @@ final router = GoRouter(
           path: '/profile/:userId',
           builder: (context, state) {
             final userId = state.pathParameters['userId'] ?? '';
-            final isOwnProfile = userId == 'me';
+            final isOwnProfile = userId == "me";
             return Profile(
               userId: userId,
               isOwnProfile: isOwnProfile,

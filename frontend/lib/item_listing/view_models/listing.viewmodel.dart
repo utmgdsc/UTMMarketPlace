@@ -3,7 +3,6 @@ import 'package:utm_marketplace/item_listing/model/filter_options.model.dart';
 import 'package:utm_marketplace/item_listing/model/listing.model.dart';
 import 'package:utm_marketplace/item_listing/repository/listing_repo.dart';
 import 'package:utm_marketplace/shared/view_models/loading.viewmodel.dart';
-import 'package:utm_marketplace/item_listing/components/filter_bottom_sheet/filter_bottom_sheet.component.dart';
 
 class ListingViewModel extends LoadingViewModel {
   final ListingRepo repo;
@@ -13,116 +12,79 @@ class ListingViewModel extends LoadingViewModel {
   });
 
   List<Item> _allItems = [];
-  List<Item> _filteredItems = [];
-  ListingModel? _listingModel;
+  String _currentSearchQuery = "";
+  FilterOptions? _filterOptionsSelected;
+  String nextPageToken = "";
 
-  List<Item> get items => _filteredItems;
+  List<Item> get items => _allItems;
 
   bool isLoadingMore = false;
 
-  Future<void> fetchData(
-      {int limit = 5, String? nextPageToken, String? query}) async {
-    try {
-      isLoading = true;
+  // ========== SETTERS ==============
 
-      final response = await repo.fetchData(
-          limit: limit, nextPageToken: nextPageToken, query: query);
-      _listingModel = ListingModel.fromJson(response);
-      _allItems = _listingModel!.items;
-      _filteredItems = _allItems;
-      debugPrint('Fetched ${_filteredItems.length} items');
-      debugPrint('Items: ${_filteredItems.map((item) => item.title).toList()}');
-      notifyListeners();
-    } catch (exc) {
-      debugPrint('Error in fetchData : ${exc.toString()}');
-    } finally {
-      isLoading = false;
-      notifyListeners();
-    }
+  /// Set the current filters and restart the search results based on new filters.
+  void setFiltersAndGetResults(FilterOptions filters) {
+    _filterOptionsSelected = filters;
+    searchForRelevantListings().then((_) => notifyListeners());
   }
 
-  Future<void> fetchMoreData({int limit = 5, String? query}) async {
-    if (_listingModel?.nextPageToken == null ||
-        _listingModel!.nextPageToken!.isEmpty) {
+  /// Set the current search query and restart the search results based on new search query.
+  void setSearchQueryAndGetResults(String searchQuery) {
+    _currentSearchQuery = searchQuery;
+    searchForRelevantListings().then((_) => notifyListeners());
+  }
+
+  // ========= SEARCHING AND PAGINATION =========
+  /// Searches for relevant listings based on the current search query and filter options.
+  ///
+  /// Defaults to a limit of 5 results.
+  Future<void> searchForRelevantListings({int limit = 5}) async {
+    isLoading = true;
+    isLoadingMore = false;
+    notifyListeners();
+
+    final ListingModel results = await repo.getSearchResults(
+      searchQuery: _currentSearchQuery,
+      limit: limit,
+      filterOptions: _filterOptionsSelected,
+    );
+
+    isLoading = false;
+    _allItems = results.items;
+    nextPageToken = results.nextPageToken ?? "";
+    notifyListeners();
+  }
+
+  /// Loads more results based on the current search query and filter options.
+  ///
+  /// Defaults to a limit of 5 (more) results.
+  /// If `nextPageToken` is empty, nothing will be done.
+  Future<void> loadMoreListingsBasedOnCurrentSearchParams(
+      {int limit = 5}) async {
+    if (nextPageToken.isEmpty || isLoadingMore) {
       return;
     }
 
     try {
+      isLoading = false;
       isLoadingMore = true;
-
-      final response = await repo.fetchData(
-          limit: limit,
-          nextPageToken: _listingModel!.nextPageToken,
-          query: query);
-      final newListingModel = ListingModel.fromJson(response);
-      _listingModel = newListingModel;
-      _allItems.addAll(newListingModel.items);
-      _filteredItems = _allItems;
       notifyListeners();
+
+      final ListingModel results = await repo.getSearchResults(
+        searchQuery: _currentSearchQuery,
+        nextPageToken: nextPageToken,
+        limit: limit,
+        filterOptions: _filterOptionsSelected,
+      );
+
+      // no need to notify listeners as we are already notifying in `finally`
+      _allItems.addAll(results.items);
+      nextPageToken = results.nextPageToken ?? "";
     } catch (exc) {
       debugPrint('Error in fetchMoreData : ${exc.toString()}');
     } finally {
       isLoadingMore = false;
       notifyListeners();
     }
-  }
-
-  void applyFilters(FilterOptions filters) {
-    _filteredItems = _allItems.where((item) {
-      if (filters.condition != null && item.condition != filters.condition) {
-        return false;
-      }
-      if (filters.campus != null && item.campus != filters.campus) {
-        return false;
-      }
-      if (filters.lowerPrice != null && item.price < filters.lowerPrice!) {
-        return false;
-      }
-      if (filters.upperPrice != null && item.price > filters.upperPrice!) {
-        return false;
-      }
-      if (filters.dateRange != null &&
-          (item.datePosted == null ||
-              item.datePosted!.isBefore(filters.dateRange!))) {
-        return false;
-      }
-      return true;
-    }).toList();
-
-    final sortType = filters.priceType ?? 'date-recent';
-    switch (sortType) {
-      case 'price-low-to-high':
-        _filteredItems.sort((a, b) => a.price.compareTo(b.price));
-        break;
-      case 'price-high-to-low':
-        _filteredItems.sort((a, b) => b.price.compareTo(a.price));
-        break;
-      case 'date-recent':
-        _filteredItems.sort((a, b) => (b.datePosted ?? DateTime.now())
-            .compareTo(a.datePosted ?? DateTime.now()));
-        break;
-    }
-
-    notifyListeners();
-  }
-
-  void showFilterBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (context, scrollController) => SingleChildScrollView(
-          controller: scrollController,
-          child: const FilterBottomSheet(),
-        ),
-      ),
-    );
   }
 }
