@@ -41,7 +41,7 @@ class ProfileRepository {
     }
   }
 
-  Future<ProfileModel> fetchData(String userId) async {
+  Future<ProfileModel> fetchUserProfileById(String userId) async {
     try {
       // Get the JWT token from secure storage
       final token = await secureStorage.read(key: 'jwt_token');

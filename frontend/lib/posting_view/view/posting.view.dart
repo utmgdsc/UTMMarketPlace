@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:utm_marketplace/posting_view/view_models/posting.viewmodel.dart';
 import 'package:utm_marketplace/shared/components/loading.component.dart';
@@ -214,6 +215,35 @@ class _PostingViewState extends State<PostingView> {
               ],
             );
 
+            final messageSeller = SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                ),
+                onPressed: () {
+                  final sellerId =
+                      Provider.of<PostingViewModel>(context, listen: false)
+                          .item?.sellerId;
+                  if (sellerId != null) {
+                    context.push('/profile/$sellerId');
+                  }
+                },
+                child: Text(
+                  'View Seller',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Colors.white,
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            );
+
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -231,6 +261,8 @@ class _PostingViewState extends State<PostingView> {
                   ),
                   const SizedBox(height: 16.0),
                   itemDescription,
+                  const Spacer(),
+                  messageSeller,
                 ],
               ),
             );

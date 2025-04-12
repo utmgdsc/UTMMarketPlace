@@ -24,7 +24,7 @@ class _ShellLayoutState extends State<ShellLayout> {
     // Fetch user profile data when the shell layout is mounted
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final profileViewModel = context.read<ProfileViewModel>();
-      profileViewModel.fetchData('me');
+      profileViewModel.fetchUserProfileById('me');
     });
   }
 
