@@ -81,7 +81,7 @@ class ProfileRepository {
       if (token == null) {
         throw Exception('User is not authenticated');
       }
-      
+
       // If userId is "me", get the user ID from the token
       String targetUserId = sellerId;
       if (sellerId == 'me') {
@@ -135,7 +135,8 @@ class ProfileRepository {
       return response.statusCode ?? 0;
     } catch (e) {
       debugPrint('Error submitting review: $e');
-      debugPrint("Error code: ${e is DioException ? (e).response?.statusCode : 0}");
+      debugPrint(
+          "Error code: ${e is DioException ? (e).response?.statusCode : 0}");
       return e is DioException ? (e).response?.statusCode ?? 0 : 0;
     }
   }
