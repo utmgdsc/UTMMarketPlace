@@ -45,17 +45,17 @@ class ProfileRepository {
     try {
       // Get the JWT token from secure storage
       final token = await secureStorage.read(key: 'jwt_token');
-      
+
       if (token == null) {
         throw Exception('User is not authenticated');
       }
-      
+
       // If userId is "me", get the user ID from the token
       String targetUserId = userId;
       if (userId == 'me') {
         targetUserId = _getUserIdFromToken(token);
       }
-      
+
       // Make API call with authenticated headers
       final response = await dio.get(
         '/user/$targetUserId',
@@ -65,7 +65,7 @@ class ProfileRepository {
           },
         ),
       );
-      
+
       // Convert response to profile model
       return ProfileModel.fromJson(response.data);
     } catch (e) {

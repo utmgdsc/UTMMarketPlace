@@ -228,7 +228,8 @@ class _PostingViewState extends State<PostingView> {
                 onPressed: () {
                   final sellerId =
                       Provider.of<PostingViewModel>(context, listen: false)
-                          .item?.sellerId;
+                          .item
+                          ?.sellerId;
                   if (sellerId != null) {
                     context.push('/profile/$sellerId');
                   }
