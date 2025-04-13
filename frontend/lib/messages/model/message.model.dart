@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class MessageModel {
   final List<Conversation> conversations;
 
@@ -6,7 +8,7 @@ class MessageModel {
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
       conversations: (json['conversations'] as List?)
-              ?.map((conv) => Conversation.fromJson(conv))
+              ?.map((conv) => Conversation.fromJson(conv as Map<String, dynamic>))
               .toList() ??
           [],
     );
@@ -18,7 +20,7 @@ class Conversation {
   final String userId;
   final String userName;
   final String userImageUrl;
-  final List<Message> messages;
+  List<Message> messages;
   final DateTime lastMessageTime;
   final bool isUnread;
 
@@ -33,6 +35,7 @@ class Conversation {
   });
 
   String get lastMessagePreview {
+    debugPrint('Last message preview: $messages');
     if (messages.isEmpty) return '';
     return messages.last.content.length > 30
         ? '${messages.last.content.substring(0, 30)}...'
@@ -54,26 +57,31 @@ class Conversation {
     );
   }
 }
-
 class Message {
   final String id;
   final String content;
   final DateTime timestamp;
-  final bool isFromCurrentUser;
+  final String senderId;
+  final String recipientId;
+  bool isFromCurrentUser;
 
   Message({
     required this.id,
     required this.content,
     required this.timestamp,
+    required this.senderId,
+    required this.recipientId,
     required this.isFromCurrentUser,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      id: json['id'],
+      id: json['message_id'],
       content: json['content'],
       timestamp: DateTime.parse(json['timestamp']),
-      isFromCurrentUser: json['is_from_current_user'],
+      senderId: json['sender_id'],
+      recipientId: json['recipient_id'],
+      isFromCurrentUser: json['is_from_current_user'] == true,
     );
   }
 }

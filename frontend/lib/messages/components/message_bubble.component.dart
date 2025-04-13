@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:utm_marketplace/messages/model/message.model.dart';
+import 'package:utm_marketplace/shared/dio/dio.dart';
 
 class MessageBubble extends StatelessWidget {
   final Message message;
@@ -59,9 +61,25 @@ class MessageBubble extends StatelessWidget {
         ),
       );
     } else {
-      final avatar = CircleAvatar(
-        radius: 16,
-        backgroundImage: NetworkImage(senderImageUrl),
+      final avatar = FutureBuilder<ImageProvider?>(
+        future: _fetchImage(senderImageUrl),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return buildLoadingImage();
+          } else if (snapshot.hasError ||
+              !snapshot.hasData ||
+              snapshot.data == null) {
+            return const CircleAvatar(
+              radius: 16,
+              child: Icon(Icons.person),
+            );
+          } else {
+            return CircleAvatar(
+              radius: 16,
+              backgroundImage: snapshot.data!,
+            );
+          }
+        },
       );
 
       final messageContent = Text(
@@ -111,5 +129,55 @@ class MessageBubble extends StatelessWidget {
         ),
       );
     }
+  }
+
+  Future<ImageProvider?> _fetchImage(String url) async {
+    final response = await dio.get(
+      url,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return MemoryImage(response.data);
+  }
+
+  Widget buildImageWidget(String? imageUrl) {
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return FutureBuilder<ImageProvider?>(
+        future: _fetchImage(imageUrl),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return buildLoadingImage();
+          } else if (snapshot.hasError) {
+            debugPrint('Error fetching image: ${snapshot.error}');
+            return buildErrorImage();
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return buildPlaceholderImage();
+          } else {
+            return CircleAvatar(
+              backgroundImage: snapshot.data!,
+            );
+          }
+        },
+      );
+    } else {
+      return buildPlaceholderImage();
+    }
+  }
+
+  Widget buildLoadingImage() {
+    return const CircleAvatar(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget buildErrorImage() {
+    return const CircleAvatar(
+      child: Icon(Icons.error),
+    );
+  }
+
+  Widget buildPlaceholderImage() {
+    return const CircleAvatar(
+      child: Icon(Icons.person),
+    );
   }
 }

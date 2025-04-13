@@ -71,10 +71,17 @@ final router = GoRouter(
         ),
         GoRoute(
           path: '/messages/:conversationId',
-          builder: (context, state) {
+            builder: (context, state) {
             final conversationId = state.pathParameters['conversationId'] ?? '';
+            final extra = state.extra as Map<String, dynamic>? ?? {};
+            final username = extra['username'] as String? ?? '';
+            final recipientId = extra['recipientId'] as String? ?? '';
+            final userImageUrl = extra['userImageUrl'] as String? ?? '';
             return ConversationDetailView(
               conversationId: conversationId,
+              recipientId: recipientId,
+              username: username,
+              userImageUrl: userImageUrl,
             );
           },
         ),
