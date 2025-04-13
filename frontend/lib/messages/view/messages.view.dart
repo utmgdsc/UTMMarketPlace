@@ -72,16 +72,16 @@ class _MessagesViewState extends State<MessagesView> {
         final conversation = conversations[index];
         return ConversationListItem(
           conversation: conversation,
-            onTap: () {
+          onTap: () {
             context.push(
               '/messages/${conversation.id}',
               extra: {
-              'username': conversation.userName,
-              'userImageUrl': conversation.userImageUrl,
-              'recipientId': viewModel.getRecipientId(conversation),
+                'username': conversation.userName,
+                'userImageUrl': conversation.userImageUrl,
+                'recipientId': viewModel.getRecipientId(conversation),
               },
             );
-            },
+          },
         );
       },
     );

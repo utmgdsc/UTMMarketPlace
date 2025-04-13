@@ -71,7 +71,7 @@ class ProfileViewModel extends LoadingViewModel {
       profileName = _profileModel?.displayName ?? '';
       profileImageUrl = _profileModel?.profilePicture ?? '';
       profileId = _profileModel?.id ?? '';
-      
+
       final sortedIds = [currentUserId, userId];
       sortedIds.sort((a, b) => a.compareTo(b));
       conversationId = sortedIds.join('_');

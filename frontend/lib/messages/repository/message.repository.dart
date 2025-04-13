@@ -50,13 +50,11 @@ class MessageRepository {
 
       debugPrint('Response: ${response.data}');
       if (response.statusCode == 200) {
-        final messages = (response.data['messages'] as List)
-            .map((msg) {
-              final message = Message.fromJson(msg);
-              message.isFromCurrentUser = message.senderId == userId;
-              return message;
-            })
-            .toList();
+        final messages = (response.data['messages'] as List).map((msg) {
+          final message = Message.fromJson(msg);
+          message.isFromCurrentUser = message.senderId == userId;
+          return message;
+        }).toList();
         return messages;
       } else {
         throw Exception('Failed to fetch messages');
@@ -86,7 +84,7 @@ class MessageRepository {
       throw Exception('Failed to send message: $e');
     }
   }
-  
+
   String _getUserIdFromToken(String token) {
     // Decode JWT token (format: header.payload.signature)
     final parts = token.split('.');

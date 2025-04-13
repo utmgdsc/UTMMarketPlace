@@ -8,7 +8,8 @@ class MessageModel {
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
       conversations: (json['conversations'] as List?)
-              ?.map((conv) => Conversation.fromJson(conv as Map<String, dynamic>))
+              ?.map(
+                  (conv) => Conversation.fromJson(conv as Map<String, dynamic>))
               .toList() ??
           [],
     );
@@ -57,6 +58,7 @@ class Conversation {
     );
   }
 }
+
 class Message {
   final String id;
   final String content;
